@@ -1,0 +1,112 @@
+[
+  {
+    "id": 1,
+    "title": "Market-Kigali",
+    "description": "A mobile marketplace connecting local vendors with customers in Kigali. Features real-time chat, payment integration, and delivery tracking.",
+    "technologies": ["Flutter", "Firebase", "Dart", "Google Maps API", "Stripe"],
+    "year": 2024,
+    "links": {
+      "github": "https://github.com/witnessfabrice/market-kigali",
+      "demo": "https://marketkigali.app",
+      "docs": null
+    },
+    "status": "Completed",
+    "complexity": "Medium",
+    "image": "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&auto=format&fit=crop",
+    "features": [
+      "Real-time chat system",
+      "Payment gateway integration",
+      "Location-based services",
+      "Push notifications",
+      "Multi-language support"
+    ]
+  },
+  {
+    "id": 2,
+    "title": "Analytics API Hub",
+    "description": "Multi-tenant SaaS platform for data analytics with real-time dashboards and automated reporting.",
+    "technologies": ["React", "Node.js", "PostgreSQL", "Redis", "Docker", "AWS"],
+    "year": 2023,
+    "links": {
+      "github": "https://github.com/witnessfabrice/analytics-api",
+      "demo": "https://analytics.witnessfabrice.com",
+      "docs": "https://docs.analytics.witnessfabrice.com"
+    },
+    "status": "Active",
+    "complexity": "High",
+    "image": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&auto=format&fit=crop",
+    "features": [
+      "Real-time data streaming",
+      "Multi-tenant architecture",
+      "Automated report generation",
+      "Team collaboration tools",
+      "API rate limiting"
+    ]
+  },
+  {
+    "id": 3,
+    "title": "HealthTech Dashboard",
+    "description": "Healthcare management system for clinics with patient records, appointment scheduling, and telemedicine features.",
+    "technologies": ["Next.js", "TypeScript", "MongoDB", "WebRTC", "JWT"],
+    "year": 2023,
+    "links": {
+      "github": "https://github.com/witnessfabrice/healthtech-dashboard",
+      "demo": "https://health.witnessfabrice.com",
+      "docs": null
+    },
+    "status": "Completed",
+    "complexity": "High",
+    "image": "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w-800&auto=format&fit=crop",
+    "features": [
+      "Video consultation",
+      "Electronic health records",
+      "Appointment management",
+      "Prescription management",
+      "Billing system"
+    ]
+  },
+  {
+    "id": 4,
+    "title": "E-learning Platform",
+    "description": "Interactive learning platform with video courses, quizzes, and progress tracking.",
+    "technologies": ["Vue.js", "Laravel", "MySQL", "WebSocket", "Vimeo API"],
+    "year": 2022,
+    "links": {
+      "github": "https://github.com/witnessfabrice/elearning-platform",
+      "demo": "https://learn.witnessfabrice.com",
+      "docs": "https://docs.learn.witnessfabrice.com"
+    },
+    "status": "Active",
+    "complexity": "Medium",
+    "image": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop",
+    "features": [
+      "Interactive video player",
+      "Progress tracking",
+      "Certificate generation",
+      "Discussion forums",
+      "Assignment submission"
+    ]
+  },
+  {
+    "id": 5,
+    "title": "Smart Home IoT",
+    "description": "IoT platform for smart home automation with device control, energy monitoring, and security features.",
+    "technologies": ["React Native", "Python", "MQTT", "Raspberry Pi", "TensorFlow Lite"],
+    "year": 2022,
+    "links": {
+      "github": "https://github.com/witnessfabrice/smart-home-iot",
+      "demo": "https://iot.witnessfabrice.com",
+      "docs": null
+    },
+    "status": "Completed",
+    "complexity": "High",
+    "image": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&auto=format&fit=crop",
+    "features": [
+      "Real-time device control",
+      "Energy consumption monitoring",
+      "Face recognition security",
+      "Voice commands",
+      "Automated routines"
+    ]
+  }
+]

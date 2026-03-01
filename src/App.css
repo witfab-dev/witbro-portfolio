@@ -1,0 +1,30 @@
+/* ===== REMOVE MOVING SHAPES ONLY ===== */
+/* Add this at the bottom of your index.css file */
+
+/* Remove all floating/moving shapes */
+.absolute.inset-0.overflow-hidden,
+[class*="floating-shape"],
+[class*="floating-circle"],
+[class*="floating-square"],
+[class*="particle"],
+[class*="blob"],
+[class*="floating"] {
+  display: none !important;
+}
+
+/* Remove all background animations */
+[class*="animate-blob"],
+[class*="animate-float"],
+[class*="animate-pulse"],
+[class*="animate-bounce"],
+[class*="animate-spin"]:not(button *) {
+  animation: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+/* Keep essential hover effects */
+button:hover,
+a:hover {
+  transition: all 0.2s ease !important;
+}

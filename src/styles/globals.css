@@ -1,0 +1,27 @@
+/* Add to your global CSS file */
+* {
+  animation: none !important;
+  transition: none !important;
+}
+
+.motion-div, 
+[class*="animate-"] {
+  animation: none !important;
+  transform: none !important;
+}
+/* Add to your globals.css */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}

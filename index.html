@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="%PUBLIC_URL%/wit.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fabrice Witness - Portfolio</title>
+    
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Optional Tailwind configuration -->
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: '#3B82F6',
+              secondary: '#10B981',
+            }
+          }
+        }
+      }
+    </script>
+    
+    <style>
+      /* Additional custom styles if needed */
+      .custom-gradient {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50">
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

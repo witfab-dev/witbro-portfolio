@@ -1,0 +1,173 @@
+{
+  "categories": [
+    {
+      "name": "Frontend",
+      "skills": [
+        {
+          "name": "React",
+          "level": 95,
+          "years": 4,
+          "projects": 15,
+          "lastUsed": "2024-03-15",
+          "description": "Building complex SPAs with hooks, context, and modern React patterns"
+        },
+        {
+          "name": "TypeScript",
+          "level": 90,
+          "years": 3,
+          "projects": 12,
+          "lastUsed": "2024-03-10",
+          "description": "Type-safe development with interfaces, generics, and advanced types"
+        },
+        {
+          "name": "Next.js",
+          "level": 85,
+          "years": 2,
+          "projects": 8,
+          "lastUsed": "2024-03-05",
+          "description": "SSR, SSG, and API routes for production applications"
+        },
+        {
+          "name": "Tailwind CSS",
+          "level": 92,
+          "years": 3,
+          "projects": 18,
+          "lastUsed": "2024-03-12",
+          "description": "Utility-first CSS framework for rapid UI development"
+        }
+      ]
+    },
+    {
+      "name": "Backend",
+      "skills": [
+        {
+          "name": "Node.js",
+          "level": 92,
+          "years": 4,
+          "projects": 12,
+          "lastUsed": "2024-03-08",
+          "description": "Building scalable APIs with Express, authentication, and database integration"
+        },
+        {
+          "name": "Python",
+          "level": 85,
+          "years": 3,
+          "projects": 6,
+          "lastUsed": "2024-02-20",
+          "description": "Data processing, automation, and backend services with FastAPI"
+        },
+        {
+          "name": "PostgreSQL",
+          "level": 88,
+          "years": 3,
+          "projects": 10,
+          "lastUsed": "2024-03-01",
+          "description": "Database design, optimization, and complex queries"
+        },
+        {
+          "name": "Redis",
+          "level": 80,
+          "years": 2,
+          "projects": 5,
+          "lastUsed": "2024-02-15",
+          "description": "Caching, session management, and real-time features"
+        }
+      ]
+    },
+    {
+      "name": "Mobile",
+      "skills": [
+        {
+          "name": "Flutter",
+          "level": 90,
+          "years": 3,
+          "projects": 8,
+          "lastUsed": "2024-03-14",
+          "description": "Cross-platform mobile apps with beautiful UIs and native performance"
+        },
+        {
+          "name": "React Native",
+          "level": 85,
+          "years": 2,
+          "projects": 4,
+          "lastUsed": "2024-02-28",
+          "description": "Native mobile apps with shared React codebase"
+        }
+      ]
+    },
+    {
+      "name": "DevOps & Cloud",
+      "skills": [
+        {
+          "name": "Docker",
+          "level": 85,
+          "years": 3,
+          "projects": 10,
+          "lastUsed": "2024-03-05",
+          "description": "Containerization and orchestration for microservices"
+        },
+        {
+          "name": "AWS",
+          "level": 82,
+          "years": 2,
+          "projects": 6,
+          "lastUsed": "2024-02-25",
+          "description": "Cloud infrastructure, EC2, S3, Lambda, and RDS"
+        },
+        {
+          "name": "Git",
+          "level": 95,
+          "years": 5,
+          "projects": 25,
+          "lastUsed": "2024-03-15",
+          "description": "Version control, branching strategies, and team collaboration"
+        },
+        {
+          "name": "CI/CD",
+          "level": 80,
+          "years": 2,
+          "projects": 5,
+          "lastUsed": "2024-02-20",
+          "description": "Automated testing, building, and deployment pipelines"
+        }
+      ]
+    },
+    {
+      "name": "Other",
+      "skills": [
+        {
+          "name": "GraphQL",
+          "level": 85,
+          "years": 2,
+          "projects": 4,
+          "lastUsed": "2024-03-01",
+          "description": "API design with Apollo Client/Server and schema stitching"
+        },
+        {
+          "name": "WebSocket",
+          "level": 88,
+          "years": 3,
+          "projects": 7,
+          "lastUsed": "2024-03-10",
+          "description": "Real-time communication for chat, notifications, and live updates"
+        },
+        {
+          "name": "Three.js",
+          "level": 75,
+          "years": 1,
+          "projects": 3,
+          "lastUsed": "2024-02-15",
+          "description": "3D graphics and interactive visualizations in the browser"
+        },
+        {
+          "name": "TensorFlow.js",
+          "level": 70,
+          "years": 1,
+          "projects": 2,
+          "lastUsed": "2024-02-10",
+          "description": "Machine learning models running in the browser"
+        }
+      ]
+    }
+  ]
+}
