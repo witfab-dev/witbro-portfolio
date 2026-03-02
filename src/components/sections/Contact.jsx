@@ -23,7 +23,7 @@ const Contact = () => {
     { icon: Github, href: 'https://github.com/witfab-dev', label: 'GitHub' },
     { icon: Linkedin, href: 'https://linkedin.com/in/witnessfabrice', label: 'LinkedIn' },
     { icon: Twitter, href: 'https://twitter.com/wit-fab', label: 'Twitter' },
-    { icon: Instagram ,href: 'https://instagram.com/witbr1' ,label: 'Instagram'},
+    { icon: Instagram ,href: 'https://instagram.com/witbri1' ,label: 'Instagram'},
      { icon: Facebook ,href: 'https://facebook.com/witbrice' ,label: 'Facebook'}
   ];
 
