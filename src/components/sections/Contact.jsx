@@ -14,7 +14,7 @@ const Contact = () => {
   // Simple contact info - NO href that could cause startsWith error
   const contactInfo = [
     { icon: Mail, label: 'Email', value: 'witnessfabrice@gmail.com' },
-    { icon: Phone, label: 'Phone', value: '+250 788 123 456' },
+    { icon: Phone, label: 'Phone', value: '+250 789344402' },
     { icon: MapPin, label: 'Location', value: 'Kigali, Rwanda' }
   ];
 
@@ -22,7 +22,7 @@ const Contact = () => {
   const socialLinks = [
     { icon: Github, href: 'https://github.com/witfab-dev', label: 'GitHub' },
     { icon: Linkedin, href: 'https://linkedin.com/in/witnessfabrice', label: 'LinkedIn' },
-    { icon: Twitter, href: 'https://twitter.com/witnessfabrice', label: 'Twitter' },
+    { icon: Twitter, href: 'https://twitter.com/wit-fab', label: 'Twitter' },
     { icon: Instagram ,href: 'https://instagram.com/witbr1' ,label: 'Instagram'},
      { icon: Facebook ,href: 'https://facebook.com/witbrice' ,label: 'Facebook'}
   ];
