@@ -1,214 +1,97 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useRef } from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { 
-  Code2, Server, Cloud, Database, Palette, Braces, Terminal, 
-  Layout, Box, Workflow, Layers, Gauge, Sparkles, Rocket, 
-  Award, TrendingUp, CheckCircle2, Clock, Users, BookOpen, Target 
+  Code2, Database, Globe, Cpu, 
+  Layers, Smartphone, Server, ShieldCheck 
 } from 'lucide-react';
 
+const skills = [
+  { name: "React", icon: Code2, color: "text-blue-400", size: "text-4xl", x: "-20%", y: "-30%" },
+  { name: "Node.js", icon: Server, color: "text-green-500", size: "text-5xl", x: "25%", y: "-20%" },
+  { name: "TypeScript", icon: Code2, color: "text-blue-600", size: "text-3xl", x: "-30%", y: "20%" },
+  { name: "Tailwind", icon: Layers, color: "text-cyan-400", size: "text-4xl", x: "15%", y: "30%" },
+  { name: "MongoDB", icon: Database, color: "text-emerald-600", size: "text-3xl", x: "0%", y: "0%" },
+  { name: "Python", icon: Cpu, color: "text-yellow-500", size: "text-4xl", x: "-10%", y: "40%" },
+  { name: "Next.js", icon: Globe, color: "text-white", size: "text-5xl", x: "35%", y: "10%" },
+  { name: "Cybersecurity", icon: ShieldCheck, color: "text-red-500", size: "text-2xl", x: "-35%", y: "-10%" },
+];
+
+const SkillIcon = ({ skill }) => {
+  return (
+    <motion.div
+      drag
+      dragConstraints={{ left: -100, right: 100, top: -100, bottom: 100 }}
+      whileHover={{ scale: 1.2, zIndex: 50 }}
+      className={`absolute cursor-grab active:cursor-grabbing flex flex-col items-center gap-2 drop-shadow-[0_0_15px_rgba(59,130,246,0.3)]`}
+      style={{ left: `calc(50% + ${skill.x})`, top: `calc(50% + ${skill.y})` }}
+    >
+      <motion.div
+        animate={{
+          y: [0, -10, 0],
+          rotate: [0, 5, -5, 0]
+        }}
+        transition={{
+          duration: Math.random() * 3 + 2,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
+        className={`p-4 glass-panel rounded-2xl border-white/5 bg-white/5 backdrop-blur-md`}
+      >
+        <skill.icon className={`${skill.size} ${skill.color}`} />
+      </motion.div>
+      <span className="text-[10px] font-mono text-gray-400 uppercase tracking-tighter">
+        {skill.name}
+      </span>
+    </motion.div>
+  );
+};
+
 const SkillsGalaxy = () => {
-  const [activeSkill, setActiveSkill] = useState(null);
-  const [viewMode, setViewMode] = useState('grid');
-  const [warpedSkill, setWarpedSkill] = useState(null);
-  const [screenSize, setScreenSize] = useState({ width: 1200, height: 800 });
+  const containerRef = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start end", "end start"]
+  });
 
-  // Handle Screen Resize for Galaxy Scaling
-  useEffect(() => {
-    const handleResize = () => setScreenSize({ width: window.innerWidth, height: window.innerHeight });
-    window.addEventListener('resize', handleResize);
-    handleResize();
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  // Escape Key & Scroll Lock
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape') {
-        setActiveSkill(null);
-        setWarpedSkill(null);
-      }
-    };
-    if (activeSkill || warpedSkill) {
-      window.addEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = 'hidden';
-    }
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = 'unset';
-    };
-  }, [activeSkill, warpedSkill]);
-
-  const skills = [
-    { name: 'React', level: 95, color: '#61DAFB', icon: Code2, category: 'frontend', tools: ['Next.js', 'Redux'], years: 4, projects: 25, achievements: ['Optimized bundle size by 40%'], longDescription: 'Expertise in React 18, Server Components, and complex state management.' },
-    { name: 'Node.js', level: 90, color: '#68A063', icon: Server, category: 'backend', tools: ['Express', 'NestJS'], years: 4, projects: 20, achievements: ['Handled 1M+ requests/day'], longDescription: 'Scalable backend architecture and real-time WebSocket implementation.' },
-    { name: 'TypeScript', level: 88, color: '#3178C6', icon: Braces, category: 'frontend', tools: ['Zod', 'TS-Node'], years: 3, projects: 30, achievements: ['Reduced runtime errors by 70%'], longDescription: 'Type-safe architecture and advanced utility type mastery.' },
-    { name: 'AWS', level: 75, color: '#FF9900', icon: Cloud, category: 'devops', tools: ['S3', 'Lambda'], years: 2, projects: 12, achievements: ['Reduced cloud costs by 35%'], longDescription: 'Cloud infrastructure management and serverless deployment.' },
-    { name: 'PostgreSQL', level: 77, color: '#336791', icon: Database, category: 'database', tools: ['Prisma', 'Drizzle'], years: 3, projects: 22, achievements: ['Optimized 5M+ row queries'], longDescription: 'Relational database design and query performance tuning.' }
-    // Add more skills here following the same structure
-  ];
-
-  // Calculate Galaxy Coordinates
-  const galaxySkills = useMemo(() => {
-    const radiusScale = screenSize.width < 768 ? 0.5 : 1;
-    return skills.map((skill, i) => {
-      const angle = (i * 360) / skills.length;
-      const radius = (180 + skill.level) * radiusScale;
-      return {
-        ...skill,
-        x: Math.cos((angle * Math.PI) / 180) * radius,
-        y: Math.sin((angle * Math.PI) / 180) * radius,
-      };
-    });
-  }, [skills.length, screenSize.width]);
+  const rotate = useTransform(scrollYProgress, [0, 1], [0, 45]);
+  const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0]);
 
   return (
-    <section className="relative min-h-screen py-20 px-4 bg-gray-50 dark:bg-gray-950 overflow-hidden transition-colors duration-500">
-      
-      {/* 🌌 Starfield Background (Galaxy Mode Only) */}
-      <AnimatePresence>
-        {viewMode === 'galaxy' && (
-          <motion.div 
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="absolute inset-0 pointer-events-none"
-          >
-            <div className="absolute inset-0 bg-[#020617] -z-20" />
-            <div className="stars-small" /> {/* Implementation requires the CSS provided earlier */}
-            <div className="stars-large" />
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(59,130,246,0.1)_0%,_transparent_70%)]" />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <div className="max-w-7xl mx-auto relative z-10">
-        <header className="text-center mb-12">
-          <h2 className="text-5xl font-bold mb-4 dark:text-white">
-            Skills <span className="bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">Galaxy</span>
-          </h2>
-          
-          {/* View Toggles */}
-          <div className="flex justify-center gap-4 mt-8">
-            <button 
-              onClick={() => { setViewMode('grid'); setWarpedSkill(null); }}
-              className={`px-6 py-2 rounded-full border transition-all ${viewMode === 'grid' ? 'bg-blue-600 border-blue-600 text-white shadow-lg' : 'bg-white dark:bg-gray-800 dark:text-white'}`}
-            >
-              Grid View
-            </button>
-            <button 
-              onClick={() => setViewMode('galaxy')}
-              className={`px-6 py-2 rounded-full border transition-all ${viewMode === 'galaxy' ? 'bg-purple-600 border-purple-600 text-white shadow-lg' : 'bg-white dark:bg-gray-800 dark:text-white'}`}
-            >
-              Galaxy View
-            </button>
-          </div>
-        </header>
-
-        {/* 🚀 Main Display Container */}
-        <div className={`relative min-h-[600px] transition-all duration-1000 ${viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6' : 'flex items-center justify-center'}`}>
-          
-          <motion.div
-            animate={warpedSkill ? { scale: 2.2, x: -warpedSkill.x * 2.2, y: -warpedSkill.y * 2.2 } : { scale: 1, x: 0, y: 0 }}
-            transition={{ type: "spring", stiffness: 80, damping: 20 }}
-            className={`w-full h-full ${viewMode === 'galaxy' ? 'absolute flex items-center justify-center' : 'contents'}`}
-          >
-            {galaxySkills.map((skill) => {
-              const Icon = skill.icon;
-              const isWarped = warpedSkill?.name === skill.name;
-
-              return (
-                <motion.div
-                  key={skill.name}
-                  layout
-                  transition={{ type: "spring", stiffness: 200, damping: 25 }}
-                  onClick={() => {
-                    if (viewMode === 'galaxy') {
-                      setWarpedSkill(isWarped ? null : { name: skill.name, x: skill.x, y: skill.y });
-                      if (!isWarped) setTimeout(() => setActiveSkill(skill), 600);
-                    } else {
-                      setActiveSkill(skill);
-                    }
-                  }}
-                  style={viewMode === 'galaxy' ? { position: 'absolute', x: skill.x, y: skill.y } : {}}
-                  className={`group cursor-pointer p-6 rounded-2xl border transition-all ${viewMode === 'grid' ? 'bg-white dark:bg-gray-800 shadow-sm hover:shadow-xl' : 'border-none'}`}
-                >
-                  <motion.div 
-                    layout="position"
-                    className="flex flex-col items-center"
-                    animate={{ 
-                      opacity: warpedSkill && !isWarped ? 0.3 : 1,
-                      scale: isWarped ? 0.6 : 1 
-                    }}
-                  >
-                    <div 
-                      className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4 transition-transform group-hover:scale-110"
-                      style={{ backgroundColor: `${skill.color}20` }}
-                    >
-                      <Icon className="w-8 h-8" style={{ color: skill.color }} />
-                    </div>
-                    {viewMode === 'grid' && (
-                      <>
-                        <h3 className="text-xl font-bold dark:text-white">{skill.name}</h3>
-                        <div className="w-full h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full mt-4 overflow-hidden">
-                          <motion.div 
-                            initial={{ width: 0 }} whileInView={{ width: `${skill.level}%` }}
-                            className="h-full" style={{ backgroundColor: skill.color }}
-                          />
-                        </div>
-                      </>
-                    )}
-                  </motion.div>
-                </motion.div>
-              );
-            })}
-          </motion.div>
-        </div>
+    <section id="skills" ref={containerRef} className="relative min-h-screen flex items-center justify-center overflow-hidden py-20">
+      {/* Galaxy Background Decoration */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.05)_0%,transparent_70%)]" />
+        <motion.div 
+          style={{ rotate }}
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] border border-dashed border-blue-500/10 rounded-full" 
+        />
+        <motion.div 
+          style={{ rotate: rotate, scale: 0.8 }}
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] border border-dashed border-purple-500/10 rounded-full" 
+        />
       </div>
 
-      {/* 📄 Detail Modal */}
-      <AnimatePresence>
-        {activeSkill && (
-          <motion.div 
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md"
-            onClick={() => { setActiveSkill(null); setWarpedSkill(null); }}
-          >
-            <motion.div 
-              initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }}
-              onClick={(e) => e.stopPropagation()}
-              className="bg-white dark:bg-gray-900 rounded-3xl p-8 max-w-xl w-full shadow-2xl relative border dark:border-gray-800"
-            >
-              <div className="flex items-center gap-6 mb-8">
-                <div className="p-4 rounded-2xl" style={{ backgroundColor: `${activeSkill.color}20` }}>
-                  <activeSkill.icon className="w-12 h-12" style={{ color: activeSkill.color }} />
-                </div>
-                <div>
-                  <h3 className="text-4xl font-bold dark:text-white">{activeSkill.name}</h3>
-                  <p className="text-blue-500 font-medium">{activeSkill.level}% Mastery</p>
-                </div>
-              </div>
-              
-              <p className="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">{activeSkill.longDescription}</p>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
-                  <div className="flex items-center gap-2 mb-2 text-gray-500"><Clock size={16}/> Experience</div>
-                  <div className="text-xl font-bold dark:text-white">{activeSkill.years}+ Years</div>
-                </div>
-                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
-                  <div className="flex items-center gap-2 mb-2 text-gray-500"><Target size={16}/> Projects</div>
-                  <div className="text-xl font-bold dark:text-white">{activeSkill.projects}+ Apps</div>
-                </div>
-              </div>
+      <motion.div style={{ opacity }} className="relative z-10 text-center w-full max-w-6xl">
+        <div className="mb-20">
+          <h2 className="text-4xl md:text-6xl font-black text-gradient inline-block">
+            Skills Galaxy
+          </h2>
+          <p className="text-gray-500 font-mono text-sm mt-4">Interactive Tech Stack Explorer • Drag to Move</p>
+        </div>
 
-              <button 
-                onClick={() => { setActiveSkill(null); setWarpedSkill(null); }}
-                className="mt-8 w-full py-4 bg-gray-900 dark:bg-white dark:text-black text-white rounded-xl font-bold hover:opacity-90 transition-opacity"
-              >
-                Close Constellation
-              </button>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+        {/* The Orbit Container */}
+        <div className="relative h-[600px] w-full">
+          {skills.map((skill, idx) => (
+            <SkillIcon key={idx} skill={skill} />
+          ))}
+          
+          {/* Central Core */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 glass-panel rounded-full flex items-center justify-center border-blue-500/20">
+             <div className="w-16 h-16 bg-blue-500/20 blur-xl absolute rounded-full animate-pulse" />
+             <Code2 className="w-10 h-10 text-blue-500" />
+          </div>
+        </div>
+      </motion.div>
     </section>
   );
 };

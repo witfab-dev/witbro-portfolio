@@ -1,28 +1,16 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { LanguageProvider } from './contexts/LanguageContext';
+
+// Layout & UI
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
-import CustomCursor from './components/ui/CustomCursor';
 import VoiceAssistant from './components/ui/VoiceAssistant';
-import ConfettiCanvas from './components/ui/ConfettiCanvas';
-import ThemeToggle from './components/ui/ThemeToggle';
-import LanguageSelector from './components/ui/LanguageSelector';
+
 import { 
-  Loader2, 
-  CheckCircle2, 
-  Sparkles, 
-  Palette, 
-  Rocket, 
-  Zap,
-  Code2,
-  Eye,
-  Github,
-  Linkedin,
-  Twitter,
-  Mail,
-  Activity,
-  Mic
+  Loader2, CheckCircle2, Sparkles, Palette, Rocket, 
+  Zap, Code2, Github, Linkedin, Twitter, Mail, Mic
 } from 'lucide-react';
 
 // Lazy load sections
@@ -33,124 +21,106 @@ const SkillsGalaxy = lazy(() => import('./components/sections/SkillsGalaxy'));
 const Experience = lazy(() => import('./components/sections/Experience'));
 const Contact = lazy(() => import('./components/sections/Contact'));
 
-// Handle image import with fallback
-let profileImage;
-try {
-  profileImage = new URL('../images/wit.png', import.meta.url).href;
-} catch (e) {
-  console.log('Profile image not found, using fallback');
-  profileImage = null;
-}
+// Asset logic
+const profileImage = new URL('../images/wit.png', import.meta.url).href || `https://ui-avatars.com/api/?name=Witness+Fabrice&background=3b82f6&color=fff`;
 
-// Loading component with profile image and name
-const LoadingScreen = () => {
+const LoadingScreen = ({ onFinished }) => {
   const [progress, setProgress] = useState(0);
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const [imageError, setImageError] = useState(false);
   const [currentTip, setCurrentTip] = useState(0);
 
   const tips = [
-    { icon: Sparkles, text: "Loading interactive features..." },
-    { icon: Palette, text: "Applying beautiful themes..." },
-    { icon: Rocket, text: "Optimizing performance..." },
-    { icon: Zap, text: "Almost ready..." },
-    { icon: CheckCircle2, text: "Welcome to my portfolio!" }
+    { icon: Sparkles, text: "Initializing interactive engine..." },
+    { icon: Palette, text: "Styling digital environment..." },
+    { icon: Rocket, text: "Optimizing asset delivery..." },
+    { icon: Zap, text: "Syncing voice intelligence..." },
+    { icon: CheckCircle2, text: "Environment Ready." }
   ];
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(interval);
+    const timer = setInterval(() => {
+      setProgress(oldProgress => {
+        if (oldProgress >= 100) {
+          clearInterval(timer);
+          setTimeout(onFinished, 500);
           return 100;
         }
-        return prev + 1;
+        const diff = Math.random() * 10;
+        return Math.min(oldProgress + diff, 100);
       });
-    }, 20);
-
-    return () => clearInterval(interval);
-  }, []);
+    }, 150);
+    return () => clearInterval(timer);
+  }, [onFinished]);
 
   useEffect(() => {
     const tipIndex = Math.floor((progress / 100) * tips.length);
     setCurrentTip(Math.min(tipIndex, tips.length - 1));
   }, [progress]);
 
-  const fallbackImage = `https://ui-avatars.com/api/?name=Witness+Fabrice&size=200&background=3b82f6&color=fff&bold=true&length=2`;
   const CurrentTipIcon = tips[currentTip].icon;
-  const imageSrc = imageError ? fallbackImage : (profileImage || fallbackImage);
 
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center z-50">
-      <div className="text-center px-4 w-full max-w-md">
-        {/* Profile Image with Animation */}
-        <div className="relative mx-auto w-32 h-32 sm:w-40 sm:h-40 mb-6 group">
-          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 animate-ping opacity-20"></div>
-          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 animate-pulse opacity-30"></div>
-          
-          <div className="relative w-full h-full rounded-full bg-gradient-to-r from-blue-500 to-purple-500 p-1">
-            <div className="w-full h-full rounded-full overflow-hidden border-4 border-white dark:border-gray-800 shadow-xl">
-              <img 
-                src={imageSrc}
-                alt="Witness Fabrice"
-                className="w-full h-full object-cover"
-                onLoad={() => setImageLoaded(true)}
-                onError={() => setImageError(true)}
-              />
-            </div>
+    <motion.div 
+      initial={{ opacity: 1 }}
+      exit={{ opacity: 0, scale: 1.1 }}
+      transition={{ duration: 0.8, ease: "easeInOut" }}
+      className="fixed inset-0 z-[999] bg-[#030712] flex flex-col items-center justify-center overflow-hidden"
+    >
+      {/* Background Glows */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-blue-600/20 blur-[120px] rounded-full" />
+      
+      <div className="relative z-10 w-full max-w-sm px-8 text-center">
+        {/* Animated Avatar Box */}
+        <motion.div 
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="relative mx-auto w-24 h-24 mb-8"
+        >
+          <div className="absolute inset-0 rounded-3xl bg-blue-500/20 animate-pulse rotate-6" />
+          <div className="absolute inset-0 rounded-3xl bg-purple-500/20 animate-pulse -rotate-6" />
+          <div className="relative w-full h-full rounded-3xl overflow-hidden border border-white/10 glass-panel p-1">
+             <img src={profileImage} alt="Loading..." className="w-full h-full object-cover rounded-2xl" />
           </div>
-          
-          {imageLoaded && !imageError && (
-            <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center border-4 border-white dark:border-gray-800 shadow-lg animate-bounce">
-              <CheckCircle2 className="w-4 h-4 text-white" />
-            </div>
-          )}
-        </div>
+        </motion.div>
 
-        <h1 className="text-3xl sm:text-4xl font-bold mb-2 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-          Witness Fabrice
-        </h1>
+        <h2 className="text-white text-xl font-bold tracking-tight mb-1">Fabrice Witness</h2>
+        <p className="text-blue-400 text-xs font-mono mb-8 tracking-widest uppercase">System Initialization</p>
 
-        <div className="flex items-center justify-center gap-2 text-gray-600 dark:text-gray-300 mb-8">
-          <Code2 className="w-4 h-4" />
-          <span className="text-sm sm:text-base">Full-Stack Developer</span>
-        </div>
-
-        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-4 overflow-hidden">
-          <div 
-            className="h-full rounded-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-300 ease-out"
+        {/* Technical Progress Bar */}
+        <div className="relative h-[2px] w-full bg-white/5 rounded-full mb-4 overflow-hidden">
+          <motion.div 
+            className="absolute top-0 left-0 h-full bg-gradient-to-r from-blue-500 to-cyan-400"
             style={{ width: `${progress}%` }}
           />
         </div>
 
-        <div className="flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-4">
-          <Loader2 className="w-4 h-4 animate-spin" />
-          <span>{progress}% loaded</span>
+        <div className="flex justify-between items-center text-[10px] font-mono text-gray-500 mb-12">
+          <span className="flex items-center gap-2">
+            <Loader2 className="w-3 h-3 animate-spin" /> {Math.round(progress)}%
+          </span>
+          <span>STABLE_REVISION_2026</span>
         </div>
 
-        <div className="flex items-center justify-center gap-2 text-gray-500 dark:text-gray-400 mt-8">
-          <CurrentTipIcon className="w-4 h-4 text-blue-500 animate-pulse" />
-          <span className="text-xs sm:text-sm">{tips[currentTip].text}</span>
-        </div>
-
-        <div className="mt-12 flex justify-center gap-3">
-          {[Github, Linkedin, Twitter, Mail].map((Icon, index) => (
-            <div
-              key={index}
-              className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center opacity-50"
-            >
-              <Icon className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-            </div>
-          ))}
-        </div>
-
-        {/* Voice Assistant Hint */}
-        <div className="mt-4 text-xs text-gray-500 dark:text-gray-500 flex items-center justify-center gap-1">
-          <Mic className="w-3 h-3" />
-          <span>Try saying "Help" or press Ctrl+M</span>
-        </div>
+        <AnimatePresence mode="wait">
+          <motion.div 
+            key={currentTip}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="flex items-center justify-center gap-3 text-gray-400"
+          >
+            <CurrentTipIcon className="w-4 h-4 text-blue-500" />
+            <span className="text-xs italic">{tips[currentTip].text}</span>
+          </motion.div>
+        </AnimatePresence>
       </div>
-    </div>
+
+      {/* Aesthetic Bottom HUD */}
+      <div className="absolute bottom-10 w-full flex justify-center gap-8 opacity-20">
+         <Code2 size={16} className="text-white" />
+         <Mic size={16} className="text-white" />
+         <Sparkles size={16} className="text-white" />
+      </div>
+    </motion.div>
   );
 };
 
@@ -159,104 +129,85 @@ function App() {
   const [showVoiceAssistant, setShowVoiceAssistant] = useState(false);
 
   useEffect(() => {
-    // Initialize AOS
-    import('aos').then((AOS) => {
-      AOS.init({
-        duration: 800,
-        once: true,
-        offset: 100,
-      });
-    });
-
-    // Simulate loading
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 2000);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Automatically open voice assistant after loading
-  useEffect(() => {
+    // Setup logic for when app is ready
     if (!loading) {
-      // Check if user has visited before
       const hasVisited = localStorage.getItem('hasVisited');
-      
       if (!hasVisited) {
-        // First visit - open voice assistant after 1 second
         setTimeout(() => {
           setShowVoiceAssistant(true);
           localStorage.setItem('hasVisited', 'true');
-        }, 1000);
+        }, 1500);
       }
     }
   }, [loading]);
 
-  if (loading) {
-    return <LoadingScreen />;
-  }
-
   return (
     <ThemeProvider>
       <LanguageProvider>
-        <div className="min-h-screen bg-primary">
-          {/* Optional UI elements */}
-          {/* <CustomCursor /> */}
-          {/* <ConfettiCanvas /> */}
-          
-          {/* Voice Assistant - Automatically opens on first visit */}
-          <VoiceAssistant 
-            autoOpen={showVoiceAssistant} 
-            onClose={() => setShowVoiceAssistant(false)}
-          />
-          
-          <Header />
-
-          <main className="relative z-10">
-            <Suspense fallback={
-              <div className="min-h-screen flex items-center justify-center">
-                <div className="text-center">
-                  <Loader2 className="w-12 h-12 text-blue-500 animate-spin mx-auto mb-4" />
-                  <p className="text-gray-600 dark:text-gray-400">Loading section...</p>
-                </div>
-              </div>
-            }>
-              {/* All sections with proper IDs for navigation */}
-              <Hero />
-              <About />
-              <Projects />
-              <SkillsGalaxy />
-              <Experience />
-              <Contact />
-            </Suspense>
-          </main>
-
-          <Footer />
-          
-
-          {/* Quick voice command hint */}
-          <div className="fixed bottom-6 left-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-lg px-4 py-2 shadow-lg border border-gray-200 dark:border-gray-700 z-40 hidden md:block">
-            <p className="text-xs text-gray-600 dark:text-gray-300 flex items-center gap-2">
-              <Mic className="w-3 h-3 text-blue-500" />
-              <span>Try voice commands: "Go to projects", "Show skills", "Contact me"</span>
-              <span className="text-gray-400 text-[10px]">(Ctrl+M)</span>
-            </p>
-          </div>
-
-          {/* Manual voice assistant button (appears when assistant is closed) */}
-          {!showVoiceAssistant && (
-            <button
-              onClick={() => setShowVoiceAssistant(true)}
-              className="fixed bottom-6 right-6 p-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full shadow-lg z-50 hover:scale-110 transition-transform"
-              title="Open Voice Assistant"
+        <AnimatePresence mode="wait">
+          {loading ? (
+            <LoadingScreen key="loader" onFinished={() => setLoading(false)} />
+          ) : (
+            <motion.div 
+              key="main-content"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="min-h-screen bg-white dark:bg-[#030712] selection:bg-blue-500 selection:text-white"
             >
-              <Mic className="w-6 h-6" />
-            </button>
+              <div className="bg-grain" /> {/* Global Grain Texture */}
+              
+              <VoiceAssistant 
+                autoOpen={showVoiceAssistant} 
+                onClose={() => setShowVoiceAssistant(false)}
+              />
+              
+              <Header />
+
+              <main className="relative">
+                {/* Visual Ambient Backgrounds */}
+                <div className="fixed top-0 left-0 w-full h-full pointer-events-none -z-10 overflow-hidden">
+                   <div className="absolute top-[-10%] right-[-10%] w-[40vw] h-[40vw] bg-blue-600/10 blur-[120px] rounded-full" />
+                   <div className="absolute bottom-[-10%] left-[-10%] w-[40vw] h-[40vw] bg-purple-600/10 blur-[120px] rounded-full" />
+                </div>
+
+                <Suspense fallback={<SectionLoader />}>
+                  <Hero />
+                  <About />
+                  <Projects />
+                  <SkillsGalaxy />
+                  <Experience />
+                  <Contact />
+                </Suspense>
+              </main>
+
+              <Footer />
+
+              {/* Float Action: Voice Assistant */}
+              <AnimatePresence>
+                {!showVoiceAssistant && (
+                  <motion.button
+                    initial={{ scale: 0, rotate: -45 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    whileHover={{ scale: 1.1 }}
+                    onClick={() => setShowVoiceAssistant(true)}
+                    className="fixed bottom-8 right-8 p-4 bg-blue-600 text-white rounded-2xl shadow-2xl shadow-blue-500/40 z-50 group"
+                  >
+                    <Mic className="w-6 h-6 group-hover:animate-pulse" />
+                  </motion.button>
+                )}
+              </AnimatePresence>
+            </motion.div>
           )}
-        </div>
+        </AnimatePresence>
       </LanguageProvider>
     </ThemeProvider>
   );
 }
+
+const SectionLoader = () => (
+  <div className="h-[50vh] flex items-center justify-center">
+    <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+  </div>
+);
 
 export default App;
