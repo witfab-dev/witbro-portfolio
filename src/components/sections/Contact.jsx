@@ -60,7 +60,7 @@ const Contact = () => {
           className="text-center mb-16"
         >
           <h2 className="text-4xl md:text-5xl font-extrabold mb-4 tracking-tight">
-            {t('contact_title') || 'Let\'s Create'} <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Something Great</span>
+            {t('') || 'Let\'s Create'} <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Something Great</span>
           </h2>
           <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto text-lg">
             Whether you have a question or just want to say hi, my inbox is always open.

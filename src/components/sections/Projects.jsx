@@ -68,7 +68,7 @@ const Projects = () => {
             viewport={{ once: true }}
           >
             <h2 className="text-4xl md:text-5xl font-black mb-4">
-              {t('projects_title') || 'Selected'} <span className="text-blue-600 dark:text-blue-400">Works</span>
+              {t('my all projects') || 'Selected'} <span className="text-blue-600 dark:text-blue-400">Works</span>
             </h2>
             <p className="text-gray-600 dark:text-gray-400 max-w-md">
               A collection of digital experiences I've crafted, ranging from mobile ecosystems to high-performance web apps.
