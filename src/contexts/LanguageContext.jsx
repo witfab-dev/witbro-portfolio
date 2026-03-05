@@ -2,9 +2,9 @@ import React, { createContext, useState, useContext, useEffect, useCallback } fr
 
 const LanguageContext = createContext();
 
-// 1. Enhanced Translations Object
 const translations = {
   en: {
+    // Navigation
     home: "Home",
     about: "About",
     welcome: "Welcome",
@@ -12,29 +12,26 @@ const translations = {
     skills: "Skills",
     experience: "Experience",
     contact: "Contact",
+    
+    // UI Elements
     viewProjects: "View Projects",
     exploreMore: "Explore More",
-    portfolioViews: "Portfolio Views",
-    clients: "Clients",
-    satisfaction: "Satisfaction",
     trySaying: "Try saying",
     or: "or",
     theme: "Theme",
     language: "Language",
     darkMode: "Dark Mode",
     lightMode: "Light Mode",
-    english: "English",
-    french: "French",
-    kinyarwanda: "Kinyarwanda",
     downloadCV: "Download CV",
     hireMe: "Hire Me",
-    viewAll: "View All",
-    liveDemo: "Live Demo",
-    sourceCode: "Source Code",
-    technologies: "Technologies",
-    role: "Role",
-    duration: "Duration",
-    achievements: "Achievements",
+    
+    // Voice Assistant / Intro (New)
+    aiAssistant: "Witness_OS Assistant",
+    aiGreeting: "Hello! I am Witness's digital assistant. How can I help you today?",
+    witnessBio: "Witness Fabrice is a Full-Stack Architect specialized in high-performance web experiences. He bridges the gap between cinematic design and robust backend engineering.",
+    navigatingTo: "Navigating to",
+    
+    // Form & Status
     sendMessage: "Send Message",
     yourName: "Your Name",
     yourEmail: "Your Email",
@@ -43,10 +40,8 @@ const translations = {
     loading: "Loading...",
     success: "Success!",
     error: "Error!",
-    connected: "Connected",
-    disconnected: "Disconnected",
-    online: "Online",
-    offline: "Offline"
+    online: "System Online",
+    offline: "Connection Lost"
   },
   fr: {
     home: "Accueil",
@@ -58,39 +53,31 @@ const translations = {
     contact: "Contact",
     viewProjects: "Voir les projets",
     exploreMore: "Explorer plus",
-    portfolioViews: "Vues du portfolio",
-    clients: "Clients",
-    satisfaction: "Satisfaction",
     trySaying: "Essayez de dire",
     or: "ou",
     theme: "Thème",
     language: "Langue",
     darkMode: "Mode sombre",
     lightMode: "Mode clair",
-    english: "Anglais",
-    french: "Français",
-    kinyarwanda: "Kinyarwanda",
-    downloadCV: "Télécharger CV",
+    downloadCV: "Télécharger le CV",
     hireMe: "Engagez-moi",
-    viewAll: "Voir tout",
-    liveDemo: "Démo en direct",
-    sourceCode: "Code source",
-    technologies: "Technologies",
-    role: "Rôle",
-    duration: "Durée",
-    achievements: "Réalisations",
+    
+    // Voice Assistant / Intro
+    aiAssistant: "Assistant Witness_OS",
+    aiGreeting: "Bonjour! Je suis l'assistant numérique de Witness. Comment puis-je vous aider?",
+    witnessBio: "Witness Fabrice est un architecte Full-Stack spécialisé dans les expériences web haute performance. Il fait le pont entre le design cinématographique et l'ingénierie backend.",
+    navigatingTo: "Navigation vers",
+
     sendMessage: "Envoyer le message",
     yourName: "Votre nom",
-    yourEmail: "Votre email",
+    yourEmail: "Votre e-mail",
     message: "Message",
-    submit: "Soumettre",
+    submit: "Envoyer",
     loading: "Chargement...",
     success: "Succès !",
     error: "Erreur !",
-    connected: "Connecté",
-    disconnected: "Déconnecté",
-    online: "En ligne",
-    offline: "Hors ligne"
+    online: "Système en ligne",
+    offline: "Connexion perdue"
   },
   rw: {
     home: "Ahabanza",
@@ -102,27 +89,21 @@ const translations = {
     contact: "Twandikire",
     viewProjects: "Reba imishinga",
     exploreMore: "Shakisha byinshi",
-    portfolioViews: "Abasuye",
-    clients: "Abakiriya",
-    satisfaction: "Abanyuzwe",
     trySaying: "Gerageza kuvuga",
     or: "cyangwa",
     theme: "Ishusho",
     language: "Ururimi",
     darkMode: "Umukara",
     lightMode: "Umweru",
-    english: "Icyongereza",
-    french: "Igifaransa",
-    kinyarwanda: "Kinyarwanda",
     downloadCV: "Kuramo CV",
     hireMe: "Mpe akazi",
-    viewAll: "Reba byose",
-    liveDemo: "Yerekane",
-    sourceCode: "Kode",
-    technologies: "Ikoranabuhanga",
-    role: "Umwanya",
-    duration: "Igihe",
-    achievements: "Ibyagezweho",
+    
+    // Voice Assistant / Intro
+    aiAssistant: "Umuhamagazi wa Witness_OS",
+    aiGreeting: "Muraho! Ndi umufasha wa Witness mu buryo bw'ikoranabuhanga. Nagufasha iki uyu munsi?",
+    witnessBio: "Witness Fabrice ni umuhanga mu kubaka imbuga za internet (Full-Stack). Akora ibijyanye n'ishusho ndetse na kode zikomeye zicunga imbuga.",
+    navigatingTo: "Turajya kuri",
+
     sendMessage: "Ohereza ubutumwa",
     yourName: "Izina ryawe",
     yourEmail: "Imeli yawe",
@@ -131,10 +112,8 @@ const translations = {
     loading: "Biratunganywa...",
     success: "Byakunze!",
     error: "Ikosa!",
-    connected: "Bihujwe",
-    disconnected: "Byahagaze",
-    online: "Kuri murandasi",
-    offline: "Ntabwo uri kuri murandasi"
+    online: "Birakora",
+    offline: "Murandasi yakatse"
   }
 };
 
@@ -146,21 +125,27 @@ export const LanguageProvider = ({ children }) => {
     return 'en';
   });
 
-  // 2. Wrap t function in useCallback to prevent unnecessary re-renders
+  // t function: Priority: Language -> English -> Key
   const t = useCallback((key) => {
-    // Priority: Current Language -> English Fallback -> Key Name
     return translations[language]?.[key] || translations['en'][key] || key;
   }, [language]);
 
   const changeLanguage = (lang) => {
     setLanguage(lang);
     localStorage.setItem('portfolio-language', lang);
-    // Add a slight haptic feel by changing the document language attribute
     document.documentElement.lang = lang;
   };
 
+  // Sync Voice Assistant Language Accent
+  useEffect(() => {
+    const speech = window.speechSynthesis;
+    if (speech) {
+      speech.cancel(); // Stop any speaking when language changes
+    }
+  }, [language]);
+
   return (
-    <LanguageContext.Provider value={{ language, t, changeLanguage }}>
+    <LanguageContext.Provider value={{ language, t, changeLanguage, translations }}>
       {children}
     </LanguageContext.Provider>
   );
@@ -168,8 +153,6 @@ export const LanguageProvider = ({ children }) => {
 
 export const useLanguage = () => {
   const context = useContext(LanguageContext);
-  if (!context) {
-    throw new Error('useLanguage must be used within a LanguageProvider');
-  }
+  if (!context) throw new Error('useLanguage must be used within LanguageProvider');
   return context;
 };

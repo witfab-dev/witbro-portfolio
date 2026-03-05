@@ -14,35 +14,37 @@ import profileImage from '../images/wit.png';
 
 const Hero = ({ onExplore }) => {
   const { theme } = useTheme();
-  const { t } = useLanguage();
+  const { t } = useLanguage(); // Pulling translations
 
   const [imageError, setImageError] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [currentTitleIndex, setCurrentTitleIndex] = useState(0);
-
-  // Animated Views Counter
   const [viewCount, setViewCount] = useState(1247);
+
+  // Titles list - these could also be moved to LanguageContext if you want them translated
+  const titles = [
+    'Full-Stack Architect',
+    'React Specialist',
+    'Creative Developer',
+    'AI Integrator',
+    'UI/UX Enthusiast',
+    'Tech Mentor'
+  ];
 
   useEffect(() => {
     const saved = localStorage.getItem('portfolioViews');
-    if (saved) {
-      setViewCount(Number(saved));
-    } else {
-      localStorage.setItem('portfolioViews', 1247);
-    }
-
+    if (saved) setViewCount(Number(saved));
+    
     const interval = setInterval(() => {
       setViewCount(prev => {
-        const newVal = prev + Math.floor(Math.random() * 3) + 1;
+        const newVal = prev + Math.floor(Math.random() * 2) + 1;
         localStorage.setItem('portfolioViews', newVal);
         return newVal;
       });
-    }, 2500);
-
+    }, 5000);
     return () => clearInterval(interval);
   }, []);
 
-  // Cycle through titles for Typewriter
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentTitleIndex((prev) => (prev + 1) % titles.length);
@@ -50,18 +52,7 @@ const Hero = ({ onExplore }) => {
     return () => clearInterval(interval);
   }, []);
 
-  const titles = [
-    'Full-Stack Developer',
-    'React Specialist',
-    'Flutter Expert',
-    'Problem Solver',
-    'UI/UX Enthusiast',
-    'Tech Mentor'
-  ];
-
-  const fallbackImage =
-    "https://ui-avatars.com/api/?name=Witness+Fabrice&size=400&background=3b82f6&color=fff&bold=true";
-
+  const fallbackImage = `https://ui-avatars.com/api/?name=Witness+Fabrice&size=400&background=3b82f6&color=fff&bold=true`;
   const imgSrc = imageError ? fallbackImage : profileImage;
 
   const socialLinks = [
@@ -71,215 +62,173 @@ const Hero = ({ onExplore }) => {
     { icon: Mail, href: 'mailto:witnessfabrice@gmail.com', label: 'Email' }
   ];
 
+  // Achievement labels now use t()
   const achievements = [
-    { icon: Award, label: 'Years', value: 3, suffix: '+', color: 'text-yellow-500' },
-    { icon: Code2, label: 'Projects', value: 50, suffix: '+', color: 'text-blue-500' },
-    { icon: Heart, label: 'Satisfaction', value: 99, suffix: '%', color: 'text-red-500' },
-    { icon: Star, label: 'Open Source', value: 15, suffix: '+', color: 'text-purple-500' }
+    { icon: Award, label: t('experience'), value: 3, suffix: '+', color: 'text-yellow-500' },
+    { icon: Code2, label: t('projects'), value: 50, suffix: '+', color: 'text-blue-500' },
+    { icon: Heart, label: t('satisfaction'), value: 99, suffix: '%', color: 'text-red-500' },
+    { icon: Star, label: 'OSS', value: 15, suffix: '+', color: 'text-purple-500' }
   ];
 
   return (
-    <section
-      id="hero"
-      className="relative min-h-screen flex items-center bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 overflow-hidden"
-    >
-      {/* Background decoration */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-500 rounded-full opacity-10 blur-3xl"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-500 rounded-full opacity-10 blur-3xl"></div>
+    <section id="hero" className="relative min-h-screen flex items-center justify-center overflow-hidden bg-white dark:bg-[#030712] pt-20">
+      
+      {/* Background Tech Orbs */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/10 blur-[120px] rounded-full animate-pulse" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 blur-[120px] rounded-full animate-pulse-slow" />
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative z-10">
-        <div className="grid md:grid-cols-2 gap-12 items-center">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10 w-full">
+        <div className="grid lg:grid-cols-2 gap-16 items-center">
 
-          {/* LEFT COLUMN */}
+          {/* LEFT: CONTENT */}
           <motion.div
-            initial={{ opacity: 0, x: -30 }}
+            initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6 }}
-            className="space-y-6"
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="text-left space-y-8"
           >
-
-            {/* VIEW COUNTER */}
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-full border border-gray-200 dark:border-gray-700"
-            >
-              <Eye className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-              <span className="text-sm text-gray-600 dark:text-gray-300">
-                Portfolio Views:
+            {/* Live System Tag */}
+            <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full glass-panel border-white/10 dark:bg-white/5 backdrop-blur-md">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
               </span>
-              <span className="font-bold text-blue-600 dark:text-blue-400">
-                {viewCount.toLocaleString()}
+              <span className="text-[10px] font-mono uppercase tracking-widest text-gray-500 dark:text-gray-400">
+                {t('portfolioViews')}: <span className="text-blue-500 font-bold">{viewCount.toLocaleString()}</span>
               </span>
-            </motion.div>
+            </div>
 
-            {/* Greeting */}
-            <p className="text-blue-600 dark:text-blue-400 font-semibold tracking-wider">
-              {t("helloIm") || "Hi, I'm"}
-            </p>
+            <div className="space-y-4">
+              <motion.h2 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-blue-600 dark:text-blue-400 font-mono text-sm tracking-[0.3em] uppercase"
+              >
+                {t('welcome')}
+              </motion.h2>
+              <h1 className="text-6xl md:text-8xl font-black tracking-tighter leading-none">
+                <span className="text-slate-900 dark:text-white">Witness</span><br/>
+                <span className="text-gradient">Fabrice</span>
+              </h1>
+            </div>
 
-            {/* Name */}
-            <h1 className="text-5xl md:text-6xl font-bold">
-              <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Witness Fabrice
-              </span>
-            </h1>
-
-            {/* Typewriter Effect - FIXED: using 'text' prop instead of 'texts' */}
-            <div className="h-12">
+            <div className="h-8">
               <Typewriter
                 text={titles[currentTitleIndex]}
-                speed={100}
-                delay={2000}
-                className="text-2xl text-gray-700 dark:text-gray-300"
+                speed={80}
+                className="text-xl md:text-2xl font-mono text-gray-500 dark:text-gray-400 italic"
               />
             </div>
 
-            {/* Location */}
-            <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-              <MapPin className="w-5 h-5" />
-              <span>Kigali, Rwanda</span>
-              <span className="w-1 h-1 bg-gray-400 rounded-full mx-2"></span>
-              <Briefcase className="w-5 h-5" />
-              <span>Open to work</span>
-            </div>
+            <p className="max-w-lg text-gray-600 dark:text-gray-400 leading-relaxed">
+              {t('witnessBio')}
+            </p>
 
-            {/* Achievements Grid with AnimatedCounter */}
-            <div className="grid grid-cols-4 gap-3 pt-4">
+            {/* Achievement Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               {achievements.map((item, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 + index * 0.1 }}
-                  className="text-center p-3 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-gray-700"
-                >
-                  <item.icon className={`w-6 h-6 mx-auto mb-2 ${item.color}`} />
+                <div key={index} className="p-4 glass-panel border-white/5 rounded-2xl group hover:border-blue-500/30 transition-colors">
+                  <item.icon size={20} className={`${item.color} mb-2 opacity-80`} />
                   <AnimatedCounter 
                     value={item.value} 
                     suffix={item.suffix}
-                    className="text-xl font-bold text-gray-900 dark:text-white" 
+                    className="text-xl font-black text-slate-900 dark:text-white block" 
                   />
-                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    {item.label}
-                  </div>
-                </motion.div>
+                  <span className="text-[10px] uppercase tracking-tighter text-gray-500">{item.label}</span>
+                </div>
               ))}
             </div>
 
-            {/* CTA Buttons */}
-            <div className="flex flex-wrap gap-4 pt-4">
+            {/* CTA Group */}
+            <div className="flex flex-wrap gap-4 items-center">
               <motion.button
-                whileHover={{ scale: 1.05 }}
+                whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(59, 130, 246, 0.4)" }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() =>
-                  document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' })
-                }
-                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg shadow-lg hover:shadow-xl transition-all flex items-center gap-2"
+                onClick={() => document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' })}
+                className="px-8 py-4 bg-blue-600 text-white rounded-2xl font-bold flex items-center gap-3"
               >
-                <Eye className="w-4 h-4" />
-                View Projects
+                <Rocket className="w-5 h-5" /> {t('viewProjects')}
               </motion.button>
 
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={onExplore}
-                className="px-6 py-3 border-2 border-blue-600 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all flex items-center gap-2"
-              >
-                <Zap className="w-4 h-4" />
-                Explore More
-                <ChevronDown className="w-4 h-4" />
-              </motion.button>
-
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => {
-                  const link = document.createElement('a');
-                  link.href = '/Witness_Fabrice_CV.pdf';
-                  link.download = 'Witness_Fabrice_Resume.pdf';
-                  link.click();
-                }}
-                className="px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-all flex items-center gap-2"
-              >
-                <Download className="w-4 h-4" />
-                Resume
-              </motion.button>
-            </div>
-
-            {/* Social Links */}
-            <div className="flex gap-4 pt-4">
-              {socialLinks.map((social) => (
-                <motion.a
-                  key={social.label}
-                  href={social.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  whileHover={{ scale: 1.2, rotate: 5 }}
-                  whileTap={{ scale: 0.9 }}
-                  className="p-2 bg-gray-200 dark:bg-gray-700 rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-                >
-                  <social.icon className="w-5 h-5 text-gray-700 dark:text-gray-300" />
-                </motion.a>
-              ))}
+              <div className="flex gap-3">
+                {socialLinks.map((social) => (
+                  <motion.a
+                    key={social.label}
+                    href={social.href}
+                    target="_blank"
+                    whileHover={{ y: -5, color: "#3b82f6" }}
+                    className="p-4 glass-panel rounded-2xl text-gray-500 hover:text-blue-500 transition-all"
+                  >
+                    <social.icon size={20} />
+                  </motion.a>
+                ))}
+              </div>
             </div>
           </motion.div>
 
-          {/* RIGHT COLUMN - IMAGE */}
+          {/* RIGHT: CYBER IMAGE */}
           <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="flex justify-center"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1, ease: "circOut" }}
+            className="relative flex justify-center lg:justify-end"
           >
-            <div className="relative w-72 h-72 md:w-80 md:h-80">
-              {/* Loading State */}
-              {!imageLoaded && !imageError && (
-                <div className="absolute inset-0 bg-gray-200 dark:bg-gray-700 rounded-2xl flex items-center justify-center">
-                  <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                </div>
-              )}
+            <div className="relative w-80 h-80 md:w-[450px] md:h-[450px]">
+              {/* Spinning Ring */}
+              <div className="absolute inset-0 border-[1px] border-dashed border-blue-500/30 rounded-full animate-spin-slow" />
               
-              {/* Image with decorative elements */}
-              <div className="relative group">
-                {/* Glow effect */}
-                <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
-                
-               <img
-    src={imgSrc}
-    alt="Witness Fabrice"
-    className={`h-50 w-auto object-cover rounded-2xl border-4 border-white dark:border-gray-800 shadow-xl transition-transform duration-500 group-hover:scale-105 ${
-      imageLoaded ? 'opacity-100' : 'opacity-0'
-    }`}
-    onLoad={() => setImageLoaded(true)}
-    onError={() => {
-      setImageError(true);
-      setImageLoaded(true);
-    }}
-  />
-                
+              <div className="absolute inset-10 rounded-[3rem] overflow-hidden border border-white/10 shadow-2xl">
+                {!imageLoaded && (
+                  <div className="absolute inset-0 bg-slate-100 dark:bg-white/5 animate-pulse flex items-center justify-center">
+                    <Loader2 className="animate-spin text-blue-500" />
+                  </div>
+                )}
+                <img
+                  src={imgSrc}
+                  alt="Witness"
+                  onLoad={() => setImageLoaded(true)}
+                  onError={() => setImageError(true)}
+                  className={`w-full h-full object-cover transition-transform duration-700 hover:scale-110 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+                />
               </div>
+
+              {/* Floating Floating Tech Badges */}
+              <motion.div 
+                animate={{ y: [0, -20, 0] }} 
+                transition={{ duration: 4, repeat: Infinity }}
+                className="absolute top-0 right-10 p-4 glass-panel rounded-2xl border-blue-500/20"
+              >
+                <Code2 className="text-blue-500" />
+              </motion.div>
+              <motion.div 
+                animate={{ y: [0, 20, 0] }} 
+                transition={{ duration: 5, repeat: Infinity, delay: 1 }}
+                className="absolute bottom-10 left-0 p-4 glass-panel rounded-2xl border-purple-500/20"
+              >
+                <Sparkles className="text-purple-500" />
+              </motion.div>
             </div>
           </motion.div>
         </div>
       </div>
 
-      {/* Scroll Indicator */}
-      <motion.div
-        className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
-        animate={{ y: [0, 10, 0] }}
-        transition={{ duration: 1.5, repeat: Infinity }}
-      >
-        <ChevronDown className="w-6 h-6 text-blue-600 dark:text-blue-400 cursor-pointer"
-          onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
-        />
-      </motion.div>
+      {/* Scroll Down */}
+      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-50">
+        <span className="text-[10px] font-mono tracking-widest uppercase">{t('exploreMore')}</span>
+        <motion.div animate={{ y: [0, 10, 0] }} transition={{ repeat: Infinity, duration: 2 }}>
+          <ChevronDown size={20} />
+        </motion.div>
+      </div>
     </section>
   );
 };
+
+const Rocket = ({ className }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-5c1.62-2.2 5-3 5-3"/><path d="M12 15v5s3.03-.55 5-2c2.2-1.62 3-5 3-5"/>
+  </svg>
+);
 
 export default Hero;
