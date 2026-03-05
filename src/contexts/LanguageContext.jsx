@@ -1,11 +1,12 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 
 const LanguageContext = createContext();
 
-export const useLanguage = () => useContext(LanguageContext);
-
+// 1. Enhanced Translations Object
 const translations = {
   en: {
+    home: "Home",
+    about: "About",
     welcome: "Welcome",
     projects: "Projects",
     skills: "Skills",
@@ -48,6 +49,8 @@ const translations = {
     offline: "Offline"
   },
   fr: {
+    home: "Accueil",
+    about: "À propos",
     welcome: "Bienvenue",
     projects: "Projets",
     skills: "Compétences",
@@ -90,65 +93,70 @@ const translations = {
     offline: "Hors ligne"
   },
   rw: {
+    home: "Ahabanza",
+    about: "Ibijyanye",
     welcome: "Murakaza neza",
-    projects: "Porogaramu",
+    projects: "Imishinga",
     skills: "Ubuhanga",
-    experience: "Ubuyobozi",
+    experience: "Ubunararibonye",
     contact: "Twandikire",
-    viewProjects: "Reba porogaramu",
-    exploreMore: "Sobanukirwa byinshi",
-    portfolioViews: "Kureba portfolio",
+    viewProjects: "Reba imishinga",
+    exploreMore: "Shakisha byinshi",
+    portfolioViews: "Abasuye",
     clients: "Abakiriya",
-    satisfaction: "Gushimishwa",
+    satisfaction: "Abanyuzwe",
     trySaying: "Gerageza kuvuga",
     or: "cyangwa",
     theme: "Ishusho",
     language: "Ururimi",
-    darkMode: "Uburyo bwirabura",
-    lightMode: "Uburyo bwerurutso",
+    darkMode: "Umukara",
+    lightMode: "Umweru",
     english: "Icyongereza",
     french: "Igifaransa",
     kinyarwanda: "Kinyarwanda",
     downloadCV: "Kuramo CV",
-    hireMe: "Mpaye",
+    hireMe: "Mpe akazi",
     viewAll: "Reba byose",
-    liveDemo: "Demo y'ubuzima",
-    sourceCode: "Kode y'ingingo",
+    liveDemo: "Yerekane",
+    sourceCode: "Kode",
     technologies: "Ikoranabuhanga",
     role: "Umwanya",
     duration: "Igihe",
     achievements: "Ibyagezweho",
     sendMessage: "Ohereza ubutumwa",
     yourName: "Izina ryawe",
-    yourEmail: "Email yawe",
+    yourEmail: "Imeli yawe",
     message: "Ubutumwa",
     submit: "Ohereza",
-    loading: "Birangira...",
+    loading: "Biratunganywa...",
     success: "Byakunze!",
     error: "Ikosa!",
-    connected: "Byahuwe",
-    disconnected: "Byahakanye",
-    online: "Kuri interineti",
-    offline: "Ntabwo kuri interineti"
+    connected: "Bihujwe",
+    disconnected: "Byahagaze",
+    online: "Kuri murandasi",
+    offline: "Ntabwo uri kuri murandasi"
   }
 };
 
 export const LanguageProvider = ({ children }) => {
   const [language, setLanguage] = useState(() => {
-    const savedLang = localStorage.getItem('portfolio-language');
-    return savedLang || 'en';
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('portfolio-language') || 'en';
+    }
+    return 'en';
   });
 
-  useEffect(() => {
-    localStorage.setItem('portfolio-language', language);
+  // 2. Wrap t function in useCallback to prevent unnecessary re-renders
+  const t = useCallback((key) => {
+    // Priority: Current Language -> English Fallback -> Key Name
+    return translations[language]?.[key] || translations['en'][key] || key;
   }, [language]);
-
-  const t = (key) => {
-    return translations[language]?.[key] || key;
-  };
 
   const changeLanguage = (lang) => {
     setLanguage(lang);
+    localStorage.setItem('portfolio-language', lang);
+    // Add a slight haptic feel by changing the document language attribute
+    document.documentElement.lang = lang;
   };
 
   return (
@@ -156,4 +164,12 @@ export const LanguageProvider = ({ children }) => {
       {children}
     </LanguageContext.Provider>
   );
+};
+
+export const useLanguage = () => {
+  const context = useContext(LanguageContext);
+  if (!context) {
+    throw new Error('useLanguage must be used within a LanguageProvider');
+  }
+  return context;
 };

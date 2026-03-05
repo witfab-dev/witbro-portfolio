@@ -1,30 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Heart, 
-  Coffee, 
-  Mail, 
-  MapPin, 
-  Globe, 
-  ExternalLink,
-  Github,
-  Linkedin,
-  Twitter,
-  Instagram,
-  Code2,
-  ArrowUp,
-  Clock,
-  Users,
-  Zap,
-  ChevronRight,
-  Sparkles,
-  Shield,
-  FileText,
-  Smartphone,
-  Laptop,
-  Server,
-  Database,
-  Cloud,
-  Lock
+  Heart, Coffee, Mail, MapPin, Globe, ExternalLink, Github, Linkedin, 
+  Twitter, Instagram, Code2, ArrowUp, Clock, Users, Zap, ChevronRight, 
+  Sparkles, Shield, FileText, Smartphone, Laptop, Cloud, Database, 
+  Lock, Copy, CheckCircle2
 } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -34,351 +13,159 @@ const Footer = () => {
   const { t } = useLanguage();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [visitorCount, setVisitorCount] = useState(1247);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
-
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     const visitorTimer = setInterval(() => {
       setVisitorCount(prev => prev + Math.floor(Math.random() * 3));
     }, 30000);
-
     return () => {
       clearInterval(timer);
       clearInterval(visitorTimer);
     };
   }, []);
 
-  const currentYear = new Date().getFullYear();
+  const copyEmail = () => {
+    navigator.clipboard.writeText('witnessfabrice@example.com');
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const socialLinks = [
-    { name: 'GitHub', url: 'https://github.com/witbri1', icon: Github, color: 'hover:bg-[#333]' },
-    { name: 'LinkedIn', url: 'https://linkedin.com/in/witnessfabrice', icon: Linkedin, color: 'hover:bg-[#0077b5]' },
-    { name: 'Twitter', url: 'https://twitter.com/witnessfabrice', icon: Twitter, color: 'hover:bg-[#1DA1F2]' },
-    { name: 'Dev.to', url: 'https://dev.to/witnessfabrice', icon: Code2, color: 'hover:bg-[#0A0A0A]' },
-    { name: 'Instagram', url: 'https://instagram.com/witbri1' ,icon:Instagram, color: 'hover:bg-[violet]'}
-  ];
-
-  const quickLinks = [
-    { label: t('projects'), href: '#projects', icon: Laptop },
-    { label: t('skills'), href: '#skills', icon: Zap },
-    { label: t('experience'), href: '#experience', icon: Sparkles },
-    { label: t('contact'), href: '#contact', icon: Mail },
+    { name: 'GitHub', url: 'https://github.com/witbri1', icon: Github, color: 'hover:text-[#F0F6FC]' },
+    { name: 'LinkedIn', url: 'https://linkedin.com/in/witnessfabrice', icon: Linkedin, color: 'hover:text-[#0A66C2]' },
+    { name: 'Twitter', url: 'https://twitter.com/witnessfabrice', icon: Twitter, color: 'hover:text-[#1DA1F2]' },
+    { name: 'Instagram', url: 'https://instagram.com/witbri1', icon: Instagram, color: 'hover:text-[#E4405F]' }
   ];
 
   const services = [
-    { name: 'Web Development', icon: Laptop, description: 'React, Next.js, Node.js' },
-    { name: 'Mobile Apps', icon: Smartphone, description: 'Flutter, React Native' },
-    { name: 'Cloud Architecture', icon: Cloud, description: 'AWS, Docker, Kubernetes' },
-    { name: 'Database Design', icon: Database, description: 'MongoDB, PostgreSQL' },
+    { name: 'Web Architecture', icon: Laptop, tech: 'Next.js • Node' },
+    { name: 'Mobile Solutions', icon: Smartphone, tech: 'React Native' },
+    { name: 'Cloud & DevOps', icon: Cloud, tech: 'AWS • Docker' },
   ];
-
-  const technologies = [
-    { name: 'React', icon: '⚛️' },
-    { name: 'TypeScript', icon: '📘' },
-    { name: 'Node.js', icon: '🟢' },
-    { name: 'Next.js', icon: '▲' },
-    { name: 'MongoDB', icon: '🍃' },
-    { name: 'PostgreSQL', icon: '🐘' },
-    { name: 'AWS', icon: '☁️' },
-    { name: 'Docker', icon: '🐳' },
-  ];
-
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
 
   return (
-    <footer className="relative bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white overflow-hidden">
-      {/* Animated Background Elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-2000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-cyan-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-4000"></div>
+    <footer className="relative bg-[#030712] text-white pt-20 pb-10 overflow-hidden">
+      {/* Dynamic Background Mesh */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-[120px] animate-pulse"></div>
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-[120px] animate-pulse delay-700"></div>
       </div>
 
-      {/* Main Content */}
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        {/* Main Footer Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 mb-16">
-          
-          {/* Brand Column */}
-          <div className="space-y-6">
+      <div className="relative z-10 max-w-7xl mx-auto px-6">
+        {/* Top Section: Brand & Contact Card */}
+        <div className="grid lg:grid-cols-12 gap-12 mb-20">
+          <div className="lg:col-span-5 space-y-8">
             <div>
-              <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-400 via-cyan-400 to-purple-400 bg-clip-text text-transparent mb-2">
-                Witness Fabrice
-              </h3>
-              <div className="h-1 w-20 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full mb-4"></div>
-            </div>
-            <p className="text-sm text-blue-100/80 leading-relaxed">
-              Building immersive digital experiences with cutting-edge technologies. 
-              Specializing in full-stack development, cloud architecture, and interactive web applications.
-            </p>
-            
-            {/* Social Links */}
-            <div className="flex gap-3">
-              {socialLinks.map((social) => {
-                const Icon = social.icon;
-                return (
-                  <a
-                    key={social.name}
-                    href={social.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`w-10 h-10 rounded-lg bg-white/10 backdrop-blur-sm flex items-center justify-center 
-                             hover:scale-110 transition-all duration-300 hover:shadow-xl group ${social.color}`}
-                    title={social.name}
-                  >
-                    <Icon className="w-5 h-5 text-white group-hover:rotate-12 transition-transform" />
-                  </a>
-                );
-              })}
+              <h2 className="text-4xl font-black tracking-tighter mb-4 italic">
+                WITNESS<span className="text-blue-500 text-5xl">.</span>
+              </h2>
+              <p className="text-gray-400 text-lg max-w-md leading-relaxed">
+                Crafting digital ecosystems where <span className="text-white font-medium">design meets performance</span>. 
+                Based in Kigali, shipping worldwide.
+              </p>
             </div>
 
-            {/* Contact Badge */}
-            <div className="bg-white/5 backdrop-blur-sm rounded-lg p-4 border border-white/10">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
-                  <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse"></div>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-blue-100">Available for work</p>
-                  <p className="text-xs text-blue-100/60">Open to collaborations</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Quick Links */}
-          <div>
-            <h4 className="text-sm font-semibold mb-6 text-blue-200 uppercase tracking-wider flex items-center gap-2">
-              <span className="w-8 h-[2px] bg-gradient-to-r from-blue-400 to-transparent"></span>
-              Quick Links
-            </h4>
-            <ul className="space-y-4">
-              {quickLinks.map((link) => {
-                const Icon = link.icon;
-                return (
-                  <li key={link.href}>
-                    <a
-                      href={link.href}
-                      className="text-sm text-blue-100/80 hover:text-white transition-all duration-300 flex items-center gap-3 group"
-                    >
-                      <Icon className="w-4 h-4 text-blue-400 group-hover:scale-110 transition-transform" />
-                      <span className="flex-1">{link.label}</span>
-                      <ChevronRight className="w-3 h-3 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-                    </a>
-                  </li>
-                );
-              })}
-            </ul>
-
-            {/* Resources */}
-            <div className="mt-8">
-              <h4 className="text-sm font-semibold mb-4 text-blue-200 uppercase tracking-wider flex items-center gap-2">
-                <span className="w-8 h-[2px] bg-gradient-to-r from-blue-400 to-transparent"></span>
-                Resources
-              </h4>
-              <ul className="space-y-3">
-                <li>
-                  <a href="#" className="text-sm text-blue-100/80 hover:text-white transition-colors flex items-center gap-2">
-                    <FileText className="w-4 h-4" /> Blog
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-sm text-blue-100/80 hover:text-white transition-colors flex items-center gap-2">
-                    <Shield className="w-4 h-4" /> Privacy Policy
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-sm text-blue-100/80 hover:text-white transition-colors flex items-center gap-2">
-                    <Lock className="w-4 h-4" /> Terms of Service
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          {/* Services */}
-          <div>
-            <h4 className="text-sm font-semibold mb-6 text-blue-200 uppercase tracking-wider flex items-center gap-2">
-              <span className="w-8 h-[2px] bg-gradient-to-r from-blue-400 to-transparent"></span>
-              Services
-            </h4>
-            <div className="space-y-4">
-              {services.map((service) => {
-                const Icon = service.icon;
-                return (
-                  <div key={service.name} className="group">
-                    <div className="flex items-start gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center group-hover:bg-blue-500/20 transition-colors">
-                        <Icon className="w-4 h-4 text-blue-400" />
-                      </div>
-                      <div>
-                        <h5 className="text-sm font-medium text-white mb-1">{service.name}</h5>
-                        <p className="text-xs text-blue-100/60">{service.description}</p>
-                      </div>
-                    </div>
+            {/* Innovative Contact Trigger */}
+            <div className="relative group max-w-sm">
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-50 transition duration-1000"></div>
+              <div className="relative flex items-center justify-between bg-gray-900/50 backdrop-blur-xl p-4 rounded-2xl border border-white/10">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center">
+                    <Mail className="w-5 h-5 text-blue-400" />
                   </div>
-                );
-              })}
+                  <div>
+                    <p className="text-xs text-gray-400 uppercase tracking-widest">Project Inquiry</p>
+                    <p className="text-sm font-medium">witnessfabrice@email.com</p>
+                  </div>
+                </div>
+                <button onClick={copyEmail} className="p-2 hover:bg-white/5 rounded-lg transition-colors">
+                  {copied ? <CheckCircle2 className="w-5 h-5 text-green-400" /> : <Copy className="w-5 h-5 text-gray-400" />}
+                </button>
+              </div>
             </div>
           </div>
 
-          {/* Contact & Tech Stack */}
-          <div>
-            <h4 className="text-sm font-semibold mb-6 text-blue-200 uppercase tracking-wider flex items-center gap-2">
-              <span className="w-8 h-[2px] bg-gradient-to-r from-blue-400 to-transparent"></span>
-              Get in Touch
-            </h4>
-            
-            <div className="space-y-4 mb-6">
-              <div className="flex items-start gap-3 group">
-                <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center group-hover:bg-blue-500/20 transition-colors">
-                  <Mail className="w-4 h-4 text-blue-400" />
-                </div>
-                <div>
-                  <p className="text-xs text-blue-200/60 mb-1">Email</p>
-                  <a href="mailto:witnessfabrice@example.com" className="text-sm text-white hover:text-blue-300 transition-colors">
-                    witnessfabrice@example.com
-                  </a>
-                </div>
+          {/* Service Cards */}
+          <div className="lg:col-span-7 grid sm:grid-cols-3 gap-4">
+            {services.map((service, i) => (
+              <div key={i} className="p-6 rounded-3xl bg-white/[0.02] border border-white/5 hover:border-blue-500/30 transition-all group">
+                <service.icon className="w-8 h-8 text-blue-500 mb-12 group-hover:scale-110 transition-transform" />
+                <h3 className="font-bold text-lg mb-1">{service.name}</h3>
+                <p className="text-xs text-gray-500 font-mono uppercase">{service.tech}</p>
               </div>
-              
-              <div className="flex items-start gap-3 group">
-                <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center group-hover:bg-blue-500/20 transition-colors">
-                  <MapPin className="w-4 h-4 text-blue-400" />
-                </div>
-                <div>
-                  <p className="text-xs text-blue-200/60 mb-1">Location</p>
-                  <p className="text-sm text-white">Kigali, Rwanda</p>
-                </div>
-              </div>
-              
-              <div className="flex items-start gap-3 group">
-                <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center group-hover:bg-blue-500/20 transition-colors">
-                  <Globe className="w-4 h-4 text-blue-400" />
-                </div>
-                <div>
-                  <p className="text-xs text-blue-200/60 mb-1">Timezone</p>
-                  <p className="text-sm text-white">CAT (UTC+2)</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Tech Stack Pills */}
-            <h4 className="text-sm font-semibold mb-4 text-blue-200 uppercase tracking-wider flex items-center gap-2">
-              <span className="w-8 h-[2px] bg-gradient-to-r from-blue-400 to-transparent"></span>
-              Tech Stack
-            </h4>
-            <div className="flex flex-wrap gap-2">
-              {technologies.map((tech) => (
-                <span
-                  key={tech.name}
-                  className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded-lg bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 hover:border-blue-400/50 transition-all cursor-default"
-                >
-                  <span>{tech.icon}</span>
-                  {tech.name}
-                </span>
-              ))}
-            </div>
+            ))}
           </div>
         </div>
 
-        {/* Live Stats Section */}
-        <div className="relative mb-12">
-          {/* Gradient Border */}
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl opacity-20 blur-xl"></div>
+        {/* Bento Stats Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-20">
+          <div className="col-span-2 md:col-span-1 p-6 rounded-3xl bg-blue-600 flex flex-col justify-between min-h-[160px] hover:rotate-1 transition-transform">
+             <Users className="w-6 h-6 text-white/80" />
+             <div>
+               <p className="text-4xl font-bold">{visitorCount.toLocaleString()}</p>
+               <p className="text-sm text-white/70">Global Visitors</p>
+             </div>
+          </div>
           
-          <div className="relative bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 p-8">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div className="text-center p-4 rounded-xl bg-white/5">
-                <Users className="w-8 h-8 text-blue-400 mx-auto mb-3" />
-                <div className="text-3xl font-bold text-white mb-1">{visitorCount.toLocaleString()}+</div>
-                <p className="text-xs text-blue-200/60">Portfolio Views</p>
-              </div>
-              
-              <div className="text-center p-4 rounded-xl bg-white/5">
-                <Clock className="w-8 h-8 text-blue-400 mx-auto mb-3" />
-                <div className="text-3xl font-bold text-white mb-1">
-                  {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-                </div>
-                <p className="text-xs text-blue-200/60">Local Time (CAT)</p>
-              </div>
-              
-              <div className="text-center p-4 rounded-xl bg-white/5">
-                <Zap className="w-8 h-8 text-blue-400 mx-auto mb-3" />
-                <div className="text-3xl font-bold text-white mb-1">15+</div>
-                <p className="text-xs text-blue-200/60">Projects Completed</p>
-              </div>
-              
-              <div className="text-center p-4 rounded-xl bg-white/5">
-                <Sparkles className="w-8 h-8 text-blue-400 mx-auto mb-3" />
-                <div className="text-3xl font-bold text-white mb-1">3+</div>
-                <p className="text-xs text-blue-200/60">Years Experience</p>
-              </div>
+          <div className="p-6 rounded-3xl bg-[#111827] border border-white/5 flex flex-col justify-between">
+            <div className="flex justify-between items-start">
+              <Clock className="w-5 h-5 text-blue-400" />
+              <span className="text-[10px] bg-blue-500/20 text-blue-400 px-2 py-1 rounded-full uppercase">CAT</span>
             </div>
+            <p className="text-2xl font-mono font-bold">
+              {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </p>
+          </div>
+
+          <div className="p-6 rounded-3xl bg-[#111827] border border-white/5 flex flex-col justify-between">
+            <Zap className="w-5 h-5 text-yellow-400" />
+            <div>
+              <p className="text-2xl font-bold">15+</p>
+              <p className="text-xs text-gray-500 uppercase">Deployments</p>
+            </div>
+          </div>
+
+          <div className="p-6 rounded-3xl bg-gradient-to-br from-purple-600 to-blue-600 flex flex-col justify-between shadow-lg shadow-blue-500/10">
+            <Sparkles className="w-5 h-5 text-white" />
+            <p className="text-sm font-medium leading-tight">Available for new opportunities 2026</p>
           </div>
         </div>
 
-        {/* Bottom Bar */}
-        <div className="relative pt-8 border-t border-white/10">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="flex items-center gap-2 text-sm text-blue-200/60">
-              <span>&copy; {currentYear} Witness Fabrice. All rights reserved.</span>
-              <span className="hidden md:inline">•</span>
-              <span className="flex items-center gap-1">
-                Made with <Heart className="w-4 h-4 text-red-400 fill-red-400 animate-pulse" /> and
-                <Coffee className="w-4 h-4 text-amber-400" /> in Kigali
-              </span>
-            </div>
-            
-            <div className="flex items-center gap-6">
-              <a
-                href="#"
-                className="text-sm text-blue-200/60 hover:text-white transition-colors flex items-center gap-1 group"
-              >
-                Privacy <Shield className="w-3 h-3 group-hover:rotate-12 transition-transform" />
-              </a>
-              <span className="text-white/20">|</span>
-              <a
-                href="#"
-                className="text-sm text-blue-200/60 hover:text-white transition-colors flex items-center gap-1 group"
-              >
-                Terms <FileText className="w-3 h-3 group-hover:rotate-12 transition-transform" />
-              </a>
-              <span className="text-white/20">|</span>
-              <button
-                onClick={scrollToTop}
-                className="text-sm text-blue-200/60 hover:text-white transition-colors flex items-center gap-2 group"
-              >
-                Back to Top 
-                <ArrowUp className="w-4 h-4 group-hover:-translate-y-1 transition-transform" />
-              </button>
-            </div>
+        {/* Final Footer Bar */}
+        <div className="pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8">
+          <div className="flex gap-8 items-center">
+             {socialLinks.map((link, i) => (
+               <a 
+                key={i} 
+                href={link.url} 
+                target="_blank" 
+                className={`text-gray-500 ${link.color} transition-all duration-300 transform hover:-translate-y-1`}
+               >
+                 <link.icon className="w-5 h-5" />
+               </a>
+             ))}
           </div>
+
+          <div className="flex items-center gap-2 text-xs text-gray-500 font-mono tracking-tighter">
+            <span>©{new Date().getFullYear()}</span>
+            <div className="w-1 h-1 rounded-full bg-gray-800"></div>
+            <span>KIGALI, RW</span>
+            <div className="w-1 h-1 rounded-full bg-gray-800"></div>
+            <span className="flex items-center gap-1">
+              BUILT WITH <Heart className="w-3 h-3 text-red-500" />
+            </span>
+          </div>
+
+          <button 
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            className="group flex items-center gap-2 text-xs uppercase tracking-widest text-gray-400 hover:text-white transition-colors"
+          >
+            Top <ArrowUp className="w-4 h-4 group-hover:-translate-y-1 transition-transform" />
+          </button>
         </div>
       </div>
-
-      {/* Add animation keyframes to your global CSS */}
-      <style jsx>{`
-        @keyframes blob {
-          0% { transform: translate(0px, 0px) scale(1); }
-          33% { transform: translate(30px, -50px) scale(1.1); }
-          66% { transform: translate(-20px, 20px) scale(0.9); }
-          100% { transform: translate(0px, 0px) scale(1); }
-        }
-        .animate-blob {
-          animation: blob 7s infinite;
-        }
-        .animation-delay-2000 {
-          animation-delay: 2s;
-        }
-        .animation-delay-4000 {
-          animation-delay: 4s;
-        }
-      `}</style>
     </footer>
   );
 };

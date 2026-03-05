@@ -1,22 +1,81 @@
 import React from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Sun, Moon } from 'lucide-react';
 import { useTheme } from "../../contexts/ThemeContext";
+
 const ThemeToggle = () => {
   const { theme, toggleTheme } = useTheme();
+  const isDark = theme === 'dark';
 
   return (
     <button
       onClick={toggleTheme}
-      className="relative w-14 h-8 rounded-full p-1 bg-gradient-to-r from-gray-300 to-gray-400 dark:from-gray-600 dark:to-gray-700 transition-all duration-300 hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-500"
-      aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-      title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+      className={`relative w-16 h-8 rounded-full p-1 transition-colors duration-500 overflow-hidden border ${
+        isDark 
+          ? 'bg-slate-900 border-white/10 shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)]' 
+          : 'bg-blue-100 border-slate-300 shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)]'
+      }`}
+      aria-label="Toggle Theme"
     >
-      <div className={`absolute top-1 w-6 h-6 rounded-full bg-white shadow-lg transform transition-transform duration-300 ${theme === 'dark' ? 'translate-x-7' : 'translate-x-0'}`}>
-        {theme === 'dark' ? (
-          <span className="absolute inset-0 flex items-center justify-center text-yellow-500 text-sm">🌙</span>
+      {/* Dynamic Background Particles */}
+      <div className="absolute inset-0 pointer-events-none">
+        {isDark ? (
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            className="absolute inset-0 flex items-center justify-around px-2"
+          >
+            <div className="w-0.5 h-0.5 bg-white rounded-full animate-pulse" />
+            <div className="w-0.5 h-0.5 bg-white rounded-full animate-pulse delay-75" />
+            <div className="w-0.5 h-0.5 bg-white rounded-full animate-pulse delay-150" />
+          </motion.div>
         ) : (
-          <span className="absolute inset-0 flex items-center justify-center text-orange-500 text-sm">☀️</span>
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }}
+            className="absolute top-1 right-2 w-2 h-2 bg-yellow-400/20 rounded-full blur-sm" 
+          />
         )}
       </div>
+
+      {/* The Sliding Knob */}
+      <motion.div
+        layout
+        transition={{
+          type: "spring",
+          stiffness: 700,
+          damping: 30
+        }}
+        className={`relative z-10 w-6 h-6 rounded-full flex items-center justify-center shadow-md ${
+          isDark 
+            ? 'bg-gradient-to-tr from-slate-700 to-slate-500 ml-auto' 
+            : 'bg-gradient-to-tr from-yellow-400 to-orange-400 ml-0'
+        }`}
+      >
+        <AnimatePresence mode="wait" initial={false}>
+          {isDark ? (
+            <motion.div
+              key="moon"
+              initial={{ rotate: -90, opacity: 0 }}
+              animate={{ rotate: 0, opacity: 1 }}
+              exit={{ rotate: 90, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <Moon className="w-3.5 h-3.5 text-blue-200 fill-blue-200" />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="sun"
+              initial={{ rotate: 90, opacity: 0 }}
+              animate={{ rotate: 0, opacity: 1 }}
+              exit={{ rotate: -90, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <Sun className="w-3.5 h-3.5 text-white fill-white" />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
     </button>
   );
 };

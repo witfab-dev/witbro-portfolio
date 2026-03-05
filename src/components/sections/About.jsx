@@ -1,352 +1,152 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  User,
-  Code2,
-  Heart,
-  Coffee,
-  MapPin,
-  Calendar,
-  Briefcase,
-  GraduationCap,
-  Award,
-  Star,
-  Target,
-  Lightbulb,
-  Rocket,
-  Zap,
-  Globe,
-  Users,
-  BookOpen,
-  Music,
-  Camera,
-  Plane,
-  Gamepad,
-  Palette,
-  Dumbbell,
-  Sparkles,
-  Download,
-  Mail,
-  Github,
-  Linkedin,
-  Twitter,
-  ExternalLink,
-  CheckCircle2,
-  Clock,
-  TrendingUp,
-  Smile,
-  Quote
+  User, Code2, Heart, Coffee, MapPin, Briefcase, 
+  GraduationCap, Award, Star, Globe, Users, BookOpen, 
+  Music, Camera, Plane, Gamepad, Palette, Dumbbell, 
+  Sparkles, Download, Mail, Github, Linkedin, Twitter, 
+  Smile, Quote, Rocket, ChevronDown, ChevronUp, Database,
+  Smartphone, Box, Cloud, GitBranch
 } from 'lucide-react';
 
 const About = () => {
   const [activeTab, setActiveTab] = useState('bio');
   const [showFullBio, setShowFullBio] = useState(false);
 
-  // Personal information
   const personalInfo = {
     name: 'Witness Fabrice',
     title: 'Full-Stack Developer',
     location: 'Kigali, Rwanda',
     email: 'witnessfabrice@gmail.com',
-    phone: '+250 788 123 456',
-    birthdate: '1998-05-15',
-    nationality: 'Rwandan',
-    languages: ['English (Fluent)', 'French (Professional)', 'Kinyarwanda (Native)'],
     availability: 'Open for opportunities',
     freelance: 'Available'
   };
 
-  // Bio sections
   const bio = {
     short: "I'm a passionate Full-Stack Developer with over 3 years of experience building web and mobile applications. Based in Kigali, Rwanda, I love creating solutions that make a difference.",
-    long: `My journey into tech started when I built my first website at 16. Since then, I've been on an exciting path of continuous learning and growth. I graduated with honors in Computer Science from the University of Rwanda and have since worked with startups, enterprises, and freelance clients across Africa and beyond.
-
-    I believe in writing clean, maintainable code and creating experiences that users love. When I'm not coding, you'll find me exploring new technologies, contributing to open source, or mentoring aspiring developers.
-
-    I'm passionate about using technology to solve real-world problems, especially in areas like education, healthcare, and financial inclusion. Every project I work on is an opportunity to learn something new and make a positive impact.`
+    long: `My journey into tech started when I built my first website at 16. Since then, I've been on an exciting path of continuous learning and growth. I graduated with honors in Computer Science from the University of Rwanda and have since worked with startups, enterprises, and freelance clients across Africa and beyond.\n\nI believe in writing clean, maintainable code and creating experiences that users love. When I'm not coding, you'll find me exploring new technologies, contributing to open source, or mentoring aspiring developers.`
   };
 
-  // Skills data
   const skills = {
     frontend: [
       { name: 'React', level: 95, icon: Code2, color: 'from-blue-400 to-blue-600' },
-      { name: 'Next.js', level: 88, icon: Code2, color: 'from-gray-400 to-gray-600' },
-      { name: 'TypeScript', level: 90, icon: Code2, color: 'from-blue-400 to-blue-600' },
-      { name: 'Tailwind CSS', level: 92, icon: Palette, color: 'from-cyan-400 to-cyan-600' },
-      { name: 'Framer Motion', level: 85, icon: Sparkles, color: 'from-pink-400 to-pink-600' }
+      { name: 'Next.js', level: 88, icon: Sparkles, color: 'from-gray-600 to-gray-800' },
+      { name: 'TypeScript', level: 90, icon: Code2, color: 'from-blue-500 to-indigo-600' },
+      { name: 'Tailwind CSS', level: 92, icon: Palette, color: 'from-cyan-400 to-cyan-600' }
     ],
     backend: [
       { name: 'Node.js', level: 90, icon: Code2, color: 'from-green-400 to-green-600' },
-      { name: 'Python', level: 85, icon: Code2, color: 'from-yellow-400 to-yellow-600' },
       { name: 'PostgreSQL', level: 82, icon: Database, color: 'from-blue-400 to-blue-600' },
-      { name: 'MongoDB', level: 80, icon: Database, color: 'from-green-400 to-green-600' },
-      { name: 'GraphQL', level: 78, icon: Code2, color: 'from-pink-400 to-pink-600' }
-    ],
-    mobile: [
-      { name: 'Flutter', level: 82, icon: Smartphone, color: 'from-blue-400 to-blue-600' },
-      { name: 'React Native', level: 80, icon: Smartphone, color: 'from-purple-400 to-purple-600' }
-    ],
-    tools: [
-      { name: 'Docker', level: 75, icon: Container, color: 'from-blue-400 to-blue-600' },
-      { name: 'Git', level: 92, icon: GitBranch, color: 'from-orange-400 to-orange-600' },
-      { name: 'AWS', level: 78, icon: Cloud, color: 'from-yellow-400 to-yellow-600' },
-      { name: 'Figma', level: 85, icon: Palette, color: 'from-purple-400 to-purple-600' }
+      { name: 'Docker', level: 75, icon: Box, color: 'from-blue-500 to-blue-700' }
     ]
   };
 
-  // Journey timeline
   const journey = [
-    {
-      year: '2025',
-      title: 'Sinior Developer',
-      description: 'Leading development at Innovatech Solutions',
-      icon: Rocket,
-      color: 'from-blue-500 to-blue-600'
-    },
-    {
-      year: '2024',
-      title: 'Full-Stack Developer',
-      description: 'Joined TechStart Africa, worked on multiple client projects',
-      icon: Briefcase,
-      color: 'from-purple-500 to-purple-600'
-    },
-    {
-      year: '2023',
-      title: 'Graduated',
-      description: 'BSc Computer Science, University of Rwanda',
-      icon: GraduationCap,
-      color: 'from-green-500 to-green-600'
-    },
-    {
-      year: '2017',
-      title: 'Started University',
-      description: 'Began journey in Computer Science',
-      icon: BookOpen,
-      color: 'from-yellow-500 to-yellow-600'
-    },
-    {
-      year: '2016',
-      title: 'First Website',
-      description: 'Built first website, discovered passion for coding',
-      icon: Code2,
-      color: 'from-red-500 to-red-600'
-    }
+    { year: '2025', title: 'Senior Developer', description: 'Leading development at Innovatech Solutions', icon: Rocket, color: 'from-blue-500 to-indigo-600' },
+    { year: '2024', title: 'Full-Stack Developer', description: 'Joined TechStart Africa, scaled client systems', icon: Briefcase, color: 'from-purple-500 to-pink-600' },
+    { year: '2023', title: 'Graduated', description: 'BSc Computer Science, University of Rwanda', icon: GraduationCap, color: 'from-emerald-500 to-teal-600' }
   ];
 
-  // Achievements
-  const achievements = [
-    { icon: Award, label: 'Best Innovation Award', year: '2023', color: 'text-yellow-500' },
-    { icon: Star, label: 'Top Rated Freelancer', year: '2024', color: 'text-purple-500' },
-    { icon: Users, label: 'Mentored 20+ Developers', year: '2023', color: 'text-green-500' },
-    { icon: Globe, label: 'Projects in 10+ Countries', year: '2024', color: 'text-blue-500' },
-    { icon: Code2, label: '50+ Projects Completed', year: '2024', color: 'text-orange-500' },
-    { icon: Heart, label: '100% Client Satisfaction', year: '2024', color: 'text-red-500' }
-  ];
-
-  // Hobbies
-  const hobbies = [
-    { icon: Music, name: 'Music', description: 'Play guitar and produce beats' },
-    { icon: Camera, name: 'Photography', description: 'Street and landscape photography' },
-    { icon: Plane, name: 'Travel', description: 'Explored 15+ countries' },
-    { icon: Gamepad, name: 'Gaming', description: 'Strategy and RPG games' },
-    { icon: BookOpen, name: 'Reading', description: 'Tech blogs and sci-fi novels' },
-    { icon: Dumbbell, name: 'Fitness', description: 'Morning runs and gym' }
-  ];
-
-  // Testimonials
-  const testimonials = [
-    {
-      name: 'Alice Uwase',
-      role: 'Product Manager, Innovatech',
-      content: 'Witness is one of the most talented developers I\'ve worked with. His attention to detail and problem-solving skills are exceptional.',
-      avatar: 'https://ui-avatars.com/api/?name=Alice+Uwase&background=3b82f6&color=fff'
-    },
-    {
-      name: 'Jean Paul',
-      role: 'CTO, TechStart Africa',
-      content: 'His ability to quickly grasp complex requirements and deliver high-quality code is impressive. A true asset to any team.',
-      avatar: 'https://ui-avatars.com/api/?name=Jean+Paul&background=8b5cf6&color=fff'
-    },
-    {
-      name: 'Sarah Johnson',
-      role: 'Client, USA',
-      content: 'Working with Witness was a pleasure. He understood our vision perfectly and delivered beyond expectations.',
-      avatar: 'https://ui-avatars.com/api/?name=Sarah+Johnson&background=10b981&color=fff'
-    }
-  ];
-
-  // Stats
   const stats = [
     { icon: Code2, label: 'Lines of Code', value: '500K+', color: 'from-blue-500 to-blue-600' },
-    { icon: Users, label: 'Happy Clients', value: '30+', color: 'from-green-500 to-green-600' },
+    { icon: Users, label: 'Happy Clients', value: '30+', color: 'from-emerald-500 to-emerald-600' },
     { icon: Globe, label: 'Countries', value: '10+', color: 'from-purple-500 to-purple-600' },
     { icon: Coffee, label: 'Coffee Cups', value: '1000+', color: 'from-orange-500 to-orange-600' }
   ];
 
   return (
-    <section id="about" className="py-20 px-4 relative overflow-hidden">
+    <section id="about" className="py-20 px-4 relative overflow-hidden bg-white dark:bg-gray-950 transition-colors duration-500">
       {/* Background decoration */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-blue-100/20 via-transparent to-purple-100/20 dark:from-blue-900/10 dark:to-purple-900/10" />
       
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        {[...Array(15)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute rounded-full bg-gradient-to-r from-blue-500/10 to-purple-500/10"
-            style={{
-              width: Math.random() * 200 + 50,
-              height: Math.random() * 200 + 50,
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-            }}
-            animate={{
-              x: [0, Math.random() * 100 - 50],
-              y: [0, Math.random() * 100 - 50],
-              scale: [1, Math.random() + 0.5],
-            }}
-            transition={{
-              duration: Math.random() * 10 + 10,
-              repeat: Infinity,
-              repeatType: 'reverse',
-            }}
-          />
-        ))}
-      </div>
-
       <div className="max-w-7xl mx-auto relative z-10">
-        {/* Section Header */}
-        <motion.div
+        {/* Header */}
+        <motion.div 
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            About{' '}
-            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Me
-            </span>
+          <h2 className="text-4xl md:text-6xl font-black mb-4 tracking-tight text-gray-900 dark:text-white">
+            About <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Me</span>
           </h2>
-          <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Get to know the person behind the code
-          </p>
+          <div className="h-1.5 w-20 bg-gradient-to-r from-blue-600 to-purple-600 mx-auto rounded-full" />
         </motion.div>
 
-        {/* Stats Cards */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12"
-        >
-          {stats.map((stat, index) => {
-            const Icon = stat.icon;
-            return (
-              <motion.div
-                key={stat.label}
-                whileHover={{ scale: 1.05, y: -5 }}
-                className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-6 text-center border border-gray-200 dark:border-gray-700 shadow-lg"
-              >
-                <div className={`w-12 h-12 rounded-xl bg-gradient-to-r ${stat.color} flex items-center justify-center mx-auto mb-3`}>
-                  <Icon className="w-6 h-6 text-white" />
-                </div>
-                <div className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
-                  {stat.value}
-                </div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">
-                  {stat.label}
-                </div>
-              </motion.div>
-            );
-          })}
-        </motion.div>
+        {/* Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16">
+          {stats.map((stat, idx) => (
+            <motion.div
+              key={idx}
+              whileHover={{ y: -5 }}
+              className="p-6 rounded-2xl bg-white/50 dark:bg-gray-900/50 backdrop-blur-md border border-gray-200 dark:border-gray-800 shadow-xl shadow-gray-200/20 dark:shadow-none"
+            >
+              <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center mb-4 shadow-lg`}>
+                <stat.icon className="text-white w-6 h-6" />
+              </div>
+              <h4 className="text-3xl font-bold dark:text-white">{stat.value}</h4>
+              <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">{stat.label}</p>
+            </motion.div>
+          ))}
+        </div>
 
-        {/* Profile Section */}
-        <div className="grid lg:grid-cols-3 gap-8 mb-16">
-          {/* Profile Card */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6 }}
-            className="lg:col-span-1"
-          >
-            <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-200 dark:border-gray-700 shadow-xl sticky top-24">
-              {/* Profile Image */}
-              <div className="relative mb-6">
-                <div className="w-32 h-32 mx-auto rounded-full bg-gradient-to-r from-blue-500 to-purple-500 p-1">
-                  <img 
-                    src="../images/wit.png" 
-                    alt="Witness Fabrice"
-                    className="w-full h-full rounded-full object-cover border-4 border-white dark:border-gray-800"
-                  />
-                </div>
-                <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium">
+        <div className="grid lg:grid-cols-12 gap-12">
+          {/* Sidebar */}
+          <div className="lg:col-span-4">
+            <motion.div 
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              className="sticky top-24 p-8 rounded-3xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-2xl"
+            >
+              <div className="relative w-40 h-40 mx-auto mb-8">
+                <div className="absolute inset-0 bg-gradient-to-tr from-blue-600 to-purple-600 rounded-full animate-pulse blur-lg opacity-30" />
+                <img 
+                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop" 
+                  alt="Profile" 
+                  className="relative w-full h-full rounded-full object-cover border-4 border-white dark:border-gray-800 shadow-2xl"
+                />
+              </div>
+              
+              <div className="text-center space-y-2 mb-8">
+                <h3 className="text-2xl font-bold dark:text-white">{personalInfo.name}</h3>
+                <p className="text-blue-600 dark:text-blue-400 font-semibold">{personalInfo.title}</p>
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-xs font-bold uppercase tracking-wider">
+                  <span className="w-2 h-2 rounded-full bg-green-500 animate-ping" />
                   {personalInfo.availability}
                 </div>
               </div>
 
-              <h3 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-1">
-                {personalInfo.name}
-              </h3>
-              <p className="text-center text-gray-600 dark:text-gray-400 mb-4">
-                {personalInfo.title}
-              </p>
-
-              {/* Quick Info */}
-              <div className="space-y-3 mb-6">
-                <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                  <MapPin className="w-4 h-4" />
-                  {personalInfo.location}
+              <div className="space-y-4 mb-8">
+                <div className="flex items-center gap-4 text-gray-600 dark:text-gray-400">
+                  <MapPin className="w-5 h-5 text-blue-500" />
+                  <span className="text-sm">{personalInfo.location}</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                  <Mail className="w-4 h-4" />
-                  {personalInfo.email}
-                </div>
-                <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                  <Briefcase className="w-4 h-4" />
-                  {personalInfo.freelance} for freelance
+                <div className="flex items-center gap-4 text-gray-600 dark:text-gray-400">
+                  <Mail className="w-5 h-5 text-blue-500" />
+                  <span className="text-sm truncate">{personalInfo.email}</span>
                 </div>
               </div>
 
-              {/* Social Links */}
-              <div className="flex justify-center gap-3 mb-6">
-                {[Github, Linkedin, Twitter].map((Icon, i) => (
-                  <a
-                    key={i}
-                    href="#"
-                    className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-                  >
-                    <Icon className="w-5 h-5 text-gray-700 dark:text-gray-300" />
-                  </a>
-                ))}
-              </div>
-
-              {/* Download Resume Button */}
-              <button className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2 group">
-                <Download className="w-4 h-4 group-hover:translate-y-1 transition-transform" />
-                Download Resume
+              <button 
+                onClick={() => window.print()}
+                className="w-full py-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-2xl font-bold flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-blue-500/10"
+              >
+                <Download className="w-5 h-5" />
+                Download CV
               </button>
-            </div>
-          </motion.div>
+            </motion.div>
+          </div>
 
-          {/* Main Content */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6 }}
-            className="lg:col-span-2 space-y-8"
-          >
-            {/* Tabs */}
-            <div className="flex gap-2 border-b border-gray-200 dark:border-gray-700 pb-4">
+          {/* Tabs Content */}
+          <div className="lg:col-span-8">
+            <div className="flex p-1.5 bg-gray-100 dark:bg-gray-900 rounded-2xl mb-8">
               {['bio', 'skills', 'journey'].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`px-6 py-2 rounded-lg font-medium capitalize transition-all duration-300 ${
-                    activeTab === tab
-                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
-                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                  className={`flex-1 py-3 rounded-xl font-bold text-sm transition-all duration-300 capitalize ${
+                    activeTab === tab 
+                      ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-white shadow-sm' 
+                      : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
                   }`}
                 >
                   {tab}
@@ -354,304 +154,157 @@ const About = () => {
               ))}
             </div>
 
-            {/* Tab Content */}
             <AnimatePresence mode="wait">
-              {/* Bio Tab */}
               {activeTab === 'bio' && (
                 <motion.div
                   key="bio"
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3 }}
-                  className="space-y-6"
+                  exit={{ opacity: 0, y: -10 }}
+                  className="space-y-8"
                 >
-                  <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-8 border border-gray-200 dark:border-gray-700">
-                    <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
+                  <div className="prose prose-blue dark:prose-invert max-w-none">
+                    <p className="text-xl leading-relaxed text-gray-700 dark:text-gray-300">
                       {bio.short}
                     </p>
-                    
                     <AnimatePresence>
                       {showFullBio && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: 'auto' }}
-                          exit={{ opacity: 0, height: 0 }}
-                          transition={{ duration: 0.3 }}
+                        <motion.div 
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          className="overflow-hidden"
                         >
-                          <p className="text-gray-600 dark:text-gray-400 leading-relaxed whitespace-pre-line">
+                          <p className="text-gray-600 dark:text-gray-400 mt-4 whitespace-pre-line leading-relaxed">
                             {bio.long}
                           </p>
                         </motion.div>
                       )}
                     </AnimatePresence>
-
-                    <button
+                    <button 
                       onClick={() => setShowFullBio(!showFullBio)}
-                      className="mt-4 text-blue-600 dark:text-blue-400 font-medium hover:underline flex items-center gap-2"
+                      className="mt-4 flex items-center gap-2 text-blue-600 font-bold hover:gap-3 transition-all"
                     >
-                      {showFullBio ? 'Show less' : 'Read more'}
+                      {showFullBio ? 'Show Less' : 'Read Full Story'}
+                      {showFullBio ? <ChevronUp className="w-4 h-4"/> : <ChevronDown className="w-4 h-4"/>}
                     </button>
                   </div>
 
-                  {/* Personal Info Grid */}
                   <div className="grid md:grid-cols-2 gap-6">
-                    <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-200 dark:border-gray-700">
-                      <h4 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                        <User className="w-4 h-4" />
-                        Personal Details
+                    <div className="p-6 rounded-2xl bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800/50">
+                      <h4 className="font-bold flex items-center gap-2 mb-4 dark:text-white">
+                        <User className="w-5 h-5 text-blue-500" /> Personal Info
                       </h4>
-                      <div className="space-y-3">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-600 dark:text-gray-400">Birthday</span>
-                          <span className="text-gray-900 dark:text-white">May 15, 2008</span>
+                      <div className="space-y-3 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">Nationality</span>
+                          <span className="font-medium dark:text-gray-200">Rwandan</span>
                         </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-600 dark:text-gray-400">Nationality</span>
-                          <span className="text-gray-900 dark:text-white">Rwandan</span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-600 dark:text-gray-400">Languages</span>
-                          <span className="text-gray-900 dark:text-white">English, French, Kinyarwanda</span>
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">Language</span>
+                          <span className="font-medium dark:text-gray-200">English, French</span>
                         </div>
                       </div>
                     </div>
-
-                    <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-200 dark:border-gray-700">
-                      <h4 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                        <Heart className="w-4 h-4" />
-                        Interests
+                    <div className="p-6 rounded-2xl bg-purple-50 dark:bg-purple-900/10 border border-purple-100 dark:border-purple-800/50">
+                      <h4 className="font-bold flex items-center gap-2 mb-4 dark:text-white">
+                        <Heart className="w-5 h-5 text-purple-500" /> Interests
                       </h4>
                       <div className="flex flex-wrap gap-2">
-                        {hobbies.map((hobby) => {
-                          const Icon = hobby.icon;
-                          return (
-                            <div
-                              key={hobby.name}
-                              className="px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg text-sm text-gray-700 dark:text-gray-300 flex items-center gap-2"
-                            >
-                              <Icon className="w-4 h-4" />
-                              {hobby.name}
-                            </div>
-                          );
-                        })}
+                        {['Coding', 'Music', 'Fitness', 'Travel'].map(tag => (
+                          <span key={tag} className="px-3 py-1 rounded-full bg-white dark:bg-gray-800 text-xs font-bold shadow-sm dark:text-gray-300">
+                            {tag}
+                          </span>
+                        ))}
                       </div>
-                    </div>
-                  </div>
-
-                  {/* Testimonials */}
-                  <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-200 dark:border-gray-700">
-                    <h4 className="font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
-                      <Quote className="w-4 h-4" />
-                      What People Say
-                    </h4>
-                    <div className="grid md:grid-cols-3 gap-4">
-                      {testimonials.map((testimonial, i) => (
-                        <div key={i} className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
-                          <p className="text-sm text-gray-600 dark:text-gray-400 italic mb-3">
-                            "{testimonial.content}"
-                          </p>
-                          <div className="flex items-center gap-2">
-                            <img 
-                              src={testimonial.avatar} 
-                              alt={testimonial.name}
-                              className="w-8 h-8 rounded-full"
-                            />
-                            <div>
-                              <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                                {testimonial.name}
-                              </p>
-                              <p className="text-xs text-gray-500 dark:text-gray-500">
-                                {testimonial.role}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
                     </div>
                   </div>
                 </motion.div>
               )}
 
-              {/* Skills Tab */}
               {activeTab === 'skills' && (
                 <motion.div
                   key="skills"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3 }}
-                  className="space-y-6"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="space-y-8"
                 >
-                  {Object.entries(skills).map(([category, skillList]) => (
-                    <div key={category} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-200 dark:border-gray-700">
-                      <h4 className="font-semibold text-gray-900 dark:text-white mb-4 capitalize">
-                        {category}
-                      </h4>
-                      <div className="space-y-4">
-                        {skillList.map((skill) => {
-                          const Icon = skill.icon;
-                          return (
-                            <div key={skill.name}>
-                              <div className="flex items-center justify-between mb-2">
-                                <div className="flex items-center gap-2">
-                                  <Icon className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                    {skill.name}
-                                  </span>
-                                </div>
-                                <span className="text-sm text-gray-600 dark:text-gray-400">
-                                  {skill.level}%
-                                </span>
+                  {Object.entries(skills).map(([category, list]) => (
+                    <div key={category} className="space-y-4">
+                      <h4 className="text-lg font-bold capitalize dark:text-white">{category} Development</h4>
+                      <div className="grid gap-4">
+                        {list.map((skill) => (
+                          <div key={skill.name} className="space-y-2">
+                            <div className="flex justify-between items-center text-sm font-bold dark:text-gray-300">
+                              <div className="flex items-center gap-2">
+                                <skill.icon className="w-4 h-4 text-blue-500" />
+                                {skill.name}
                               </div>
-                              <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                                <motion.div
-                                  initial={{ width: 0 }}
-                                  whileInView={{ width: `${skill.level}%` }}
-                                  transition={{ duration: 1, delay: 0.2 }}
-                                  className={`h-full rounded-full bg-gradient-to-r ${skill.color}`}
-                                />
-                              </div>
+                              <span>{skill.level}%</span>
                             </div>
-                          );
-                        })}
+                            <div className="h-2.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                              <motion.div 
+                                initial={{ width: 0 }}
+                                whileInView={{ width: `${skill.level}%` }}
+                                transition={{ duration: 1 }}
+                                className={`h-full bg-gradient-to-r ${skill.color}`}
+                              />
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   ))}
-
-                  {/* Achievements */}
-                  <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-200 dark:border-gray-700">
-                    <h4 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                      <Award className="w-4 h-4" />
-                      Achievements
-                    </h4>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                      {achievements.map((achievement, i) => {
-                        const Icon = achievement.icon;
-                        return (
-                          <div key={i} className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                            <Icon className={`w-5 h-5 ${achievement.color} mb-2`} />
-                            <p className="text-sm font-medium text-gray-900 dark:text-white">
-                              {achievement.label}
-                            </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-500">
-                              {achievement.year}
-                            </p>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
                 </motion.div>
               )}
 
-              {/* Journey Tab */}
               {activeTab === 'journey' && (
                 <motion.div
                   key="journey"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3 }}
-                  className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-200 dark:border-gray-700"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="relative pl-8 space-y-12 before:absolute before:left-0 before:top-2 before:bottom-2 before:w-0.5 before:bg-gray-200 dark:before:bg-gray-800"
                 >
-                  <div className="relative">
-                    {/* Timeline line */}
-                    <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-500 via-purple-500 to-pink-500"></div>
-
-                    <div className="space-y-8">
-                      {journey.map((item, index) => {
-                        const Icon = item.icon;
-                        return (
-                          <motion.div
-                            key={index}
-                            initial={{ opacity: 0, x: -20 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            transition={{ delay: index * 0.1 }}
-                            className="relative pl-12"
-                          >
-                            <div className={`absolute left-0 p-2 rounded-lg bg-gradient-to-r ${item.color}`}>
-                              <Icon className="w-4 h-4 text-white" />
-                            </div>
-                            <div>
-                              <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">
-                                {item.year}
-                              </span>
-                              <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-1">
-                                {item.title}
-                              </h4>
-                              <p className="text-gray-600 dark:text-gray-400">
-                                {item.description}
-                              </p>
-                            </div>
-                          </motion.div>
-                        );
-                      })}
+                  {journey.map((item, idx) => (
+                    <div key={idx} className="relative">
+                      <div className={`absolute -left-10 p-2 rounded-xl bg-gradient-to-br ${item.color} text-white shadow-lg`}>
+                        <item.icon className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <span className="text-xs font-black text-blue-600 uppercase tracking-widest">{item.year}</span>
+                        <h4 className="text-xl font-bold dark:text-white mt-1">{item.title}</h4>
+                        <p className="text-gray-600 dark:text-gray-400 mt-2">{item.description}</p>
+                      </div>
                     </div>
-                  </div>
+                  ))}
                 </motion.div>
               )}
             </AnimatePresence>
-          </motion.div>
+          </div>
         </div>
 
-        {/* Call to Action */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-center bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 rounded-2xl p-8 border border-blue-500/20"
+        {/* CTA */}
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          className="mt-20 p-12 rounded-[2rem] bg-gradient-to-br from-blue-600 to-indigo-700 text-center text-white shadow-2xl overflow-hidden relative"
         >
-          <Rocket className="w-12 h-12 text-blue-600 dark:text-blue-400 mx-auto mb-4" />
-          <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
-            Let's Work Together
-          </h3>
-          <p className="text-gray-600 dark:text-gray-300 mb-6 max-w-2xl mx-auto">
-            I'm always open to discussing new projects, creative ideas, or opportunities to be part of your vision.
+          <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10" />
+          <Rocket className="w-16 h-16 mx-auto mb-6 animate-bounce" />
+          <h3 className="text-3xl md:text-4xl font-black mb-4">Let's build something epic.</h3>
+          <p className="text-blue-100 mb-8 max-w-xl mx-auto text-lg">
+            I'm currently available for new projects and collaborations. If you have an idea, let's make it real.
           </p>
-          <a
-            href="#contact"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:shadow-xl transition-all duration-300 group"
+          <a 
+            href={`mailto:${personalInfo.email}`}
+            className="inline-flex items-center gap-3 px-10 py-4 bg-white text-blue-600 rounded-2xl font-black hover:bg-blue-50 transition-all shadow-xl hover:scale-105 active:scale-95"
           >
-            <Mail className="w-5 h-5" />
-            Get In Touch
-            <Smile className="w-4 h-4 ml-2 group-hover:rotate-12 transition-transform" />
+            Hire Me <Smile className="w-5 h-5" />
           </a>
         </motion.div>
       </div>
     </section>
   );
 };
-
-// Missing imports
-const Database = ({ className }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
-  </svg>
-);
-
-const Smartphone = ({ className }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-  </svg>
-);
-
-const Container = ({ className }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-  </svg>
-);
-
-const Cloud = ({ className }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
-  </svg>
-);
-
-const GitBranch = ({ className }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
-  </svg>
-);
 
 export default About;
