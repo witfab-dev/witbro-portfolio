@@ -20,7 +20,7 @@ const Projects = () => {
       category: 'mobile',
       image: 'https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=800&auto=format&fit=crop',
       technologies: ['Flutter', 'Firebase', 'Stripe'],
-      links: { github: 'https://github.com/witfab-dev/market-kigali', demo: 'https://marketkigali.com' },
+      links: { github: 'https://github.com/witfab-dev/ecomerce', demo: 'https://witfab-dev.github.io/ecomerce/' },
       year: '2024',
       featured: true
     },
@@ -68,7 +68,7 @@ const Projects = () => {
             viewport={{ once: true }}
           >
             <h2 className="text-4xl md:text-5xl font-black mb-4">
-              {t('my all projects') || 'Selected'} <span className="text-blue-600 dark:text-blue-400">Works</span>
+              {t('') || 'Selected'} <span className="text-blue-600 dark:text-blue-400">Works</span>
             </h2>
             <p className="text-gray-600 dark:text-gray-400 max-w-md">
               A collection of digital experiences I've crafted, ranging from mobile ecosystems to high-performance web apps.
