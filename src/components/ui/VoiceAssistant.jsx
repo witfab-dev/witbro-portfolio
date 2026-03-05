@@ -1,258 +1,146 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Mic, MicOff, Volume2, VolumeX, Navigation, Home, User, Code2, 
-  Briefcase, Mail, Award, Globe, HelpCircle, X, Sparkles, Zap, 
-  Settings, Command, Languages, MessageSquare
-} from 'lucide-react';
-import { useTheme } from '../../contexts/ThemeContext';
-import { useLanguage } from '../../contexts/LanguageContext';
+import { Mic, X, Terminal, Search, Navigation, Volume2, VolumeX } from 'lucide-react';
 
-const VoiceAssistant = () => {
-  const { theme, toggleTheme } = useTheme();
-  const { t, changeLanguage, language } = useLanguage();
-  
-  const [isListening, setIsListening] = useState(false);
-  const [transcript, setTranscript] = useState('');
-  const [response, setResponse] = useState('');
-  const [showAssistant, setShowAssistant] = useState(false);
+const VoiceAssistant = ({ autoOpen, onClose }) => {
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [visualizerBars, setVisualizerBars] = useState(new Array(15).fill(0));
-  
-  const recognitionRef = useRef(null);
-  const synth = window.speechSynthesis;
+  const [displayText, setDisplayText] = useState("");
+  const [isMuted, setIsMuted] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
-  // 1. IMPROVED COMMAND SYSTEM
-  const commands = [
-    { 
-      id: 'nav_home',
-      keywords: ['home', 'start', 'habanza', 'accueil'], 
-      action: () => scrollToSection('home'),
-      res: () => t('home_voice_res') || "Navigating home",
-      icon: Home 
-    },
-    { 
-      id: 'nav_projects',
-      keywords: ['projects', 'work', 'imishinga', 'projets'], 
-      action: () => scrollToSection('projects'),
-      res: () => t('projects_voice_res') || "Opening my portfolio",
-      icon: Briefcase 
-    },
-    { 
-      id: 'theme_toggle',
-      keywords: ['theme', 'dark', 'light', 'umukara', 'umweru', 'mode'], 
-      action: () => toggleTheme(),
-      res: () => `Switching to ${theme === 'dark' ? 'light' : 'dark'} mode`,
-      icon: Zap 
-    },
-    {
-      id: 'lang_rw',
-      keywords: ['kinyarwanda', 'rwanda', 'rwandan'],
-      action: () => changeLanguage('rw'),
-      res: () => "Ubu ndimo kuvuga Ikinyarwanda",
-      icon: Globe
-    },
-    {
-      id: 'lang_en',
-      keywords: ['english', 'ingereza'],
-      action: () => changeLanguage('en'),
-      res: () => "Switching to English",
-      icon: Globe
-    },
-    {
-      id: 'contact_me',
-      keywords: ['contact', 'email', 'message', 'twandikire'],
-      action: () => scrollToSection('contact'),
-      res: () => "Opening contact form",
-      icon: Mail
-    }
-  ];
+  // 1. Bio & Welcome Content
+  const bio = "Witness Fabrice is a Full-Stack Architect specialized in high-performance web experiences. He bridges the gap between cinematic design and robust backend engineering. Currently, he is focused on React ecosystems and AI integration.";
+  const welcome = "Welcome to the digital space of Witness Fabrice. I am your system navigator.";
 
-  // 2. INITIALIZE SPEECH ENGINE
-  useEffect(() => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (SpeechRecognition) {
-      recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = false;
-      recognitionRef.current.interimResults = true;
-      recognitionRef.current.lang = language === 'rw' ? 'en-US' : language; // Kinyarwanda fallback to EN for better pick-up
-
-      recognitionRef.current.onresult = (event) => {
-        const current = event.resultIndex;
-        const resultTranscript = event.results[current][0].transcript.toLowerCase();
-        setTranscript(resultTranscript);
-
-        if (event.results[current].isFinal) {
-          handleVoiceAction(resultTranscript);
-        }
-      };
-
-      recognitionRef.current.onend = () => setIsListening(false);
-    }
-  }, [language]);
-
-  // 3. VOICE VISUALIZER ANIMATION
-  useEffect(() => {
-    if (isListening) {
-      const interval = setInterval(() => {
-        setVisualizerBars(prev => prev.map(() => Math.random() * 100));
-      }, 100);
-      return () => clearInterval(interval);
-    } else {
-      setVisualizerBars(new Array(15).fill(0));
-    }
-  }, [isListening]);
-
-  const handleVoiceAction = (text) => {
-    let found = false;
-    commands.forEach(cmd => {
-      if (cmd.keywords.some(key => text.includes(key))) {
-        cmd.action();
-        const msg = cmd.res();
-        setResponse(msg);
-        speak(msg);
-        found = true;
-      }
-    });
-
-    if (!found) {
-      const errorMsg = "I couldn't find that command. Try 'projects' or 'change theme'.";
-      setResponse(errorMsg);
-      speak(errorMsg);
-    }
-  };
-
-  const speak = (text) => {
-    if (!synth) return;
-    synth.cancel(); // Stop current speech
+  // 2. The Voice & Typewriter Engine
+  const speak = useCallback((text) => {
+    if (isMuted) return;
+    window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.pitch = 1.1;
-    utterance.rate = 1;
+    
+    // Voice styling
+    utterance.rate = 1.0; 
+    utterance.pitch = 1.0;
+
     utterance.onstart = () => setIsSpeaking(true);
     utterance.onend = () => setIsSpeaking(false);
-    synth.speak(utterance);
-  };
+    window.speechSynthesis.speak(utterance);
+    
+    // Typewriter effect logic
+    let i = 0;
+    setDisplayText("");
+    const interval = setInterval(() => {
+      setDisplayText(text.slice(0, i));
+      i++;
+      if (i > text.length) clearInterval(interval);
+    }, 20);
+    return () => clearInterval(interval);
+  }, [isMuted]);
 
-  const toggleListening = () => {
-    if (isListening) {
-      recognitionRef.current?.stop();
-      setIsListening(false);
+  // 3. Command & Navigation Logic
+  const handleAction = (cmd) => {
+    const input = cmd.toLowerCase();
+    if (input.includes("project") || input.includes("work")) {
+      document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' });
+      speak("Navigating to the project gallery. Explore Witness's latest builds.");
+    } else if (input.includes("who") || input.includes("witness") || input.includes("about")) {
+      document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
+      speak(bio);
+    } else if (input.includes("contact") || input.includes("hire")) {
+      document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+      speak("Opening contact portal. Witness is currently available for selected collaborations.");
     } else {
-      setIsListening(true);
-      recognitionRef.current?.start();
+      speak(`Searching for ${cmd} in system archives...`);
     }
   };
 
-  const scrollToSection = (id) => {
-    const el = document.getElementById(id);
-    if (el) window.scrollTo({ top: el.offsetTop - 80, behavior: 'smooth' });
-  };
+  // 4. Auto-Start Sequence
+  useEffect(() => {
+    if (autoOpen) {
+      const timer = setTimeout(() => {
+        speak(`${welcome} ${bio}`);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [autoOpen]);
 
   return (
-    <div className="fixed bottom-8 right-8 z-[100] flex flex-col items-end gap-4">
-      
-      <AnimatePresence>
-        {showAssistant && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.8, y: 20 }}
-            className={`w-80 rounded-3xl overflow-hidden shadow-2xl border ${
-              theme === 'dark' ? 'bg-slate-900/95 border-white/10' : 'bg-white/95 border-slate-200'
-            } backdrop-blur-xl`}
-          >
-            {/* Header / Aura Section */}
-            <div className="p-6 bg-gradient-to-br from-blue-600/20 to-purple-600/20 relative">
-              <div className="flex justify-between items-center mb-4">
-                <div className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full ${isListening ? 'bg-red-500 animate-ping' : 'bg-blue-500'}`} />
-                  <span className={`text-[10px] font-black uppercase tracking-widest ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-                    AI Assistant
-                  </span>
-                </div>
-                <button onClick={() => setShowAssistant(false)} className="hover:rotate-90 transition-transform">
-                  <X className="w-4 h-4 opacity-50" />
-                </button>
-              </div>
+    <AnimatePresence>
+      {autoOpen && (
+        <motion.div
+          initial={{ opacity: 0, x: 50, scale: 0.9 }}
+          animate={{ opacity: 1, x: 0, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+          className="fixed bottom-8 right-6 z-[100] w-full max-w-[400px]"
+        >
+          <div className="glass-panel p-6 rounded-[2.5rem] border-blue-500/30 shadow-[0_20px_50px_rgba(0,0,0,0.4)] relative overflow-hidden">
+            {/* Ambient Background Glow */}
+            <div className="absolute -top-24 -right-24 w-48 h-48 bg-blue-500/10 blur-[80px] rounded-full" />
 
-              {/* Visualizer */}
-              <div className="flex items-end justify-center gap-1 h-12 mb-4">
-                {visualizerBars.map((h, i) => (
+            <div className="flex items-center justify-between mb-4 relative z-10">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse shadow-[0_0_10px_#3b82f6]" />
+                <span className="text-[10px] font-mono font-bold text-blue-400 tracking-widest uppercase">Witness_OS v1.0</span>
+              </div>
+              <div className="flex gap-2">
+                <button onClick={() => setIsMuted(!isMuted)} className="p-2 hover:bg-white/5 rounded-full text-gray-400">
+                  {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
+                </button>
+                <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-full text-gray-400"><X size={16} /></button>
+              </div>
+            </div>
+
+            {/* AI Console Display */}
+            <div className="bg-black/40 rounded-2xl p-4 mb-4 border border-white/5 min-h-[140px] relative z-10">
+              <div className="flex gap-2 text-blue-400 mb-2">
+                <Terminal size={14} />
+                <span className="text-[10px] font-mono uppercase tracking-tighter">Output</span>
+              </div>
+              <p className="text-sm text-blue-50/80 font-mono leading-relaxed italic">
+                {displayText}
+                <motion.span animate={{ opacity: [1, 0] }} transition={{ repeat: Infinity, duration: 0.8 }} className="inline-block w-2 h-4 bg-blue-500 ml-1" />
+              </p>
+            </div>
+
+            {/* Command Search Bar */}
+            <div className="relative mb-6 z-10">
+              <input 
+                type="text"
+                placeholder="Ask Witness_OS... (e.g., 'Go to projects')"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => { if(e.key === 'Enter') { handleAction(searchQuery); setSearchQuery(""); }}}
+                className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-xs text-white focus:outline-none focus:border-blue-500/50"
+              />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-500/50" size={14} />
+            </div>
+
+            {/* Visualizer & Quick Nav */}
+            <div className="flex flex-col gap-4 relative z-10">
+              <div className="flex items-center justify-center gap-1.5 h-6">
+                {[...Array(12)].map((_, i) => (
                   <motion.div
                     key={i}
-                    animate={{ height: isListening ? `${h}%` : '4px' }}
-                    className="w-1 bg-gradient-to-t from-blue-500 to-purple-500 rounded-full"
+                    animate={isSpeaking ? { height: [4, 18, 6, 14, 4] } : { height: 2 }}
+                    transition={{ repeat: Infinity, duration: 0.5, delay: i * 0.05 }}
+                    className="w-1 bg-gradient-to-t from-blue-600 to-cyan-400 rounded-full"
                   />
                 ))}
               </div>
 
-              <p className={`text-center text-xs italic ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
-                {transcript || "Listening for command..."}
-              </p>
-            </div>
-
-            {/* Response Section */}
-            {response && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="px-6 py-4 border-t border-white/5 bg-blue-500/5">
-                <div className="flex gap-3 items-start">
-                  <Sparkles className="w-4 h-4 text-blue-500 mt-1 shrink-0" />
-                  <p className={`text-xs leading-relaxed font-medium ${theme === 'dark' ? 'text-blue-100' : 'text-blue-900'}`}>
-                    {response}
-                  </p>
-                </div>
-              </motion.div>
-            )}
-
-            {/* Quick Actions Grid */}
-            <div className="p-4 grid grid-cols-2 gap-2">
-              {commands.slice(0, 4).map((cmd) => (
-                <button
-                  key={cmd.id}
-                  onClick={() => {
-                    cmd.action();
-                    setResponse(cmd.res());
-                    speak(cmd.res());
-                  }}
-                  className={`flex items-center gap-2 p-2 rounded-xl text-[10px] font-bold uppercase transition-all ${
-                    theme === 'dark' ? 'bg-white/5 hover:bg-white/10 text-slate-300' : 'bg-slate-900/5 hover:bg-slate-900/10 text-slate-700'
-                  }`}
-                >
-                  <cmd.icon className="w-3 h-3 text-blue-500" />
-                  {cmd.keywords[0]}
+              <div className="grid grid-cols-2 gap-2">
+                <button onClick={() => handleAction("about")} className="flex items-center justify-center gap-2 py-2.5 bg-blue-600/10 border border-blue-500/20 rounded-xl text-[10px] text-blue-400 hover:bg-blue-600/20 transition-all">
+                  <Navigation size={12} /> Who is Witness?
                 </button>
-              ))}
+                <button onClick={() => handleAction("projects")} className="flex items-center justify-center gap-2 py-2.5 bg-purple-600/10 border border-purple-500/20 rounded-xl text-[10px] text-purple-400 hover:bg-purple-600/20 transition-all">
+                  <Search size={12} /> View Projects
+                </button>
+              </div>
             </div>
-
-            {/* Footer Control */}
-            <div className="p-4 bg-black/5 flex justify-center">
-              <button 
-                onClick={toggleListening}
-                className={`p-4 rounded-full transition-all ${
-                  isListening ? 'bg-red-500 scale-110 shadow-lg shadow-red-500/40' : 'bg-blue-600 hover:bg-blue-700 text-white'
-                }`}
-              >
-                {isListening ? <MicOff /> : <Mic />}
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Main Trigger Button */}
-      {!showAssistant && (
-        <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          onClick={() => setShowAssistant(true)}
-          className="w-14 h-14 bg-gradient-to-tr from-blue-600 to-indigo-700 rounded-2xl flex items-center justify-center shadow-xl shadow-blue-500/20 text-white"
-        >
-          <div className="relative">
-            <MessageSquare className="w-6 h-6" />
-            <span className="absolute -top-1 -right-1 w-2 h-2 bg-green-400 rounded-full border-2 border-blue-600" />
           </div>
-        </motion.button>
+        </motion.div>
       )}
-    </div>
+    </AnimatePresence>
   );
 };
 

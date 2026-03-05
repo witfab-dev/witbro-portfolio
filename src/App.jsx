@@ -10,7 +10,7 @@ import VoiceAssistant from './components/ui/VoiceAssistant';
 
 import { 
   Loader2, CheckCircle2, Sparkles, Palette, Rocket, 
-  Zap, Code2, Github, Linkedin, Twitter, Mail, Mic
+  Zap, Code2, Mic
 } from 'lucide-react';
 
 // Lazy load sections
@@ -21,7 +21,6 @@ const SkillsGalaxy = lazy(() => import('./components/sections/SkillsGalaxy'));
 const Experience = lazy(() => import('./components/sections/Experience'));
 const Contact = lazy(() => import('./components/sections/Contact'));
 
-// Asset logic
 const profileImage = new URL('../images/wit.png', import.meta.url).href || `https://ui-avatars.com/api/?name=Witness+Fabrice&background=3b82f6&color=fff`;
 
 const LoadingScreen = ({ onFinished }) => {
@@ -44,10 +43,10 @@ const LoadingScreen = ({ onFinished }) => {
           setTimeout(onFinished, 500);
           return 100;
         }
-        const diff = Math.random() * 10;
+        const diff = Math.random() * 15; // Faster, more organic loading
         return Math.min(oldProgress + diff, 100);
       });
-    }, 150);
+    }, 100);
     return () => clearInterval(timer);
   }, [onFinished]);
 
@@ -61,64 +60,54 @@ const LoadingScreen = ({ onFinished }) => {
   return (
     <motion.div 
       initial={{ opacity: 1 }}
-      exit={{ opacity: 0, scale: 1.1 }}
-      transition={{ duration: 0.8, ease: "easeInOut" }}
+      exit={{ opacity: 0, filter: "blur(20px)", scale: 1.1 }}
+      transition={{ duration: 0.8, ease: "circOut" }}
       className="fixed inset-0 z-[999] bg-[#030712] flex flex-col items-center justify-center overflow-hidden"
     >
-      {/* Background Glows */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-blue-600/20 blur-[120px] rounded-full" />
+      <div className="absolute w-[600px] h-[600px] bg-blue-600/10 blur-[150px] rounded-full animate-pulse" />
       
       <div className="relative z-10 w-full max-w-sm px-8 text-center">
-        {/* Animated Avatar Box */}
         <motion.div 
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="relative mx-auto w-24 h-24 mb-8"
+          className="relative mx-auto w-24 h-24 mb-10"
         >
-          <div className="absolute inset-0 rounded-3xl bg-blue-500/20 animate-pulse rotate-6" />
-          <div className="absolute inset-0 rounded-3xl bg-purple-500/20 animate-pulse -rotate-6" />
-          <div className="relative w-full h-full rounded-3xl overflow-hidden border border-white/10 glass-panel p-1">
-             <img src={profileImage} alt="Loading..." className="w-full h-full object-cover rounded-2xl" />
+          <div className="absolute inset-0 rounded-[2rem] bg-gradient-to-tr from-blue-500 to-purple-500 animate-spin-slow opacity-20" />
+          <div className="relative w-full h-full rounded-[2rem] overflow-hidden border border-white/10 glass-panel p-1">
+             <img src={profileImage} alt="Loading..." className="w-full h-full object-cover rounded-[1.8rem]" />
           </div>
         </motion.div>
 
-        <h2 className="text-white text-xl font-bold tracking-tight mb-1">Fabrice Witness</h2>
-        <p className="text-blue-400 text-xs font-mono mb-8 tracking-widest uppercase">System Initialization</p>
+        <h2 className="text-white text-2xl font-black tracking-tighter mb-1">Witness_OS</h2>
+        <p className="text-blue-500/60 text-[10px] font-mono mb-8 tracking-[0.3em] uppercase">Booting Digital Identity</p>
 
-        {/* Technical Progress Bar */}
-        <div className="relative h-[2px] w-full bg-white/5 rounded-full mb-4 overflow-hidden">
+        <div className="relative h-[1px] w-full bg-white/10 rounded-full mb-4">
           <motion.div 
-            className="absolute top-0 left-0 h-full bg-gradient-to-r from-blue-500 to-cyan-400"
+            className="absolute top-0 left-0 h-full bg-blue-500 shadow-[0_0_15px_#3b82f6]"
             style={{ width: `${progress}%` }}
           />
         </div>
 
-        <div className="flex justify-between items-center text-[10px] font-mono text-gray-500 mb-12">
+        <div className="flex justify-between items-center font-mono text-[9px] text-gray-500 mb-10">
           <span className="flex items-center gap-2">
-            <Loader2 className="w-3 h-3 animate-spin" /> {Math.round(progress)}%
+            <div className="w-1 h-1 bg-blue-500 rounded-full animate-ping" />
+            {Math.round(progress)}% LOADED
           </span>
-          <span>STABLE_REVISION_2026</span>
+          <span>SR_v2.6</span>
         </div>
 
         <AnimatePresence mode="wait">
           <motion.div 
             key={currentTip}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="flex items-center justify-center gap-3 text-gray-400"
+            initial={{ opacity: 0, x: 10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -10 }}
+            className="flex items-center justify-center gap-3 text-gray-400 font-medium"
           >
-            <CurrentTipIcon className="w-4 h-4 text-blue-500" />
-            <span className="text-xs italic">{tips[currentTip].text}</span>
+            <CurrentTipIcon size={14} className="text-blue-500" />
+            <span className="text-xs">{tips[currentTip].text}</span>
           </motion.div>
         </AnimatePresence>
-      </div>
-
-      {/* Aesthetic Bottom HUD */}
-      <div className="absolute bottom-10 w-full flex justify-center gap-8 opacity-20">
-         <Code2 size={16} className="text-white" />
-         <Mic size={16} className="text-white" />
-         <Sparkles size={16} className="text-white" />
       </div>
     </motion.div>
   );
@@ -129,14 +118,14 @@ function App() {
   const [showVoiceAssistant, setShowVoiceAssistant] = useState(false);
 
   useEffect(() => {
-    // Setup logic for when app is ready
     if (!loading) {
-      const hasVisited = localStorage.getItem('hasVisited');
-      if (!hasVisited) {
+      // Logic for automatic welcome message
+      const hasBeenWelcomed = sessionStorage.getItem('welcomeDone');
+      if (!hasBeenWelcomed) {
         setTimeout(() => {
           setShowVoiceAssistant(true);
-          localStorage.setItem('hasVisited', 'true');
-        }, 1500);
+          sessionStorage.setItem('welcomeDone', 'true');
+        }, 1800);
       }
     }
   }, [loading]);
@@ -152,10 +141,16 @@ function App() {
               key="main-content"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="min-h-screen bg-white dark:bg-[#030712] selection:bg-blue-500 selection:text-white"
+              transition={{ duration: 1 }}
+              className="min-h-screen bg-slate-50 dark:bg-[#030712] relative"
             >
-              <div className="bg-grain" /> {/* Global Grain Texture */}
-              
+              {/* Cinematic Elements */}
+              <div className="bg-grain fixed inset-0 pointer-events-none z-50" />
+              <div className="fixed inset-0 pointer-events-none z-[-1]">
+                 <div className="absolute top-0 left-[20%] w-[50vw] h-[50vw] bg-blue-600/5 blur-[120px] rounded-full" />
+                 <div className="absolute bottom-0 right-[10%] w-[40vw] h-[40vw] bg-purple-600/5 blur-[120px] rounded-full" />
+              </div>
+
               <VoiceAssistant 
                 autoOpen={showVoiceAssistant} 
                 onClose={() => setShowVoiceAssistant(false)}
@@ -163,13 +158,7 @@ function App() {
               
               <Header />
 
-              <main className="relative">
-                {/* Visual Ambient Backgrounds */}
-                <div className="fixed top-0 left-0 w-full h-full pointer-events-none -z-10 overflow-hidden">
-                   <div className="absolute top-[-10%] right-[-10%] w-[40vw] h-[40vw] bg-blue-600/10 blur-[120px] rounded-full" />
-                   <div className="absolute bottom-[-10%] left-[-10%] w-[40vw] h-[40vw] bg-purple-600/10 blur-[120px] rounded-full" />
-                </div>
-
+              <main className="relative z-10">
                 <Suspense fallback={<SectionLoader />}>
                   <Hero />
                   <About />
@@ -182,20 +171,19 @@ function App() {
 
               <Footer />
 
-              {/* Float Action: Voice Assistant */}
-              <AnimatePresence>
-                {!showVoiceAssistant && (
-                  <motion.button
-                    initial={{ scale: 0, rotate: -45 }}
-                    animate={{ scale: 1, rotate: 0 }}
-                    whileHover={{ scale: 1.1 }}
-                    onClick={() => setShowVoiceAssistant(true)}
-                    className="fixed bottom-8 right-8 p-4 bg-blue-600 text-white rounded-2xl shadow-2xl shadow-blue-500/40 z-50 group"
-                  >
-                    <Mic className="w-6 h-6 group-hover:animate-pulse" />
-                  </motion.button>
-                )}
-              </AnimatePresence>
+              {/* Floating Trigger */}
+              {!showVoiceAssistant && (
+                <motion.button
+                  layoutId="assistant-btn"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  whileHover={{ scale: 1.1, boxShadow: "0 0 20px rgba(59, 130, 246, 0.4)" }}
+                  onClick={() => setShowVoiceAssistant(true)}
+                  className="fixed bottom-8 right-8 p-5 bg-blue-600 text-white rounded-[2rem] shadow-2xl z-40 transition-colors"
+                >
+                  <Mic size={24} />
+                </motion.button>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
@@ -205,8 +193,11 @@ function App() {
 }
 
 const SectionLoader = () => (
-  <div className="h-[50vh] flex items-center justify-center">
-    <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+  <div className="h-screen flex items-center justify-center bg-transparent">
+    <div className="flex flex-col items-center gap-4">
+      <Loader2 className="w-10 h-10 text-blue-500 animate-spin opacity-20" />
+      <span className="text-[10px] font-mono text-gray-500 tracking-[0.2em]">LOADING_SECTION</span>
+    </div>
   </div>
 );
 
