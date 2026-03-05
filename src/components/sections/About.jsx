@@ -100,7 +100,7 @@ const About = () => {
               <div className="relative w-40 h-40 mx-auto mb-8">
                 <div className="absolute inset-0 bg-gradient-to-tr from-blue-600 to-purple-600 rounded-full animate-pulse blur-lg opacity-30" />
                 <img 
-                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop" 
+                  src="/images/wit.png" 
                   alt="Profile" 
                   className="relative w-full h-full rounded-full object-cover border-4 border-white dark:border-gray-800 shadow-2xl"
                 />
