@@ -1,186 +1,207 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Mail, Phone, MapPin, Send, Github, Linkedin, Twitter ,Instagram,Facebook} from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  Mail, Phone, MapPin, Send, Github, Linkedin, 
+  Twitter, Instagram, Facebook, Check, Copy 
+} from 'lucide-react';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 const Contact = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    message: ''
-  });
+  const { t } = useLanguage();
+  const [formData, setFormData] = useState({ name: '', email: '', message: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null);
+  const [copiedField, setCopiedField] = useState(null);
 
-  // Simple contact info - NO href that could cause startsWith error
   const contactInfo = [
-    { icon: Mail, label: 'Email', value: 'witnessfabrice@gmail.com' },
-    { icon: Phone, label: 'Phone', value: '+250 789344402' },
-    { icon: MapPin, label: 'Location', value: 'Kigali, Rwanda' }
+    { id: 'email', icon: Mail, label: 'Email', value: 'witnessfabrice@gmail.com', copyable: true },
+    { id: 'phone', icon: Phone, label: 'Phone', value: '+250 789344402', copyable: true },
+    { id: 'location', icon: MapPin, label: 'Location', value: 'Kigali, Rwanda', copyable: false }
   ];
 
-  // Social links - SAFE with proper href
   const socialLinks = [
-    { icon: Github, href: 'https://github.com/witfab-dev', label: 'GitHub' },
-    { icon: Linkedin, href: 'https://linkedin.com/in/witnessfabrice', label: 'LinkedIn' },
-    { icon: Twitter, href: 'https://twitter.com/wit-fab', label: 'Twitter' },
-    { icon: Instagram ,href: 'https://instagram.com/witbri1' ,label: 'Instagram'},
-     { icon: Facebook ,href: 'https://facebook.com/witbrice' ,label: 'Facebook'}
+    { icon: Github, href: 'https://github.com/witfab-dev', color: 'hover:text-white hover:bg-gray-800' },
+    { icon: Linkedin, href: 'https://linkedin.com/in/witnessfabrice', color: 'hover:text-white hover:bg-blue-600' },
+    { icon: Twitter, href: 'https://twitter.com/wit-fab', color: 'hover:text-white hover:bg-sky-500' },
+    { icon: Instagram, href: 'https://instagram.com/witbri1', color: 'hover:text-white hover:bg-pink-600' },
+    { icon: Facebook, href: 'https://facebook.com/witbrice', color: 'hover:text-white hover:bg-blue-700' }
   ];
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+  const copyToClipboard = (text, id) => {
+    navigator.clipboard.writeText(text);
+    setCopiedField(id);
+    setTimeout(() => setCopiedField(null), 2000);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    // Simulate form submission
-    setTimeout(() => {
-      setSubmitStatus('success');
-      setIsSubmitting(false);
-      setFormData({ name: '', email: '', message: '' });
-      setTimeout(() => setSubmitStatus(null), 3000);
-    }, 1000);
+    // Simulate API Call
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    setSubmitStatus('success');
+    setIsSubmitting(false);
+    setFormData({ name: '', email: '', message: '' });
+    setTimeout(() => setSubmitStatus(null), 4000);
   };
 
   return (
-    <section id="contact" className="py-20 px-4 bg-gray-50 dark:bg-gray-900">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <motion.div
+    <section id="contact" className="relative py-24 px-4 overflow-hidden bg-slate-50 dark:bg-[#030712]">
+      {/* Background Decorative Blobs */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-500/10 blur-[120px] rounded-full" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-500/10 blur-[120px] rounded-full" />
+      </div>
+
+      <div className="max-w-6xl mx-auto">
+        <motion.div 
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-12"
+          viewport={{ once: true }}
+          className="text-center mb-16"
         >
-          <h2 className="text-4xl font-bold mb-4">
-            Get In <span className="text-blue-600 dark:text-blue-400">Touch</span>
+          <h2 className="text-4xl md:text-5xl font-extrabold mb-4 tracking-tight">
+            {t('contact_title') || 'Let\'s Create'} <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Something Great</span>
           </h2>
-          <p className="text-gray-600 dark:text-gray-300">
-            Have a question or want to work together? I'd love to hear from you.
+          <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto text-lg">
+            Whether you have a question or just want to say hi, my inbox is always open.
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-3 gap-8">
-          {/* Contact Info Cards */}
-          {contactInfo.map((info, index) => {
-            const Icon = info.icon;
-            return (
-              <motion.div
-                key={info.label}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className="bg-white dark:bg-gray-800 rounded-xl p-6 text-center shadow-lg"
-              >
-                <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Icon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+        <div className="grid lg:grid-cols-5 gap-12 items-start">
+          {/* Left Column: Info & Socials */}
+          <div className="lg:col-span-2 space-y-8">
+            <div className="space-y-4">
+              {contactInfo.map((info, index) => (
+                <motion.div
+                  key={info.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  className="group flex items-center p-4 bg-white dark:bg-gray-800/50 backdrop-blur-md border border-gray-200 dark:border-gray-700 rounded-2xl transition-all hover:shadow-xl hover:-translate-y-1"
+                >
+                  <div className="w-12 h-12 bg-blue-600 text-white rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+                    <info.icon size={20} />
+                  </div>
+                  <div className="ml-4 flex-grow">
+                    <p className="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">{info.label}</p>
+                    <p className="text-gray-900 dark:text-gray-100 font-medium">{info.value}</p>
+                  </div>
+                  {info.copyable && (
+                    <button 
+                      onClick={() => copyToClipboard(info.value, info.id)}
+                      className="p-2 text-gray-400 hover:text-blue-500 transition-colors"
+                    >
+                      {copiedField === info.id ? <Check size={18} className="text-green-500" /> : <Copy size={18} />}
+                    </button>
+                  )}
+                </motion.div>
+              ))}
+            </div>
+
+            <div className="p-6 bg-gradient-to-br from-blue-600 to-purple-700 rounded-3xl text-white shadow-2xl">
+              <h3 className="text-xl font-bold mb-4">Follow Me</h3>
+              <div className="flex flex-wrap gap-3">
+                {socialLinks.map((social, i) => (
+                  <a
+                    key={i}
+                    href={social.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`p-3 bg-white/10 backdrop-blur-md rounded-xl transition-all duration-300 transform hover:scale-110 ${social.color}`}
+                  >
+                    <social.icon size={22} />
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column: Form */}
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            className="lg:col-span-3 bg-white dark:bg-gray-800/40 backdrop-blur-xl border border-gray-200 dark:border-gray-700 p-8 rounded-3xl shadow-2xl"
+          >
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="grid md:grid-cols-2 gap-5">
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold ml-1">Name</label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.name}
+                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    className="w-full px-5 py-4 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                    placeholder="Enter your name"
+                  />
                 </div>
-                <h3 className="font-semibold mb-2">{info.label}</h3>
-                <p className="text-gray-600 dark:text-gray-400 text-sm">{info.value}</p>
-              </motion.div>
-            );
-          })}
-        </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold ml-1">Email</label>
+                  <input
+                    type="email"
+                    required
+                    value={formData.email}
+                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    className="w-full px-5 py-4 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                    placeholder="email@example.com"
+                  />
+                </div>
+              </div>
 
-        {/* Contact Form */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="mt-12 bg-white dark:bg-gray-800 rounded-xl p-8 shadow-lg"
-        >
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium mb-2">Your Name</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
+              <div className="space-y-2">
+                <label className="text-sm font-semibold ml-1">Message</label>
+                <textarea
                   required
-                  className="w-full px-4 py-3 rounded-lg bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="John Doe"
+                  rows="4"
+                  value={formData.message}
+                  onChange={(e) => setFormData({...formData, message: e.target.value})}
+                  className="w-full px-5 py-4 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 outline-none transition-all resize-none"
+                  placeholder="How can I help you?"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">Your Email</label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-3 rounded-lg bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="john@example.com"
-                />
-              </div>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium mb-2">Message</label>
-              <textarea
-                name="message"
-                value={formData.message}
-                onChange={handleChange}
-                required
-                rows="5"
-                className="w-full px-4 py-3 rounded-lg bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Your message here..."
-              />
-            </div>
 
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full md:w-auto px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 mx-auto"
-            >
-              {isSubmitting ? (
-                <>Sending...</>
-              ) : (
-                <>
-                  <Send className="w-4 h-4" />
-                  Send Message
-                </>
-              )}
-            </button>
-
-            {submitStatus === 'success' && (
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-center text-green-600"
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="group relative w-full py-4 bg-blue-600 text-white font-bold rounded-2xl overflow-hidden transition-all hover:bg-blue-700 disabled:opacity-70 shadow-lg shadow-blue-500/25"
               >
-                Message sent successfully! I'll get back to you soon.
-              </motion.p>
-            )}
-          </form>
-        </motion.div>
-
-        {/* Social Links */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-          className="flex justify-center gap-4 mt-8"
-        >
-          {socialLinks.map((social) => (
-            <a
-              key={social.label}
-              href={social.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-3 bg-gray-200 dark:bg-gray-700 rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-            >
-              <social.icon className="w-5 h-5" />
-            </a>
-          ))}
-        </motion.div>
+                <AnimatePresence mode="wait">
+                  {isSubmitting ? (
+                    <motion.div 
+                      key="loading"
+                      initial={{ y: 20, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      exit={{ y: -20, opacity: 0 }}
+                      className="flex items-center justify-center gap-2"
+                    >
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      Sending...
+                    </motion.div>
+                  ) : submitStatus === 'success' ? (
+                    <motion.div 
+                      key="success"
+                      initial={{ y: 20, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      className="flex items-center justify-center gap-2"
+                    >
+                      <Check size={20} /> Sent Successfully!
+                    </motion.div>
+                  ) : (
+                    <motion.div 
+                      key="default"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="flex items-center justify-center gap-2"
+                    >
+                      <Send size={18} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                      Send Message
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </button>
+            </form>
+          </motion.div>
+        </div>
       </div>
     </section>
   );

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Home, FolderKanban, Layers, Briefcase, Mail, User } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '../../contexts/LanguageContext';
 
 const Navigation = () => {
@@ -19,9 +19,9 @@ const Navigation = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      // Update active section
+      // 1. Update active section with intersection logic
       const sections = navItems.map(item => document.getElementById(item.id));
-      const scrollPosition = window.scrollY + 100;
+      const scrollPosition = window.scrollY + window.innerHeight / 3;
 
       for (let i = sections.length - 1; i >= 0; i--) {
         if (sections[i] && scrollPosition >= sections[i].offsetTop) {
@@ -30,95 +30,97 @@ const Navigation = () => {
         }
       }
 
-      // Update scroll progress
-      const totalHeight = document.body.scrollHeight - window.innerHeight;
+      // 2. Update scroll progress
+      const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
       const progress = (window.scrollY / totalHeight) * 100;
       setScrollProgress(progress);
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [navItems]);
 
   const scrollToSection = (id) => {
     const element = document.getElementById(id);
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+      const offset = 80; // Offset for header if any
+      const bodyRect = document.body.getBoundingClientRect().top;
+      const elementRect = element.getBoundingClientRect().top;
+      const elementPosition = elementRect - bodyRect;
+      const offsetPosition = elementPosition - offset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
       setActiveSection(id);
     }
   };
 
   return (
     <motion.nav
-      initial={{ y: 100, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ delay: 0.5 }}
-      className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-40"
+      initial={{ y: 100, x: '-50%', opacity: 0 }}
+      animate={{ y: 0, x: '-50%', opacity: 1 }}
+      transition={{ type: 'spring', damping: 20, stiffness: 100, delay: 0.5 }}
+      className="fixed bottom-6 left-1/2 z-50 flex flex-col items-center gap-4"
     >
-      {/* Main Navigation Bar */}
-      <div className="relative">
-        {/* Glass effect background */}
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-900/95 via-blue-900/95 to-slate-900/95 backdrop-blur-xl rounded-2xl border border-blue-500/20 shadow-2xl"></div>
-        
-        {/* Navigation Items */}
-        <div className="relative flex items-center gap-1 px-3 py-2">
-          {navItems.map((item) => {
-            const isActive = activeSection === item.id;
-            
-            return (
-              <button
-                key={item.id}
-                onClick={() => scrollToSection(item.id)}
-                className={`relative flex flex-col items-center p-3 rounded-xl transition-all duration-300 group ${
-                  isActive
-                    ? 'bg-gradient-to-br from-blue-500/20 to-purple-500/20'
-                    : 'hover:bg-white/5'
-                }`}
-              >
-                {/* Active indicator border */}
-                {isActive && (
-                  <div className="absolute inset-0 rounded-xl border border-blue-500/30" />
-                )}
+      {/* Tooltip Area (Handled by group-hover on buttons) */}
 
-                {/* Icon */}
-                <div className={`transition-colors duration-300 ${
-                  isActive
-                    ? 'text-blue-400'
-                    : 'text-blue-300/60 group-hover:text-blue-300'
-                }`}>
-                  {item.icon}
-                </div>
+      <div className="relative group/nav px-2 py-2 bg-slate-950/80 backdrop-blur-2xl rounded-2xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex items-center gap-1">
+        {/* Animated Background Highlight */}
+        <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-blue-500/5 to-purple-500/5 pointer-events-none" />
 
-                {/* Label */}
-                <span className={`text-xs mt-1 transition-colors duration-300 ${
-                  isActive
-                    ? 'text-blue-400 font-medium'
-                    : 'text-blue-200/60 group-hover:text-blue-200'
-                }`}>
-                  {item.label}
-                </span>
+        {navItems.map((item) => {
+          const isActive = activeSection === item.id;
 
-                {/* Active dot */}
-                {isActive && (
-                  <div className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-blue-400" />
-                )}
+          return (
+            <button
+              key={item.id}
+              onClick={() => scrollToSection(item.id)}
+              className={`relative p-3 md:p-4 rounded-xl transition-all duration-300 group outline-none`}
+              aria-label={item.label}
+            >
+              {/* Sliding Active Indicator */}
+              {isActive && (
+                <motion.div
+                  layoutId="nav-glow"
+                  className="absolute inset-0 bg-blue-500/10 rounded-xl border border-blue-500/20 shadow-[0_0_20px_rgba(59,130,246,0.15)]"
+                  transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                />
+              )}
 
-                {/* Tooltip */}
-                <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 px-3 py-2 rounded-lg bg-slate-800 text-white text-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-lg border border-blue-500/20">
-                  {item.label}
-                  <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-slate-800 rotate-45 border-r border-b border-blue-500/20"></div>
-                </div>
-              </button>
-            );
-          })}
-        </div>
+              {/* Icon */}
+              <div className={`relative z-10 transition-all duration-300 transform group-hover:scale-110 ${
+                isActive ? 'text-blue-400' : 'text-slate-400 group-hover:text-white'
+              }`}>
+                {item.icon}
+              </div>
+
+              {/* Floating Label (Tooltip) */}
+              <div className="absolute -top-12 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-slate-900 text-white text-xs font-bold rounded-lg border border-white/10 opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200 pointer-events-none whitespace-nowrap">
+                {item.label}
+                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-r border-b border-white/10" />
+              </div>
+
+              {/* Active Dot */}
+              {isActive && (
+                <motion.div 
+                  layoutId="nav-dot"
+                  className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-blue-400 rounded-full shadow-[0_0_8px_rgba(96,165,250,0.8)]" 
+                />
+              )}
+            </button>
+          );
+        })}
       </div>
 
-      {/* Scroll progress indicator */}
-      <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 w-32 h-1 bg-slate-700/50 rounded-full overflow-hidden">
-        <div 
-          className="h-full bg-gradient-to-r from-blue-400 to-purple-400 rounded-full transition-all duration-150"
-          style={{ width: `${scrollProgress}%` }}
+      {/* Progress Bar Container */}
+      <div className="w-24 h-1 bg-white/5 rounded-full overflow-hidden backdrop-blur-sm border border-white/5">
+        <motion.div 
+          className="h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500"
+          initial={{ width: 0 }}
+          animate={{ width: `${scrollProgress}%` }}
+          transition={{ type: 'spring', damping: 20, stiffness: 100 }}
         />
       </div>
     </motion.nav>
