@@ -7,21 +7,21 @@ import Typewriter from '../shared/Typewriter';
 import { 
   Github, Linkedin, Twitter, Mail, Download,
   MapPin, Briefcase, ChevronDown, Eye,
-  Award, Code2, Heart, Star, Zap, Sparkles
+  Award, Code2, Heart, Star, Zap, Sparkles,
+  Loader2 // Added Loader2 here to fix the ReferenceError
 } from 'lucide-react';
 
 import profileImage from '../images/wit.png';
 
 const Hero = ({ onExplore }) => {
   const { theme } = useTheme();
-  const { t } = useLanguage(); // Pulling translations
+  const { t } = useLanguage(); 
 
   const [imageError, setImageError] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [currentTitleIndex, setCurrentTitleIndex] = useState(0);
   const [viewCount, setViewCount] = useState(1247);
 
-  // Titles list - these could also be moved to LanguageContext if you want them translated
   const titles = [
     'Full-Stack Architect',
     'React Specialist',
@@ -62,7 +62,6 @@ const Hero = ({ onExplore }) => {
     { icon: Mail, href: 'mailto:witnessfabrice@gmail.com', label: 'Email' }
   ];
 
-  // Achievement labels now use t()
   const achievements = [
     { icon: Award, label: t('experience'), value: 3, suffix: '+', color: 'text-yellow-500' },
     { icon: Code2, label: t('projects'), value: 50, suffix: '+', color: 'text-blue-500' },
@@ -90,7 +89,7 @@ const Hero = ({ onExplore }) => {
             className="text-left space-y-8"
           >
             {/* Live System Tag */}
-            <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full glass-panel border-white/10 dark:bg-white/5 backdrop-blur-md">
+            <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full glass-panel border border-black/5 dark:border-white/10 dark:bg-white/5 backdrop-blur-md shadow-sm">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
@@ -110,7 +109,7 @@ const Hero = ({ onExplore }) => {
               </motion.h2>
               <h1 className="text-6xl md:text-8xl font-black tracking-tighter leading-none">
                 <span className="text-slate-900 dark:text-white">Witness</span><br/>
-                <span className="text-gradient">Fabrice</span>
+                <span className="text-blue-600">Fabrice</span>
               </h1>
             </div>
 
@@ -129,7 +128,7 @@ const Hero = ({ onExplore }) => {
             {/* Achievement Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               {achievements.map((item, index) => (
-                <div key={index} className="p-4 glass-panel border-white/5 rounded-2xl group hover:border-blue-500/30 transition-colors">
+                <div key={index} className="p-4 glass-panel border border-black/5 dark:border-white/5 rounded-2xl group hover:border-blue-500/30 transition-colors">
                   <item.icon size={20} className={`${item.color} mb-2 opacity-80`} />
                   <AnimatedCounter 
                     value={item.value} 
@@ -147,7 +146,7 @@ const Hero = ({ onExplore }) => {
                 whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(59, 130, 246, 0.4)" }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' })}
-                className="px-8 py-4 bg-blue-600 text-white rounded-2xl font-bold flex items-center gap-3"
+                className="px-8 py-4 bg-blue-600 text-white rounded-2xl font-bold flex items-center gap-3 transition-all"
               >
                 <Rocket className="w-5 h-5" /> {t('viewProjects')}
               </motion.button>
@@ -158,8 +157,9 @@ const Hero = ({ onExplore }) => {
                     key={social.label}
                     href={social.href}
                     target="_blank"
+                    rel="noopener noreferrer"
                     whileHover={{ y: -5, color: "#3b82f6" }}
-                    className="p-4 glass-panel rounded-2xl text-gray-500 hover:text-blue-500 transition-all"
+                    className="p-4 glass-panel border border-black/5 dark:border-white/10 rounded-2xl text-gray-500 hover:text-blue-500 transition-all"
                   >
                     <social.icon size={20} />
                   </motion.a>
@@ -177,9 +177,9 @@ const Hero = ({ onExplore }) => {
           >
             <div className="relative w-80 h-80 md:w-[450px] md:h-[450px]">
               {/* Spinning Ring */}
-              <div className="absolute inset-0 border-[1px] border-dashed border-blue-500/30 rounded-full animate-spin-slow" />
+              <div className="absolute inset-0 border-[1px] border-dashed border-blue-500/30 rounded-full animate-[spin_10s_linear_infinite]" />
               
-              <div className="absolute inset-10 rounded-[3rem] overflow-hidden border border-white/10 shadow-2xl">
+              <div className="absolute inset-10 rounded-[3rem] overflow-hidden border border-black/5 dark:border-white/10 shadow-2xl">
                 {!imageLoaded && (
                   <div className="absolute inset-0 bg-slate-100 dark:bg-white/5 animate-pulse flex items-center justify-center">
                     <Loader2 className="animate-spin text-blue-500" />
@@ -194,18 +194,18 @@ const Hero = ({ onExplore }) => {
                 />
               </div>
 
-              {/* Floating Floating Tech Badges */}
+              {/* Floating Tech Badges */}
               <motion.div 
                 animate={{ y: [0, -20, 0] }} 
                 transition={{ duration: 4, repeat: Infinity }}
-                className="absolute top-0 right-10 p-4 glass-panel rounded-2xl border-blue-500/20"
+                className="absolute top-0 right-10 p-4 glass-panel border border-black/5 dark:border-white/10 rounded-2xl shadow-lg"
               >
                 <Code2 className="text-blue-500" />
               </motion.div>
               <motion.div 
                 animate={{ y: [0, 20, 0] }} 
                 transition={{ duration: 5, repeat: Infinity, delay: 1 }}
-                className="absolute bottom-10 left-0 p-4 glass-panel rounded-2xl border-purple-500/20"
+                className="absolute bottom-10 left-0 p-4 glass-panel border border-black/5 dark:border-white/10 rounded-2xl shadow-lg"
               >
                 <Sparkles className="text-purple-500" />
               </motion.div>
@@ -225,9 +225,13 @@ const Hero = ({ onExplore }) => {
   );
 };
 
+// Internal Rocket Icon Component
 const Rocket = ({ className }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-5c1.62-2.2 5-3 5-3"/><path d="M12 15v5s3.03-.55 5-2c2.2-1.62 3-5 3-5"/>
+    <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/>
+    <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/>
+    <path d="M9 12H4s.55-3.03 2-5c1.62-2.2 5-3 5-3"/>
+    <path d="M12 15v5s3.03-.55 5-2c2.2-1.62 3-5 3-5"/>
   </svg>
 );
 
