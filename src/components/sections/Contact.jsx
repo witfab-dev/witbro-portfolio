@@ -1,15 +1,15 @@
-import React, { useState, useRef } from 'react'; // Added useRef
+import React, { useState, useRef } from 'react'; 
 import { motion, AnimatePresence } from 'framer-motion';
-import emailjs from '@emailjs/browser'; // Import EmailJS
+import emailjs from '@emailjs/browser'; 
 import { 
   Mail, Phone, MapPin, Send, Github, Linkedin, 
-  Twitter, Instagram, Facebook, Check, Copy, AlertCircle // Added AlertCircle
+  Twitter, Instagram, Facebook, Check, Copy, AlertCircle 
 } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 
 const Contact = () => {
   const { t } = useLanguage();
-  const formRef = useRef(); // Create the reference for the form
+  const formRef = useRef(); 
   const [formData, setFormData] = useState({ name: '', email: '', message: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null);
@@ -40,10 +40,15 @@ const Contact = () => {
     setIsSubmitting(true);
     setSubmitStatus(null);
 
-   const SERVICE_ID = "service_r4cj7xg";  // Your Service ID
-    const TEMPLATE_ID = "template_02y5zvl"; // Your Template ID
-    const PUBLIC_KEY = "vNc8MXvN5Xl0NLVsy"; // Your Public Key
+    // Keys provided from your dashboard
+    const SERVICE_ID = "service_r4cj7xg";
+    const TEMPLATE_ID = "template_02y5zvl";
+    const PUBLIC_KEY = "vNc8MXvN5Xl0NLVsy";
+
     try {
+      // Explicitly initialize with your public key to prevent 422 errors
+      emailjs.init(PUBLIC_KEY);
+
       await emailjs.sendForm(
         SERVICE_ID,
         TEMPLATE_ID,
@@ -58,14 +63,12 @@ const Contact = () => {
       setSubmitStatus('error');
     } finally {
       setIsSubmitting(false);
-      // Status disappears after 5 seconds
       setTimeout(() => setSubmitStatus(null), 5000);
     }
   };
 
   return (
     <section id="contact" className="relative py-24 px-4 overflow-hidden bg-slate-50 dark:bg-[#030712]">
-      {/* Background Decorative Blobs */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-500/10 blur-[120px] rounded-full" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-500/10 blur-[120px] rounded-full" />
@@ -87,7 +90,6 @@ const Contact = () => {
         </motion.div>
 
         <div className="grid lg:grid-cols-5 gap-12 items-start">
-          {/* Left Column: Info & Socials */}
           <div className="lg:col-span-2 space-y-8">
             <div className="space-y-4">
               {contactInfo.map((info, index) => (
@@ -107,6 +109,7 @@ const Contact = () => {
                   </div>
                   {info.copyable && (
                     <button 
+                      type="button"
                       onClick={() => copyToClipboard(info.value, info.id)}
                       className="p-2 text-gray-400 hover:text-blue-500 transition-colors"
                     >
@@ -135,7 +138,6 @@ const Contact = () => {
             </div>
           </div>
 
-          {/* Right Column: Form */}
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
@@ -146,7 +148,7 @@ const Contact = () => {
                 <div className="space-y-2">
                   <label className="text-sm font-semibold ml-1">Name</label>
                   <input
-                    name="from_name" // Required for EmailJS Template Mapping
+                    name="from_name"
                     type="text"
                     required
                     value={formData.name}
@@ -158,7 +160,7 @@ const Contact = () => {
                 <div className="space-y-2">
                   <label className="text-sm font-semibold ml-1">Email</label>
                   <input
-                    name="reply_to" // Required for EmailJS Template Mapping
+                    name="reply_to"
                     type="email"
                     required
                     value={formData.email}
@@ -172,7 +174,7 @@ const Contact = () => {
               <div className="space-y-2">
                 <label className="text-sm font-semibold ml-1">Message</label>
                 <textarea
-                  name="message" // Required for EmailJS Template Mapping
+                  name="message"
                   required
                   rows="4"
                   value={formData.message}
@@ -190,41 +192,20 @@ const Contact = () => {
               >
                 <AnimatePresence mode="wait">
                   {isSubmitting ? (
-                    <motion.div 
-                      key="loading"
-                      initial={{ y: 20, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      exit={{ y: -20, opacity: 0 }}
-                      className="flex items-center justify-center gap-2"
-                    >
+                    <motion.div key="loading" initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -20, opacity: 0 }} className="flex items-center justify-center gap-2">
                       <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                       Sending...
                     </motion.div>
                   ) : submitStatus === 'success' ? (
-                    <motion.div 
-                      key="success"
-                      initial={{ y: 20, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      className="flex items-center justify-center gap-2"
-                    >
+                    <motion.div key="success" initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="flex items-center justify-center gap-2">
                       <Check size={20} /> Sent Successfully!
                     </motion.div>
                   ) : submitStatus === 'error' ? (
-                    <motion.div 
-                      key="error"
-                      initial={{ y: 20, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      className="flex items-center justify-center gap-2"
-                    >
-                      <AlertCircle size={20} /> Error Sending Message
+                    <motion.div key="error" initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="flex items-center justify-center gap-2">
+                      <AlertCircle size={20} /> Error (Check Console)
                     </motion.div>
                   ) : (
-                    <motion.div 
-                      key="default"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="flex items-center justify-center gap-2"
-                    >
+                    <motion.div key="default" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center justify-center gap-2">
                       <Send size={18} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
                       Send Message
                     </motion.div>
