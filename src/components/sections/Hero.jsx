@@ -207,7 +207,6 @@ const Hero = ({ onExplore }) => {
                 transition={{ duration: 5, repeat: Infinity, delay: 1 }}
                 className="absolute bottom-10 left-0 p-4 glass-panel border border-black/5 dark:border-white/10 rounded-2xl shadow-lg"
               >
-                <Sparkles className="text-purple-500" />
               </motion.div>
             </div>
           </motion.div>
