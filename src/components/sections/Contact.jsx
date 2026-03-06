@@ -42,7 +42,7 @@ const Contact = () => {
 
     // Keys provided from your dashboard
     const SERVICE_ID = "service_r4cj7xg";
-    const TEMPLATE_ID = "template_02y5zvl";
+    const TEMPLATE_ID = "template_mn5geej";
     const PUBLIC_KEY = "vNc8MXvN5Xl0NLVsy";
 
     try {
