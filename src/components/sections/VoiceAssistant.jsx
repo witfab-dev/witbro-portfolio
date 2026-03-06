@@ -57,14 +57,17 @@ import {
   BatteryCharging,
   Cpu,
   HardDrive,
-  Activity
+  Activity,
+  ChevronRight,
+  ChevronLeft,
+  Calendar
 } from 'lucide-react';
 
-const VoiceAssistant = () => {
+const VoiceAssistant = ({ autoOpen = false, onClose }) => {
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [response, setResponse] = useState('');
-  const [showAssistant, setShowAssistant] = useState(false);
+  const [showAssistant, setShowAssistant] = useState(autoOpen);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [recentCommands, setRecentCommands] = useState([]);
   const [suggestions, setSuggestions] = useState([]);
@@ -74,7 +77,7 @@ const VoiceAssistant = () => {
   const [favorites, setFavorites] = useState([]);
   const [voiceSpeed, setVoiceSpeed] = useState(1);
   const [voicePitch, setVoicePitch] = useState(1);
-  const [autoOpen, setAutoOpen] = useState(true);
+  const [autoOpenEnabled, setAutoOpenEnabled] = useState(true);
   const [firstVisit, setFirstVisit] = useState(true);
   const [currentPage, setCurrentPage] = useState('home');
   const [pageHistory, setPageHistory] = useState([]);
@@ -151,6 +154,28 @@ const VoiceAssistant = () => {
       icon: Mail,
       category: 'navigation',
       keywords: ['contact', 'reach', 'touch', 'email']
+    },
+    // Additional Navigation Commands for specific project navigation
+    { 
+      command: ['next project', 'next'], 
+      action: () => navigateToNextProject(),
+      response: 'Moving to next project',
+      icon: ChevronRight,
+      category: 'projects'
+    },
+    { 
+      command: ['previous project', 'prev'], 
+      action: () => navigateToPreviousProject(),
+      response: 'Moving to previous project',
+      icon: ChevronLeft,
+      category: 'projects'
+    },
+    { 
+      command: ['show details', 'more info', 'project details'], 
+      action: () => showProjectDetails(),
+      response: 'Showing project details',
+      icon: Info,
+      category: 'projects'
     },
 
     // Search Commands
@@ -437,6 +462,7 @@ const VoiceAssistant = () => {
       action: () => {
         stopListening();
         setShowAssistant(false);
+        if (onClose) onClose();
         speak('Voice assistant closed');
       },
       response: 'Voice assistant closed',
@@ -574,44 +600,46 @@ const VoiceAssistant = () => {
   ];
 
   // Configure recognition
-  if (recognition) {
-    recognition.continuous = false;
-    recognition.interimResults = true;
-    recognition.lang = 'en-US';
-    recognition.maxAlternatives = 3;
+  useEffect(() => {
+    if (recognition) {
+      recognition.continuous = false;
+      recognition.interimResults = true;
+      recognition.lang = 'en-US';
+      recognition.maxAlternatives = 3;
 
-    recognition.onstart = () => {
-      setIsListening(true);
-      addNotification('Listening...', 'info');
-    };
+      recognition.onstart = () => {
+        setIsListening(true);
+        addNotification('Listening...', 'info');
+      };
 
-    recognition.onresult = (event) => {
-      const last = event.results.length - 1;
-      const command = event.results[last][0].transcript.toLowerCase();
-      const confidence = event.results[last][0].confidence;
-      
-      setTranscript(command);
-      setConfidence(confidence);
-      
-      // Show interim results
-      if (event.results[last].isFinal) {
-        processCommand(command);
-      }
-    };
+      recognition.onresult = (event) => {
+        const last = event.results.length - 1;
+        const command = event.results[last][0].transcript.toLowerCase();
+        const confidence = event.results[last][0].confidence;
+        
+        setTranscript(command);
+        setConfidence(confidence);
+        
+        // Show interim results
+        if (event.results[last].isFinal) {
+          processCommand(command);
+        }
+      };
 
-    recognition.onerror = (event) => {
-      console.error('Speech recognition error:', event.error);
-      setResponse(`Error: ${event.error}. Please try again.`);
-      addNotification(`Error: ${event.error}`, 'error');
-      setIsListening(false);
-    };
+      recognition.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+        setResponse(`Error: ${event.error}. Please try again.`);
+        addNotification(`Error: ${event.error}`, 'error');
+        setIsListening(false);
+      };
 
-    recognition.onend = () => {
-      setIsListening(false);
-    };
+      recognition.onend = () => {
+        setIsListening(false);
+      };
 
-    recognitionRef.current = recognition;
-  }
+      recognitionRef.current = recognition;
+    }
+  }, []);
 
   // Monitor online status
   useEffect(() => {
@@ -674,7 +702,7 @@ const VoiceAssistant = () => {
   useEffect(() => {
     const hasVisited = localStorage.getItem('hasVisited');
     
-    if (!hasVisited && autoOpen) {
+    if (!hasVisited && autoOpenEnabled) {
       setTimeout(() => {
         setShowAssistant(true);
         speak('Welcome to my portfolio! I am your voice assistant. Say help to see what I can do.');
@@ -682,6 +710,11 @@ const VoiceAssistant = () => {
         localStorage.setItem('hasVisited', 'true');
       }, 3000);
     }
+  }, [autoOpenEnabled]);
+
+  // Update showAssistant when autoOpen prop changes
+  useEffect(() => {
+    setShowAssistant(autoOpen);
   }, [autoOpen]);
 
   // Keyboard navigation for command history
@@ -739,6 +772,29 @@ const VoiceAssistant = () => {
     return () => observer.disconnect();
   }, []);
 
+  // Keyboard shortcut (Ctrl+M) to toggle assistant
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.ctrlKey && e.key === 'm') {
+        e.preventDefault();
+        setShowAssistant(prev => !prev);
+        if (!showAssistant) {
+          // Just opened
+        } else {
+          if (onClose) onClose();
+        }
+      } else if (e.ctrlKey && e.key === 'l' && showAssistant) {
+        e.preventDefault();
+        startListening();
+      } else if (e.key === 'Escape' && showAssistant) {
+        setShowAssistant(false);
+        if (onClose) onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showAssistant, onClose]);
+
   // Navigate to section
   const navigateTo = (sectionId) => {
     const element = document.getElementById(sectionId);
@@ -757,12 +813,65 @@ const VoiceAssistant = () => {
       const projectCards = document.querySelectorAll('[data-project-id]');
       if (projectCards[projectId - 1]) {
         projectCards[projectId - 1].scrollIntoView({ behavior: 'smooth', block: 'center' });
-        projectCards[projectId - 1].classList.add('ring-4', 'ring-blue-500', 'scale-105');
-        setTimeout(() => {
-          projectCards[projectId - 1].classList.remove('ring-4', 'ring-blue-500', 'scale-105');
-        }, 2000);
+        highlightProject(projectCards[projectId - 1]);
       }
     }, 500);
+  };
+
+  // Navigate to next/previous project
+  const navigateToNextProject = () => {
+    const projectCards = document.querySelectorAll('[data-project-id]');
+    const currentProject = Array.from(projectCards).findIndex(card => {
+      const rect = card.getBoundingClientRect();
+      return rect.top >= 0 && rect.top <= window.innerHeight / 2;
+    });
+    
+    if (currentProject < projectCards.length - 1) {
+      projectCards[currentProject + 1].scrollIntoView({ behavior: 'smooth', block: 'center' });
+      highlightProject(projectCards[currentProject + 1]);
+    } else {
+      speak('You are at the last project');
+    }
+  };
+
+  const navigateToPreviousProject = () => {
+    const projectCards = document.querySelectorAll('[data-project-id]');
+    const currentProject = Array.from(projectCards).findIndex(card => {
+      const rect = card.getBoundingClientRect();
+      return rect.top >= 0 && rect.top <= window.innerHeight / 2;
+    });
+    
+    if (currentProject > 0) {
+      projectCards[currentProject - 1].scrollIntoView({ behavior: 'smooth', block: 'center' });
+      highlightProject(projectCards[currentProject - 1]);
+    } else {
+      speak('You are at the first project');
+    }
+  };
+
+  // Show project details
+  const showProjectDetails = () => {
+    const projectCards = document.querySelectorAll('[data-project-id]');
+    const currentProject = Array.from(projectCards).find(card => {
+      const rect = card.getBoundingClientRect();
+      return rect.top >= 0 && rect.top <= window.innerHeight / 2;
+    });
+    
+    if (currentProject) {
+      // Trigger click on the project to show modal/details
+      currentProject.click();
+      speak('Showing project details');
+    } else {
+      speak('No project found');
+    }
+  };
+
+  // Highlight project helper
+  const highlightProject = (element) => {
+    element.classList.add('ring-4', 'ring-blue-500', 'scale-105', 'transition-all', 'duration-300');
+    setTimeout(() => {
+      element.classList.remove('ring-4', 'ring-blue-500', 'scale-105');
+    }, 2000);
   };
 
   // Search functionality
@@ -815,7 +924,7 @@ const VoiceAssistant = () => {
   const navigateToResult = (result) => {
     if (result.element) {
       result.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      result.element.classList.add('ring-4', 'ring-green-500');
+      result.element.classList.add('ring-4', 'ring-green-500', 'transition-all', 'duration-300');
       setTimeout(() => {
         result.element.classList.remove('ring-4', 'ring-green-500');
       }, 2000);
@@ -832,14 +941,16 @@ const VoiceAssistant = () => {
       url: window.location.href,
       timestamp: new Date().toISOString()
     };
-    setBookmarks(prev => [...prev, bookmark]);
-    localStorage.setItem('bookmarks', JSON.stringify([...bookmarks, bookmark]));
+    const updatedBookmarks = [...bookmarks, bookmark];
+    setBookmarks(updatedBookmarks);
+    localStorage.setItem('bookmarks', JSON.stringify(updatedBookmarks));
     addNotification('Page bookmarked', 'success');
   };
 
   const removeBookmark = () => {
-    setBookmarks(prev => prev.filter(b => b.page !== currentPage));
-    localStorage.setItem('bookmarks', JSON.stringify(bookmarks.filter(b => b.page !== currentPage)));
+    const updatedBookmarks = bookmarks.filter(b => b.page !== currentPage);
+    setBookmarks(updatedBookmarks);
+    localStorage.setItem('bookmarks', JSON.stringify(updatedBookmarks));
     addNotification('Bookmark removed', 'info');
   };
 
@@ -851,13 +962,15 @@ const VoiceAssistant = () => {
       speak('You have no bookmarks yet');
     } else {
       speak(`You have ${savedBookmarks.length} bookmarks`);
+      setResponse(`You have ${savedBookmarks.length} bookmarks`);
     }
   };
 
   // Favorites functions
   const addToFavorites = () => {
-    setFavorites(prev => [...prev, currentPage]);
-    localStorage.setItem('favorites', JSON.stringify([...favorites, currentPage]));
+    const updatedFavorites = [...favorites, currentPage];
+    setFavorites(updatedFavorites);
+    localStorage.setItem('favorites', JSON.stringify(updatedFavorites));
     addNotification('Added to favorites', 'success');
   };
 
@@ -869,6 +982,7 @@ const VoiceAssistant = () => {
       speak('You have no favorites yet');
     } else {
       speak(`You have ${savedFavorites.length} favorites`);
+      setResponse(`You have ${savedFavorites.length} favorites`);
     }
   };
 
@@ -877,11 +991,13 @@ const VoiceAssistant = () => {
     if (pageHistory.length > 1) {
       const prevPage = pageHistory[pageHistory.length - 2];
       navigateTo(prevPage);
+    } else {
+      speak('No previous page');
     }
   };
 
   const goForward = () => {
-    // Implement forward navigation if needed
+    speak('Forward navigation not implemented');
   };
 
   const showHistory = () => {
@@ -889,6 +1005,7 @@ const VoiceAssistant = () => {
       speak('No page history');
     } else {
       speak(`You visited ${pageHistory.length} pages`);
+      setResponse(`Page history: ${pageHistory.join(', ')}`);
     }
   };
 
@@ -906,6 +1023,7 @@ const VoiceAssistant = () => {
     setSystemInfo(info);
     
     speak(`System info: ${info.platform}, Battery at ${info.battery} percent`);
+    setResponse(`Platform: ${info.platform}, Battery: ${info.battery}%, Memory: ${info.memory}`);
   };
 
   // Share functions
@@ -919,6 +1037,7 @@ const VoiceAssistant = () => {
     } else {
       navigator.clipboard.writeText(window.location.href);
       addNotification('Link copied to clipboard', 'success');
+      speak('Link copied to clipboard');
     }
   };
 
@@ -926,11 +1045,13 @@ const VoiceAssistant = () => {
     const text = encodeURIComponent('Check out this amazing portfolio!');
     const url = encodeURIComponent(window.location.href);
     window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
+    speak('Opening Twitter');
   };
 
   const shareOnLinkedIn = () => {
     const url = encodeURIComponent(window.location.href);
     window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, '_blank');
+    speak('Opening LinkedIn');
   };
 
   // Download functions
@@ -940,6 +1061,7 @@ const VoiceAssistant = () => {
     link.download = 'Witness_Fabrice_Resume.pdf';
     link.click();
     addNotification('Resume downloaded', 'success');
+    speak('Resume downloaded');
   };
 
   const downloadProjects = () => {
@@ -958,6 +1080,7 @@ const VoiceAssistant = () => {
     link.click();
     URL.revokeObjectURL(url);
     addNotification('Projects list downloaded', 'success');
+    speak('Projects list downloaded');
   };
 
   // Notification functions
@@ -976,12 +1099,15 @@ const VoiceAssistant = () => {
       speak('No notifications');
     } else {
       speak(`You have ${notifications.length} notifications`);
+      const notificationList = notifications.map(n => n.message).join(', ');
+      setResponse(`Notifications: ${notificationList}`);
     }
   };
 
   const clearNotifications = () => {
     setNotifications([]);
     addNotification('Notifications cleared', 'info');
+    speak('Notifications cleared');
   };
 
   // Fun functions
@@ -1025,6 +1151,7 @@ const VoiceAssistant = () => {
   const toggleTheme = () => {
     document.body.classList.toggle('dark');
     addNotification('Theme toggled', 'success');
+    speak('Theme toggled');
   };
 
   const setTheme = (theme) => {
@@ -1034,6 +1161,7 @@ const VoiceAssistant = () => {
       document.body.classList.remove('dark');
     }
     addNotification(`${theme} mode activated`, 'success');
+    speak(`${theme} mode activated`);
   };
 
   // Help functions
@@ -1156,22 +1284,10 @@ const VoiceAssistant = () => {
     }, 10000);
   };
 
-  // Keyboard shortcut (Ctrl+M) to toggle assistant
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.ctrlKey && e.key === 'm') {
-        e.preventDefault();
-        setShowAssistant(prev => !prev);
-      } else if (e.ctrlKey && e.key === 'l' && showAssistant) {
-        e.preventDefault();
-        startListening();
-      } else if (e.key === 'Escape' && showAssistant) {
-        setShowAssistant(false);
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [showAssistant]);
+  const handleClose = () => {
+    setShowAssistant(false);
+    if (onClose) onClose();
+  };
 
   if (!showAssistant) {
     return (
@@ -1219,7 +1335,7 @@ const VoiceAssistant = () => {
               {batteryLevel}%
             </span>
             <button
-              onClick={() => setShowAssistant(false)}
+              onClick={handleClose}
               className="p-1 hover:bg-white/20 rounded-lg transition-colors"
             >
               <X className="w-5 h-5" />
@@ -1470,7 +1586,7 @@ const VoiceAssistant = () => {
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
-            onClick={() => setShowAssistant(false)}
+            onClick={handleClose}
             className="p-3 bg-gray-100 dark:bg-gray-700 rounded-full"
             title="Close"
           >
