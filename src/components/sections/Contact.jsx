@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react'; // Added useRef
 import { motion, AnimatePresence } from 'framer-motion';
+import emailjs from '@emailjs/browser'; // Import EmailJS
 import { 
   Mail, Phone, MapPin, Send, Github, Linkedin, 
-  Twitter, Instagram, Facebook, Check, Copy 
+  Twitter, Instagram, Facebook, Check, Copy, AlertCircle // Added AlertCircle
 } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 
 const Contact = () => {
   const { t } = useLanguage();
+  const formRef = useRef(); // Create the reference for the form
   const [formData, setFormData] = useState({ name: '', email: '', message: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null);
@@ -36,12 +38,29 @@ const Contact = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    // Simulate API Call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    setSubmitStatus('success');
-    setIsSubmitting(false);
-    setFormData({ name: '', email: '', message: '' });
-    setTimeout(() => setSubmitStatus(null), 4000);
+    setSubmitStatus(null);
+
+   const SERVICE_ID = "service_r4cj7xg";  // Your Service ID
+    const TEMPLATE_ID = "template_02y5zvl"; // Your Template ID
+    const PUBLIC_KEY = "vNc8MXvN5Xl0NLVsy"; // Your Public Key
+    try {
+      await emailjs.sendForm(
+        SERVICE_ID,
+        TEMPLATE_ID,
+        formRef.current,
+        PUBLIC_KEY
+      );
+
+      setSubmitStatus('success');
+      setFormData({ name: '', email: '', message: '' });
+    } catch (error) {
+      console.error('Submission Error:', error);
+      setSubmitStatus('error');
+    } finally {
+      setIsSubmitting(false);
+      // Status disappears after 5 seconds
+      setTimeout(() => setSubmitStatus(null), 5000);
+    }
   };
 
   return (
@@ -60,10 +79,10 @@ const Contact = () => {
           className="text-center mb-16"
         >
           <h2 className="text-4xl md:text-5xl font-extrabold mb-4 tracking-tight">
-            {t('') || 'Let\'s Create'} <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Something Great</span>
+            {t('letsCreate') || "Let's Create"} <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Something Great</span>
           </h2>
           <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto text-lg">
-            Whether you have a question or just want to say hi, my inbox is always open.
+            {t('contactSub') || "Whether you have a question or just want to say hi, my inbox is always open."}
           </p>
         </motion.div>
 
@@ -99,7 +118,7 @@ const Contact = () => {
             </div>
 
             <div className="p-6 bg-gradient-to-br from-blue-600 to-purple-700 rounded-3xl text-white shadow-2xl">
-              <h3 className="text-xl font-bold mb-4">Follow Me</h3>
+              <h3 className="text-xl font-bold mb-4">{t('followMe') || 'Follow Me'}</h3>
               <div className="flex flex-wrap gap-3">
                 {socialLinks.map((social, i) => (
                   <a
@@ -122,11 +141,12 @@ const Contact = () => {
             whileInView={{ opacity: 1, scale: 1 }}
             className="lg:col-span-3 bg-white dark:bg-gray-800/40 backdrop-blur-xl border border-gray-200 dark:border-gray-700 p-8 rounded-3xl shadow-2xl"
           >
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form ref={formRef} onSubmit={handleSubmit} className="space-y-5">
               <div className="grid md:grid-cols-2 gap-5">
                 <div className="space-y-2">
                   <label className="text-sm font-semibold ml-1">Name</label>
                   <input
+                    name="from_name" // Required for EmailJS Template Mapping
                     type="text"
                     required
                     value={formData.name}
@@ -138,6 +158,7 @@ const Contact = () => {
                 <div className="space-y-2">
                   <label className="text-sm font-semibold ml-1">Email</label>
                   <input
+                    name="reply_to" // Required for EmailJS Template Mapping
                     type="email"
                     required
                     value={formData.email}
@@ -151,6 +172,7 @@ const Contact = () => {
               <div className="space-y-2">
                 <label className="text-sm font-semibold ml-1">Message</label>
                 <textarea
+                  name="message" // Required for EmailJS Template Mapping
                   required
                   rows="4"
                   value={formData.message}
@@ -163,7 +185,8 @@ const Contact = () => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="group relative w-full py-4 bg-blue-600 text-white font-bold rounded-2xl overflow-hidden transition-all hover:bg-blue-700 disabled:opacity-70 shadow-lg shadow-blue-500/25"
+                className={`group relative w-full py-4 font-bold rounded-2xl overflow-hidden transition-all shadow-lg shadow-blue-500/25 
+                  ${submitStatus === 'error' ? 'bg-red-500' : 'bg-blue-600 hover:bg-blue-700'} text-white disabled:opacity-70`}
               >
                 <AnimatePresence mode="wait">
                   {isSubmitting ? (
@@ -185,6 +208,15 @@ const Contact = () => {
                       className="flex items-center justify-center gap-2"
                     >
                       <Check size={20} /> Sent Successfully!
+                    </motion.div>
+                  ) : submitStatus === 'error' ? (
+                    <motion.div 
+                      key="error"
+                      initial={{ y: 20, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      className="flex items-center justify-center gap-2"
+                    >
+                      <AlertCircle size={20} /> Error Sending Message
                     </motion.div>
                   ) : (
                     <motion.div 
