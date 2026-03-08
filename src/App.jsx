@@ -28,11 +28,11 @@ const LoadingScreen = ({ onFinished }) => {
   const [currentTip, setCurrentTip] = useState(0);
 
   const tips = [
-    { icon: Sparkles, text: "Initializing interactive engine..." },
-    { icon: Palette, text: "Styling digital environment..." },
+    { icon: Sparkles, text: "Initializing interactive portfolio..." },
+    { icon: Palette, text: "Styling digital portfolio..." },
     { icon: Rocket, text: "Optimizing asset delivery..." },
     { icon: Zap, text: "Syncing voice intelligence..." },
-    { icon: CheckCircle2, text: "Environment Ready." }
+    { icon: CheckCircle2, text: "Portfolio Ready." }
   ];
 
   useEffect(() => {
@@ -78,7 +78,7 @@ const LoadingScreen = ({ onFinished }) => {
           </div>
         </motion.div>
 
-        <h2 className="text-white text-2xl font-black tracking-tighter mb-1">Witness_OS</h2>
+        <h2 className="text-white text-2xl font-black tracking-tighter mb-1">Witness_Portfolio</h2>
         <p className="text-blue-500/60 text-[10px] font-mono mb-8 tracking-[0.3em] uppercase">Booting Digital Identity</p>
 
         <div className="relative h-[1px] w-full bg-white/10 rounded-full mb-4">
@@ -93,7 +93,7 @@ const LoadingScreen = ({ onFinished }) => {
             <div className="w-1 h-1 bg-blue-500 rounded-full animate-ping" />
             {Math.round(progress)}% LOADED
           </span>
-          <span>SR_v2.6</span>
+          <span>S...</span>
         </div>
 
         <AnimatePresence mode="wait">
