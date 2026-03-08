@@ -24,7 +24,7 @@ const About = () => {
 
   const bio = {
     short: "I'm a passionate Full-Stack Developer with over 3 years of experience building web and mobile applications. Based in Kigali, Rwanda, I love creating solutions that make a difference.",
-    long: `My journey into tech started when I built my first website at 16. Since then, I've been on an exciting path of continuous learning and growth. I graduated with honors in Computer Science from the University of Rwanda and have since worked with startups, enterprises, and freelance clients across Africa and beyond.\n\nI believe in writing clean, maintainable code and creating experiences that users love. When I'm not coding, you'll find me exploring new technologies, contributing to open source, or mentoring aspiring developers.`
+    long: `My journey into tech started when I built my first website at 16. Since then, I've been on an exciting path of continuous learning and growth. I graduated with honors in Software development from the Kirehe adventist tvet school and have since worked with startups, enterprises, and freelance clients across Africa and beyond.\n\nI believe in writing clean, maintainable code and creating experiences that users love. When I'm not coding, you'll find me exploring new technologies, contributing to open source, or mentoring aspiring developers.`
   };
 
   const skills = {
@@ -42,9 +42,9 @@ const About = () => {
   };
 
   const journey = [
-    { year: '2025', title: 'Senior Developer', description: 'Leading development at Innovatech Solutions', icon: Rocket, color: 'from-blue-500 to-indigo-600' },
+    { year: '2023', title: 'Senior Developer', description: 'Leading development at Innovatech Solutions', icon: Rocket, color: 'from-blue-500 to-indigo-600' },
     { year: '2024', title: 'Full-Stack Developer', description: 'Joined TechStart Africa, scaled client systems', icon: Briefcase, color: 'from-purple-500 to-pink-600' },
-    { year: '2023', title: 'Graduated', description: 'BSc Computer Science, University of Rwanda', icon: GraduationCap, color: 'from-emerald-500 to-teal-600' }
+    { year: '2026', title: 'Graduated', description: 'Graduateed at KIREHE ADVENTIST TVET SCHOOL', icon: GraduationCap, color: 'from-emerald-500 to-teal-600' }
   ];
 
   const stats = [
