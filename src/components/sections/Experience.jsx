@@ -4,26 +4,26 @@ import { Briefcase, Calendar, MapPin, Star } from 'lucide-react';
 
 const experiences = [
   {
-    company: "Tech Global Solutions",
+    company: "Kirehe adventist tvet school",
     role: "Senior Full-Stack Developer",
-    period: "2023 - Present",
+    period: "2025 - Present",
     location: "Kigali, Rwanda",
     description: "Architecting scalable microservices and leading the frontend migration to Next.js. Improved system performance by 40%.",
     skills: ["React", "Go", "AWS", "Docker"]
   },
   {
-    company: "Innovation Hub",
+    company: "Kirehe adventist tvet school",
     role: "Frontend Engineer",
-    period: "2021 - 2023",
-    location: "Remote",
+    period: "2024 - 2025",
+    location: "Kigali, Rwanda",
     description: "Developed interactive dashboards for data visualization. Integrated AI voice commands into web applications.",
     skills: ["TypeScript", "D3.js", "Tailwind CSS"]
   },
   {
-    company: "Creative Studio",
+    company: "Kirehe adventist tvet school",
     role: "Junior Developer",
-    period: "2019 - 2021",
-    location: "Nairobi, Kenya",
+    period: "2023 - 2024",
+    location: "Kigali, Rwanda",
     description: "Built responsive landing pages and managed CMS integrations for international clients.",
     skills: ["JavaScript", "PHP", "WordPress"]
   }

@@ -48,10 +48,10 @@ const About = () => {
   ];
 
   const stats = [
-    { icon: Code2, label: 'Lines of Code', value: '500K+', color: 'from-blue-500 to-blue-600' },
-    { icon: Users, label: 'Happy Clients', value: '30+', color: 'from-emerald-500 to-emerald-600' },
-    { icon: Globe, label: 'Countries', value: '10+', color: 'from-purple-500 to-purple-600' },
-    { icon: Coffee, label: 'Coffee Cups', value: '1000+', color: 'from-orange-500 to-orange-600' }
+    { icon: Code2, label: 'Lines of Code', value: '100K+', color: 'from-blue-500 to-blue-600' },
+    { icon: Users, label: 'Happy Clients', value: 10+', color: 'from-emerald-500 to-emerald-600' },
+    { icon: Globe, label: 'Countries', value: '2+', color: 'from-purple-500 to-purple-600' },
+    { icon: Coffee, label: 'Coffee Cups', value: '10+', color: 'from-orange-500 to-orange-600' }
   ];
 
   return (

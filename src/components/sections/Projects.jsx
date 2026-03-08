@@ -26,13 +26,13 @@ const Projects = () => {
     },
     {
       id: 2,
-      title: 'Analytics Dashboard',
-      description: 'Real-time analytics dashboard for businesses to track API usage and performance.',
-      longDescription: 'A powerful SaaS platform that provides real-time analytics, usage monitoring, and performance insights for API-driven businesses.',
+      title: 'KATTS WEBSITE',
+      description: 'This is intearctive websiite for kirehe adventist tvet school.',
+      longDescription: 'This is an interactive website developed for Kirehe Adventist TVET School. The website is designed to provide information about the school and improve communication between the school, students, teachers, and the community.',
       category: 'web',
       image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&auto=format&fit=crop',
-      technologies: ['React', 'Node.js', 'PostgreSQL'],
-      links: { github: 'https://github.com/witfab-dev/analytics-hub', demo: 'https://analytics.witfab.dev' },
+      technologies: ['HTML', 'JS', 'CSS'],
+      links: { github: 'https://github.com/witfab-dev/katss', demo: 'https://witfab-dev.github.io/katss/public' },
       year: '2023',
       featured: true
     },
@@ -43,8 +43,8 @@ const Projects = () => {
       longDescription: 'This very portfolio! Built with React, Framer Motion, and Tailwind CSS, featuring 3D card flips and smooth animations.',
       category: 'web',
       image: 'https://images.unsplash.com/photo-1547658719-da2b51169166?w=800&auto=format&fit=crop',
-      technologies: ['React', 'Framer Motion', 'Tailwind'],
-      links: { github: 'https://github.com/witfab-dev/portfolio-2025', demo: 'https://witnessfabrice.dev' },
+      technologies: ['HTML', 'JS', 'CSS'],
+      links: { github: 'https://github.com/witfab-dev/myportfolio', demo: 'https://witfab-dev.github.io/myportfolio/' },
       year: '2025',
       featured: true
     }
