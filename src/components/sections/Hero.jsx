@@ -64,9 +64,9 @@ const Hero = ({ onExplore }) => {
 
   const achievements = [
     { icon: Award, label: t('experience'), value: 3, suffix: '+', color: 'text-yellow-500' },
-    { icon: Code2, label: t('projects'), value: 50, suffix: '+', color: 'text-blue-500' },
+    { icon: Code2, label: t('projects'), value: 5, suffix: '+', color: 'text-blue-500' },
     { icon: Heart, label: t('satisfaction'), value: 99, suffix: '%', color: 'text-red-500' },
-    { icon: Star, label: 'OSS', value: 15, suffix: '+', color: 'text-purple-500' }
+    { icon: Star, label: 'OSS', value: 5, suffix: '+', color: 'text-purple-500' }
   ];
 
   return (

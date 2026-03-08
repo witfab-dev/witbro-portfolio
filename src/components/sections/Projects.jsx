@@ -19,14 +19,14 @@ const Projects = () => {
       longDescription: 'Market-Kigali is a comprehensive e-commerce platform designed specifically for local vendors in Rwanda. It features real-time inventory management, secure payments, and a user-friendly interface.',
       category: 'mobile',
       image: 'https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=800&auto=format&fit=crop',
-      technologies: ['Flutter', 'Firebase', 'Stripe'],
+      technologies: ['HTML', 'CSS', 'JS'],
       links: { github: 'https://github.com/witfab-dev/ecomerce', demo: 'https://witfab-dev.github.io/ecomerce/' },
       year: '2024',
       featured: true
     },
     {
       id: 2,
-      title: 'KATTS WEBSITE',
+      title: 'KATSS WEBSITE',
       description: 'This is intearctive websiite for kirehe adventist tvet school.',
       longDescription: 'This is an interactive website developed for Kirehe Adventist TVET School. The website is designed to provide information about the school and improve communication between the school, students, teachers, and the community.',
       category: 'web',
@@ -47,7 +47,19 @@ const Projects = () => {
       links: { github: 'https://github.com/witfab-dev/myportfolio', demo: 'https://witfab-dev.github.io/myportfolio/' },
       year: '2025',
       featured: true
-    }
+    },
+     {
+      id: 6,
+      title: 'PSSMS',
+      description: ' Parking System Management System',
+      longDescription: 'A full-stack parking management solution. This system handles car registration, real-time slot tracking, automated billing (500 RWF/hr), and professional invoice generation.',
+      category: 'mobile',
+      image: 'https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=800&auto=format&fit=crop',
+      technologies: ['Reactjs', 'Nodejs', 'Tailwindcss'],
+      links: { github: 'https://github.com/witfab-dev/PSSMS', demo: 'https://witfab-dev.github.io/PSSMS/' },
+      year: '2025',
+      featured: true
+    },
     // ... add your other projects here
   ];
 
