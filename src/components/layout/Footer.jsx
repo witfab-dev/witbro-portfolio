@@ -153,7 +153,7 @@ const Footer = () => {
             <span>KIGALI, RW</span>
             <div className="w-1 h-1 rounded-full bg-gray-800"></div>
             <span className="flex items-center gap-1">
-              BUILT WITH <Heart className="w-3 h-3 text-red-500" />
+              BUILT BY WITBRI.DEV
             </span>
           </div>
 
