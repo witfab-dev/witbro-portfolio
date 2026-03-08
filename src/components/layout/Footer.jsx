@@ -122,13 +122,12 @@ const Footer = () => {
           <div className="p-6 rounded-3xl bg-[#111827] border border-white/5 flex flex-col justify-between">
             <Zap className="w-5 h-5 text-yellow-400" />
             <div>
-              <p className="text-2xl font-bold">15+</p>
+              <p className="text-2xl font-bold">5+</p>
               <p className="text-xs text-gray-500 uppercase">Deployments</p>
             </div>
           </div>
 
           <div className="p-6 rounded-3xl bg-gradient-to-br from-purple-600 to-blue-600 flex flex-col justify-between shadow-lg shadow-blue-500/10">
-            <Sparkles className="w-5 h-5 text-white" />
             <p className="text-sm font-medium leading-tight">Available for new opportunities 2026</p>
           </div>
         </div>
