@@ -4,26 +4,66 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/wit.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Fabrice Witness - Portfolio</title>
-    
+    <meta name="theme-color" content="#030712" />
+
+    <title>Witness Fabrice | Full-Stack Developer & UI/UX Specialist</title>
+    <meta name="title" content="Witness Fabrice | Full-Stack Developer & UI/UX Specialist" />
+    <meta name="description" content="Portfolio of Witness Fabrice, a Full-Stack Developer specializing in React, Node.js, and Flutter. Crafting high-performance applications with cinematic design." />
+    <meta name="keywords" content="Witness Fabrice, Witbri, Full Stack Developer Rwanda, React Developer, Flutter Expert, Software Engineer Kigali, Web Design" />
+    <meta name="author" content="Witness Fabrice" />
+    <link rel="canonical" href="https://witbri.onrender.com" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://witbri.onrender.com/" />
+    <meta property="og:title" content="Witness Fabrice | Portfolio" />
+    <meta property="og:description" content="Explore the digital universe of a Full-Stack Developer building the future of web and mobile." />
+    <meta property="og:image" content="https://witbri.onrender.com/og-image.png" />
+
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://witbri.onrender.com/" />
+    <meta property="twitter:title" content="Witness Fabrice | Full-Stack Developer" />
+    <meta property="twitter:description" content="Cinematic web experiences and high-performance applications." />
+    <meta property="twitter:image" content="https://witbri.onrender.com/og-image.png" />
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org/",
+      "@type": "Person",
+      "name": "Witness Fabrice",
+      "url": "https://witbri.onrender.com",
+      "image": "https://witbri.onrender.com/wit.png",
+      "jobTitle": "Full-Stack Developer",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Kigali",
+        "addressCountry": "Rwanda"
+      },
+      "sameAs": [
+        "https://github.com/witfab-dev",
+        "https://linkedin.com/in/witnessfabrice",
+        "https://twitter.com/witnessfabrice"
+      ]
+    }
+    </script>
+
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <script>
       tailwind.config = {
-        darkMode: 'class', // Critical for your ThemeContext.js to work
+        darkMode: 'class',
         theme: {
           extend: {
             colors: {
               brand: {
-                primary: '#3B82F6',   // Blue
-                secondary: '#8B5CF6', // Purple
-                accent: '#06B6D4',    // Cyan
-                dark: '#030712',      // Deepest Navy
+                primary: '#3B82F6',
+                secondary: '#8B5CF6',
+                accent: '#06B6D4',
+                dark: '#030712',
               }
             },
             animation: {
               'pulse-slow': 'pulse 6s cubic-bezier(0.4, 0, 0.6, 1) infinite',
               'float': 'float 5s ease-in-out infinite',
+              'spin-slow': 'spin 60s linear infinite',
             },
             keyframes: {
               float: {
@@ -39,21 +79,17 @@
     <style type="text/tailwindcss">
       @layer base {
         body {
-          @apply bg-slate-50 text-slate-900 dark:bg-brand-dark dark:text-slate-100 transition-colors duration-500;
+          @apply bg-slate-50 text-slate-900 dark:bg-brand-dark dark:text-slate-100 transition-colors duration-500 overflow-x-hidden;
         }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { @apply bg-transparent; }
+        ::-webkit-scrollbar-thumb { @apply bg-slate-300 dark:bg-slate-700 rounded-full hover:bg-brand-primary transition-colors; }
       }
 
       @layer components {
-        /* The Cinematic Grain/Noise Overlay */
         .bg-grain {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          pointer-events: none;
-          z-index: 50;
-          opacity: 0.04;
+          @apply fixed inset-0 pointer-events-none z-[99] opacity-[0.04];
           background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
         }
 
@@ -64,6 +100,11 @@
         .text-gradient {
           @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-primary via-brand-secondary to-brand-accent;
         }
+
+        /* Starfield Background */
+        .stars-container {
+          @apply absolute inset-0 -z-10 overflow-hidden pointer-events-none;
+        }
       }
     </style>
   </head>
@@ -71,6 +112,14 @@
     <div class="bg-grain"></div>
 
     <div id="root"></div>
+
     <script type="module" src="/src/main.jsx"></script>
+    
+    <noscript>
+      <div style="text-align: center; padding: 50px; font-family: sans-serif;">
+        <h1>JavaScript Required</h1>
+        <p>Please enable JavaScript to view the cinematic portfolio of Witness Fabrice.</p>
+      </div>
+    </noscript>
   </body>
 </html>

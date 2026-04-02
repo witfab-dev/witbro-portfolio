@@ -54,7 +54,7 @@ const Projects = () => {
       description: ' Parking System Management System',
       longDescription: 'A full-stack parking management solution. This system handles car registration, real-time slot tracking, automated billing (500 RWF/hr), and professional invoice generation.',
       category: 'mobile',
-      image: '/images/pssms.png',
+      image: '/images/pssms.jpg',
       technologies: ['Reactjs', 'Nodejs', 'Tailwindcss'],
       links: { github: 'https://github.com/witfab-dev/PSSMS', demo: 'https://witfab-dev.github.io/PSSMS/' },
       year: '2025',
