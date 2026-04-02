@@ -28,14 +28,10 @@ const SkillsGalaxy = () => {
   const skills = [
     { name: 'React', level: 95, color: '#61DAFB', icon: Code2, orbit: 120, speed: 15 },
     { name: 'Tailwind', level: 92, color: '#38BDF8', icon: Layers, orbit: 170, speed: 20 },
-    { name: 'Node.js', level: 90, color: '#68A063', icon: Server, orbit: 230, speed: 25 },
     { name: 'TypeScript', level: 88, color: '#3178C6', icon: Braces, orbit: 290, speed: 35 },
-    { name: 'Next.js', level: 85, color: '#ffffff', icon: Globe, orbit: 350, speed: 40 },
     { name: 'MySQL', level: 82, color: '#4479A1', icon: Database, orbit: 410, speed: 50 },
-    { name: 'Flutter', level: 80, color: '#02569B', icon: Smartphone, orbit: 480, speed: 65 },
     { name: 'Git', level: 88, color: '#F05032', icon: Terminal, orbit: 540, speed: 80 },
     { name: 'Python', level: 75, color: '#3776AB', icon: Cpu, orbit: 600, speed: 100 },
-    { name: 'EmailJS', level: 85, color: '#FFB13B', icon: Workflow, orbit: 660, speed: 120 },
   ];
 
   return (
