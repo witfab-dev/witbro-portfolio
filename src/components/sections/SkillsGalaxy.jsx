@@ -22,6 +22,13 @@ const GalaxySkills = () => {
   }, []);
 
   const isMobile = windowSize.width < 768;
+  
+  // 📐 Intelligent scaling to prevent overflow on small vertical screens
+  const responsiveScale = useMemo(() => {
+    if (windowSize.height < 700) return 0.7;
+    if (windowSize.height < 900) return 0.85;
+    return 1;
+  }, [windowSize.height]);
 
   const skills = useMemo(() => [
     { name: 'React', level: 95, color: '#61DAFB', icon: Code2, orbit: isMobile ? 80 : 130, speed: 20 },
@@ -33,7 +40,8 @@ const GalaxySkills = () => {
   ], [isMobile]);
 
   return (
-    <section className="relative h-800 w-full bg-[#020617] overflow-hidden flex flex-col items-center justify-center font-sans select-none">
+    // Changed to min-h-[110vh] to ensure scrolling room for all elements
+    <section className="relative min-h-[110vh] md:min-h-screen w-full bg-[#020617] overflow-hidden flex flex-col items-center justify-center font-sans select-none py-20">
       
       {/* 🌠 Immersive Starfield Background */}
       <div className="absolute inset-0 z-0">
@@ -54,7 +62,7 @@ const GalaxySkills = () => {
       </div>
 
       {/* 🏷️ Top Title Header */}
-      <div className="absolute top-12 z-50 text-center">
+      <div className="relative z-50 text-center mb-12">
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -71,8 +79,10 @@ const GalaxySkills = () => {
       </div>
 
       {/* 🚀 Galaxy Container */}
-      <div className="relative flex items-center justify-center w-full h-full pt-20">
-        
+      <motion.div 
+        style={{ scale: responsiveScale }}
+        className="relative flex items-center justify-center w-full grow"
+      >
         {/* 🌟 The Sun (Profile Core) */}
         <motion.div 
           initial={{ scale: 0 }}
@@ -80,11 +90,7 @@ const GalaxySkills = () => {
           transition={{ type: "spring", damping: 15 }}
           className="relative z-40 flex flex-col items-center justify-center"
         >
-          {/* Animated Glow Rings */}
           <div className="absolute w-32 h-32 md:w-44 md:h-44 border border-blue-500/20 rounded-full animate-[spin_15s_linear_infinite]" />
-          <div className="absolute w-36 h-36 md:w-48 md:h-48 border border-white/5 rounded-full animate-[spin_20s_linear_infinite_reverse]" />
-          
-          {/* Profile Container */}
           <div className="relative w-24 h-24 md:w-32 md:h-32 rounded-full p-1 bg-gradient-to-tr from-blue-600 to-purple-600 shadow-[0_0_50px_rgba(59,130,246,0.5)]">
             <div className="w-full h-full rounded-full bg-slate-950 overflow-hidden border-2 border-slate-950">
               <img 
@@ -94,8 +100,6 @@ const GalaxySkills = () => {
               />
             </div>
           </div>
-          
-          {/* Central Label */}
           <div className="mt-4 text-center bg-slate-950/50 backdrop-blur-md px-4 py-1 rounded-full border border-white/10">
             <h2 className="text-white font-bold text-sm md:text-base tracking-widest uppercase">Lead Developer</h2>
           </div>
@@ -108,13 +112,10 @@ const GalaxySkills = () => {
 
           return (
             <div key={skill.name} className="absolute flex items-center justify-center pointer-events-none">
-              {/* Orbit Path */}
               <div 
                 className="absolute rounded-full border border-white/5"
                 style={{ width: skill.orbit * 2, height: skill.orbit * 2 }} 
               />
-
-              {/* Orbital Motion */}
               <motion.div
                 animate={{ rotate: 360 }}
                 transition={{ duration: skill.speed, repeat: Infinity, ease: "linear" }}
@@ -140,7 +141,6 @@ const GalaxySkills = () => {
                     whileHover={{ scale: 1.1 }}
                     className="flex flex-col items-center group cursor-pointer"
                   >
-                    {/* Planet Icon Node */}
                     <motion.div 
                       animate={{ rotate: -360 }}
                       transition={{ duration: skill.speed, repeat: Infinity, ease: "linear" }}
@@ -153,8 +153,6 @@ const GalaxySkills = () => {
                     >
                       <Icon size={isMobile ? 18 : 24} style={{ color: skill.color }} />
                     </motion.div>
-
-                    {/* 🏷️ Skill Label (Positioned BELOW the icon) */}
                     <motion.div 
                       animate={{ rotate: -360 }}
                       transition={{ duration: skill.speed, repeat: Infinity, ease: "linear" }}
@@ -171,7 +169,7 @@ const GalaxySkills = () => {
             </div>
           );
         })}
-      </div>
+      </motion.div>
 
       {/* 📑 Minimalist Info Modal */}
       <AnimatePresence>
@@ -191,7 +189,6 @@ const GalaxySkills = () => {
                 <activeSkill.icon size={32} style={{ color: activeSkill.color }} />
               </div>
               <h3 className="text-3xl font-black text-white tracking-tighter uppercase">{activeSkill.name}</h3>
-              
               <div className="my-8 space-y-3 text-left">
                 <div className="flex justify-between text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em]">
                   <span>System Proficiency</span>
@@ -205,7 +202,6 @@ const GalaxySkills = () => {
                   />
                 </div>
               </div>
-
               <button 
                 onClick={() => setActiveSkill(null)}
                 className="w-full py-4 bg-white text-black rounded-xl font-bold uppercase text-xs tracking-widest hover:bg-blue-500 hover:text-white transition-all"
@@ -218,7 +214,7 @@ const GalaxySkills = () => {
       </AnimatePresence>
 
       {/* Social HUD */}
-      <div className="absolute bottom-8 flex gap-6 z-50">
+      <div className="relative mt-12 flex gap-6 z-50 pb-10">
         <Github size={20} className="text-slate-500 hover:text-white cursor-pointer transition-colors" />
         <Linkedin size={20} className="text-slate-500 hover:text-white cursor-pointer transition-colors" />
         <Mail size={20} className="text-slate-500 hover:text-white cursor-pointer transition-colors" />
