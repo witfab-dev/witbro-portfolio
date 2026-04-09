@@ -1,5 +1,6 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Analytics } from '@vercel/analytics/react';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 
@@ -182,6 +183,7 @@ function App() {
                   <Mic size={24} />
                 </motion.button>
               )}
+              <Analytics />
             </motion.div>
           )}
         </AnimatePresence>
