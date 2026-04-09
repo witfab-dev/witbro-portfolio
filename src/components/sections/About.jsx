@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import myCV from './witness_fabrice_cv.pdf';
 import { 
   User, Code2, Heart, Coffee, MapPin, Briefcase, 
   GraduationCap, Award, Star, Globe, Users, BookOpen, 
@@ -126,13 +127,14 @@ const About = () => {
                 </div>
               </div>
 
-              <button 
-                onClick={() => window.print()}
-                className="w-full py-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-2xl font-bold flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-blue-500/10"
-              >
-                <Download className="w-5 h-5" />
-                Download CV
-              </button>
+              <a 
+            href={myCV}
+            download="Witness_Fabrice_CV.pdf"
+            className="w-full py-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-2xl font-bold flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-blue-500/10"
+          >
+            <Download className="w-5 h-5" />
+            Download CV
+          </a>
             </motion.div>
           </div>
 

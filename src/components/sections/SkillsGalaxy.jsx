@@ -212,13 +212,6 @@ const GalaxySkills = () => {
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Social HUD */}
-      <div className="relative mt-12 flex gap-6 z-50 pb-10">
-        <Github size={20} className="text-slate-500 hover:text-white cursor-pointer transition-colors" />
-        <Linkedin size={20} className="text-slate-500 hover:text-white cursor-pointer transition-colors" />
-        <Mail size={20} className="text-slate-500 hover:text-white cursor-pointer transition-colors" />
-      </div>
     </section>
   );
 };
