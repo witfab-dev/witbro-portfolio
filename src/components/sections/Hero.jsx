@@ -11,7 +11,7 @@ import {
   Loader2 // Added Loader2 here to fix the ReferenceError
 } from 'lucide-react';
 
-import profileImage from '../images/wit.png';
+import profileImage from '/wit.png';
 
 const Hero = ({ onExplore }) => {
   const { theme } = useTheme();

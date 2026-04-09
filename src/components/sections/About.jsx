@@ -101,7 +101,7 @@ const About = () => {
               <div className="relative w-40 h-40 mx-auto mb-8">
                 <div className="absolute inset-0 bg-gradient-to-tr from-blue-600 to-purple-600 rounded-full animate-pulse blur-lg opacity-30" />
                 <img 
-                  src="/images/wit.png" 
+                  src="/wit.png" 
                   alt="Profile" 
                   className="relative w-full h-full rounded-full object-cover border-4 border-white dark:border-gray-800 shadow-2xl"
                 />
