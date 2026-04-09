@@ -33,7 +33,7 @@ const GalaxySkills = () => {
   ], [isMobile]);
 
   return (
-    <section className="relative h-screen w-full bg-[#020617] overflow-hidden flex flex-col items-center justify-center font-sans select-none">
+    <section className="relative h-800 w-full bg-[#020617] overflow-hidden flex flex-col items-center justify-center font-sans select-none">
       
       {/* 🌠 Immersive Starfield Background */}
       <div className="absolute inset-0 z-0">
