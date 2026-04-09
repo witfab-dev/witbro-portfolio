@@ -10,7 +10,7 @@ import VoiceAssistant from './components/ui/VoiceAssistant';
 
 import { 
   Loader2, CheckCircle2, Sparkles, Palette, Rocket, 
-  Zap, Code2, Mic
+  Zap, Mic
 } from 'lucide-react';
 
 // Lazy load sections
@@ -19,10 +19,10 @@ const About = lazy(() => import('./components/sections/About'));
 const Projects = lazy(() => import('./components/sections/Projects'));
 const SkillsGalaxy = lazy(() => import('./components/sections/SkillsGalaxy'));
 const Experience = lazy(() => import('./components/sections/Experience'));
+const NewsFeed = lazy(() => import('./components/sections/NewsFeed')); // ✅ ADDED NEWSFEED IMPORT
 const Contact = lazy(() => import('./components/sections/Contact'));
 
-const profileImage = new URL('../images/wit.png', import.meta.url).href || `https://ui-avatars.com/api/?name=Witness+Fabrice&background=3b82f6&color=fff`;
-
+const profileImage = '/wit.png'; // ✅ DO NOT IMPORT. Use the direct path from the /public folder
 const LoadingScreen = ({ onFinished }) => {
   const [progress, setProgress] = useState(0);
   const [currentTip, setCurrentTip] = useState(0);
@@ -43,7 +43,7 @@ const LoadingScreen = ({ onFinished }) => {
           setTimeout(onFinished, 500);
           return 100;
         }
-        const diff = Math.random() * 15; // Faster, more organic loading
+        const diff = Math.random() * 15; 
         return Math.min(oldProgress + diff, 100);
       });
     }, 100);
@@ -119,7 +119,6 @@ function App() {
 
   useEffect(() => {
     if (!loading) {
-      // Logic for automatic welcome message
       const hasBeenWelcomed = sessionStorage.getItem('welcomeDone');
       if (!hasBeenWelcomed) {
         setTimeout(() => {
@@ -144,7 +143,6 @@ function App() {
               transition={{ duration: 1 }}
               className="min-h-screen bg-slate-50 dark:bg-[#030712] relative"
             >
-              {/* Cinematic Elements */}
               <div className="bg-grain fixed inset-0 pointer-events-none z-50" />
               <div className="fixed inset-0 pointer-events-none z-[-1]">
                  <div className="absolute top-0 left-[20%] w-[50vw] h-[50vw] bg-blue-600/5 blur-[120px] rounded-full" />
@@ -165,13 +163,13 @@ function App() {
                   <Projects />
                   <SkillsGalaxy />
                   <Experience />
+                  <NewsFeed /> {/* ✅ ADDED NEWSFEED COMPONENT HERE */}
                   <Contact />
                 </Suspense>
               </main>
 
               <Footer />
 
-              {/* Floating Trigger */}
               {!showVoiceAssistant && (
                 <motion.button
                   layoutId="assistant-btn"
