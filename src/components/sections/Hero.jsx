@@ -5,19 +5,17 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import AnimatedCounter from '../shared/AnimatedCounter';
 import Typewriter from '../shared/Typewriter';
 import { 
-  Github, Linkedin, Twitter, Mail, Download,
-  MapPin, Briefcase, ChevronDown, Eye,
-  Award, Code2, Heart, Star, Zap, Sparkles,
-  Loader2 // Added Loader2 here to fix the ReferenceError
+  Github, Linkedin, Twitter, Mail,
+  MapPin, Briefcase, ChevronDown, 
+  Award, Code2, Heart, Star, 
+  Loader2 
 } from 'lucide-react';
 
-import profileImage from '/wit.png';
+// ✅ DO NOT IMPORT. Use the direct path from the /public folder
+const HERO_IMG_PATH = '/wit.png'; 
 
-const Hero = ({ onExplore }) => {
-  const { theme } = useTheme();
+const Hero = () => {
   const { t } = useLanguage(); 
-
-  const [imageError, setImageError] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [currentTitleIndex, setCurrentTitleIndex] = useState(0);
   const [viewCount, setViewCount] = useState(1247);
@@ -52,9 +50,6 @@ const Hero = ({ onExplore }) => {
     return () => clearInterval(interval);
   }, []);
 
-  const fallbackImage = `https://ui-avatars.com/api/?name=Witness+Fabrice&size=400&background=3b82f6&color=fff&bold=true`;
-  const imgSrc = imageError ? fallbackImage : profileImage;
-
   const socialLinks = [
     { icon: Github, href: 'https://github.com/witfab-dev', label: 'GitHub' },
     { icon: Linkedin, href: 'https://linkedin.com/in/witnessfabrice', label: 'LinkedIn' },
@@ -88,8 +83,7 @@ const Hero = ({ onExplore }) => {
             transition={{ duration: 0.8, ease: "easeOut" }}
             className="text-left space-y-8"
           >
-            {/* Live System Tag */}
-            <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full glass-panel border border-black/5 dark:border-white/10 dark:bg-white/5 backdrop-blur-md shadow-sm">
+            <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full border border-black/5 dark:border-white/10 dark:bg-white/5 backdrop-blur-md shadow-sm">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
@@ -128,7 +122,7 @@ const Hero = ({ onExplore }) => {
             {/* Achievement Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               {achievements.map((item, index) => (
-                <div key={index} className="p-4 glass-panel border border-black/5 dark:border-white/5 rounded-2xl group hover:border-blue-500/30 transition-colors">
+                <div key={index} className="p-4 border border-black/5 dark:border-white/5 rounded-2xl group hover:border-blue-500/30 transition-colors bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm">
                   <item.icon size={20} className={`${item.color} mb-2 opacity-80`} />
                   <AnimatedCounter 
                     value={item.value} 
@@ -159,7 +153,7 @@ const Hero = ({ onExplore }) => {
                     target="_blank"
                     rel="noopener noreferrer"
                     whileHover={{ y: -5, color: "#3b82f6" }}
-                    className="p-4 glass-panel border border-black/5 dark:border-white/10 rounded-2xl text-gray-500 hover:text-blue-500 transition-all"
+                    className="p-4 border border-black/5 dark:border-white/10 rounded-2xl text-gray-500 hover:text-blue-500 transition-all bg-white/50 dark:bg-gray-900/50"
                   >
                     <social.icon size={20} />
                   </motion.a>
@@ -176,47 +170,39 @@ const Hero = ({ onExplore }) => {
             className="relative flex justify-center lg:justify-end"
           >
             <div className="relative w-80 h-80 md:w-[450px] md:h-[450px]">
-              {/* Spinning Ring */}
-              <div className="absolute inset-0 border-[1px] border-dashed border-blue-500/30 rounded-full animate-[spin_10s_linear_infinite]" />
+              <div className="absolute inset-0 border-[1px] border-dashed border-blue-500/30 rounded-full animate-[spin_20s_linear_infinite]" />
               
-              <div className="absolute inset-10 rounded-[3rem] overflow-hidden border border-black/5 dark:border-white/10 shadow-2xl">
+              <div className="absolute inset-10 rounded-[3rem] overflow-hidden border border-black/5 dark:border-white/10 shadow-2xl bg-slate-900">
                 {!imageLoaded && (
-                  <div className="absolute inset-0 bg-slate-100 dark:bg-white/5 animate-pulse flex items-center justify-center">
+                  <div className="absolute inset-0 bg-slate-100 dark:bg-white/5 flex items-center justify-center">
                     <Loader2 className="animate-spin text-blue-500" />
                   </div>
                 )}
                 <img
-                  src={imgSrc}
-                  alt="Witness"
+                  src={HERO_IMG_PATH}
+                  alt="Witness Fabrice"
                   onLoad={() => setImageLoaded(true)}
-                  onError={() => setImageError(true)}
-                  className={`w-full h-full object-cover transition-transform duration-700 hover:scale-110 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+                  className={`w-full h-full object-cover transition-all duration-700 hover:scale-110 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
                 />
               </div>
 
-              {/* Floating Tech Badges */}
+              {/* Floating Tech Badge */}
               <motion.div 
-                animate={{ y: [0, -20, 0] }} 
+                animate={{ y: [0, -15, 0] }} 
                 transition={{ duration: 4, repeat: Infinity }}
-                className="absolute top-0 right-10 p-4 glass-panel border border-black/5 dark:border-white/10 rounded-2xl shadow-lg"
+                className="absolute top-0 right-10 p-4 bg-white dark:bg-gray-900 border border-black/5 dark:border-white/10 rounded-2xl shadow-xl z-20"
               >
                 <Code2 className="text-blue-500" />
-              </motion.div>
-              <motion.div 
-                animate={{ y: [0, 20, 0] }} 
-                transition={{ duration: 5, repeat: Infinity, delay: 1 }}
-                className="absolute bottom-10 left-0 p-4 glass-panel border border-black/5 dark:border-white/10 rounded-2xl shadow-lg"
-              >
               </motion.div>
             </div>
           </motion.div>
         </div>
       </div>
 
-      {/* Scroll Down */}
+      {/* Scroll Down Indicator */}
       <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-50">
         <span className="text-[10px] font-mono tracking-widest uppercase">{t('exploreMore')}</span>
-        <motion.div animate={{ y: [0, 10, 0] }} transition={{ repeat: Infinity, duration: 2 }}>
+        <motion.div animate={{ y: [0, 8, 0] }} transition={{ repeat: Infinity, duration: 2 }}>
           <ChevronDown size={20} />
         </motion.div>
       </div>
@@ -224,9 +210,8 @@ const Hero = ({ onExplore }) => {
   );
 };
 
-// Internal Rocket Icon Component
 const Rocket = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
     <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/>
     <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/>
     <path d="M9 12H4s.55-3.03 2-5c1.62-2.2 5-3 5-3"/>
