@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import myCV from './witness_fabrice_cv.pdf';
+import myCV from '/witness_fabrice_cv.pdf';
 import { 
   User, Code2, Heart, Coffee, MapPin, Briefcase, 
   GraduationCap, Award, Star, Globe, Users, BookOpen, 
