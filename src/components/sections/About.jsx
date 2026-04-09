@@ -128,7 +128,7 @@ const About = () => {
               </div>
 
               <a 
-            href={myCV}
+            href="/witness_fabrice_cv.pdf"
             download="Witness_Fabrice_CV.pdf"
             className="w-full py-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-2xl font-bold flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-blue-500/10"
           >
