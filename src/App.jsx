@@ -3,17 +3,18 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 
-// Layout & UI
+// Layout & UI Components
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import VoiceAssistant from './components/ui/VoiceAssistant';
 
+// Icons
 import { 
   Loader2, CheckCircle2, Sparkles, Database, 
-  Code2, Zap, Mic, ShieldCheck, Target, Terminal
+  Code2, Zap, Bot, ShieldCheck, Target
 } from 'lucide-react';
 
-// Lazy load sections for performance
+// Lazy load sections for optimized performance
 const Hero = lazy(() => import('./components/sections/Hero'));
 const About = lazy(() => import('./components/sections/About'));
 const Projects = lazy(() => import('./components/sections/Projects'));
@@ -22,7 +23,7 @@ const Experience = lazy(() => import('./components/sections/Experience'));
 const NewsFeed = lazy(() => import('./components/sections/NewsFeed'));
 const Contact = lazy(() => import('./components/sections/Contact'));
 
-// Profile Image Configuration
+// Profile asset configuration
 const profileImage = '/wit.png'; 
 
 const LoadingScreen = ({ onFinished }) => {
@@ -97,14 +98,15 @@ const LoadingScreen = ({ onFinished }) => {
 
       <div className="relative z-10 w-full max-w-lg px-8">
         <div className="relative p-10 border border-blue-500/10 bg-slate-900/30 backdrop-blur-xl rounded-3xl overflow-hidden shadow-[0_0_80px_-15px_rgba(59,130,246,0.2)]">
+          
           <motion.div 
             animate={{ top: ["0%", "100%", "0%"] }}
             transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
             className="absolute left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-blue-500/40 to-transparent z-20"
           />
 
-          <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-blue-500 rounded-tl-2xl" />
-          <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-blue-500 rounded-br-2xl" />
+          <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-blue-500 rounded-tl-2xl shadow-[0_0_10px_#3b82f640]" />
+          <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-blue-500 rounded-br-2xl shadow-[0_0_10px_#3b82f640]" />
 
           <div className="flex items-center gap-4 mb-10 border-b border-white/5 pb-6">
             <div className="relative w-20 h-20 rounded-xl overflow-hidden border border-white/10 p-1 bg-slate-950">
@@ -212,16 +214,34 @@ function App() {
 
               <Footer />
 
+              {/* Floating Robot Trigger */}
               {!showVoiceAssistant && (
                 <motion.button
                   layoutId="assistant-btn"
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  whileHover={{ scale: 1.1, boxShadow: "0 0 20px rgba(59, 130, 246, 0.4)" }}
+                  initial={{ scale: 0, rotate: -20 }}
+                  animate={{ 
+                    scale: 1, 
+                    rotate: 0,
+                    y: [0, -8, 0] 
+                  }}
+                  transition={{
+                    y: { duration: 3, repeat: Infinity, ease: "easeInOut" },
+                    duration: 0.5
+                  }}
+                  whileHover={{ 
+                    scale: 1.1, 
+                    boxShadow: "0 0 30px rgba(59, 130, 246, 0.5)",
+                    rotate: 5 
+                  }}
+                  whileTap={{ scale: 0.9 }}
                   onClick={() => setShowVoiceAssistant(true)}
-                  className="fixed bottom-8 right-8 p-5 bg-blue-600 text-white rounded-[2rem] shadow-2xl z-40"
+                  className="fixed bottom-8 right-8 p-5 bg-blue-600 text-white rounded-[2rem] shadow-2xl z-40 border border-blue-400/30 group"
                 >
-                  <Mic size={24} />
+                  <div className="relative">
+                    <Bot size={28} className="relative z-10" />
+                    <span className="absolute inset-0 rounded-full bg-white animate-ping opacity-20 scale-150" />
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-blue-600" />
+                  </div>
                 </motion.button>
               )}
             </motion.div>
