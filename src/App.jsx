@@ -9,30 +9,53 @@ import Footer from './components/layout/Footer';
 import VoiceAssistant from './components/ui/VoiceAssistant';
 
 import { 
-  Loader2, CheckCircle2, Sparkles, Palette, Rocket, 
-  Zap, Mic
+  Loader2, CheckCircle2, Sparkles, Database, 
+  Code2, Zap, Mic, ShieldCheck, Target, Terminal
 } from 'lucide-react';
 
-// Lazy load sections
+// Lazy load sections for performance
 const Hero = lazy(() => import('./components/sections/Hero'));
 const About = lazy(() => import('./components/sections/About'));
 const Projects = lazy(() => import('./components/sections/Projects'));
 const SkillsGalaxy = lazy(() => import('./components/sections/SkillsGalaxy'));
 const Experience = lazy(() => import('./components/sections/Experience'));
-const NewsFeed = lazy(() => import('./components/sections/NewsFeed')); // ✅ ADDED NEWSFEED IMPORT
+const NewsFeed = lazy(() => import('./components/sections/NewsFeed'));
 const Contact = lazy(() => import('./components/sections/Contact'));
 
-const profileImage = '/wit.png'; // ✅ DO NOT IMPORT. Use the direct path from the /public folder
+// Profile Image Configuration
+const profileImage = '/wit.png'; 
+
 const LoadingScreen = ({ onFinished }) => {
   const [progress, setProgress] = useState(0);
   const [currentTip, setCurrentTip] = useState(0);
+  const [logs, setLogs] = useState(["[SYSTEM] Witness_OS Initialization..."]);
 
-  const tips = [
-    { icon: Sparkles, text: "Initializing interactive engine..." },
-    { icon: Palette, text: "Styling digital environment..." },
-    { icon: Rocket, text: "Optimizing asset delivery..." },
-    { icon: Zap, text: "Syncing voice intelligence..." },
-    { icon: CheckCircle2, text: "Environment Ready." }
+  const bioMessages = [
+    { 
+      icon: Code2, 
+      category: "WITNESS_PROFILE", 
+      text: "I am a passionate full-stack developer building modern, user-friendly web applications." 
+    },
+    { 
+      icon: Database, 
+      category: "TECHNICAL_STACK", 
+      text: "Expertise in Node.js, MySQL, MongoDB, and Vue for complete end-to-end solutions." 
+    },
+    { 
+      icon: Target, 
+      category: "PERFORMANCE", 
+      text: "Specializing in system design, database management, and robust API development." 
+    },
+    { 
+      icon: Sparkles, 
+      category: "MISSION", 
+      text: "Solving real-world problems through code to create meaningful digital impact." 
+    },
+    { 
+      icon: ShieldCheck, 
+      category: "STATUS", 
+      text: "Witness: Detail-oriented and challenge-ready. IDENTITY_VERIFIED. ACCESS_GRANTED." 
+    }
   ];
 
   useEffect(() => {
@@ -40,74 +63,93 @@ const LoadingScreen = ({ onFinished }) => {
       setProgress(oldProgress => {
         if (oldProgress >= 100) {
           clearInterval(timer);
-          setTimeout(onFinished, 500);
+          setTimeout(onFinished, 1200);
           return 100;
         }
-        const diff = Math.random() * 15; 
+        const diff = Math.random() * 15;
         return Math.min(oldProgress + diff, 100);
       });
-    }, 100);
+    }, 180);
     return () => clearInterval(timer);
   }, [onFinished]);
 
   useEffect(() => {
-    const tipIndex = Math.floor((progress / 100) * tips.length);
-    setCurrentTip(Math.min(tipIndex, tips.length - 1));
+    const tipIndex = Math.floor((progress / 100) * bioMessages.length);
+    const index = Math.min(tipIndex, bioMessages.length - 1);
+    setCurrentTip(index);
+    
+    const newLog = `[FETCH] Load_Module::${bioMessages[index].category}... OK`;
+    if (!logs.includes(newLog)) {
+      setLogs(prev => [...prev.slice(-2), newLog]);
+    }
   }, [progress]);
 
-  const CurrentTipIcon = tips[currentTip].icon;
+  const CurrentIcon = bioMessages[currentTip].icon;
 
   return (
     <motion.div 
       initial={{ opacity: 1 }}
       exit={{ opacity: 0, filter: "blur(20px)", scale: 1.1 }}
-      transition={{ duration: 0.8, ease: "circOut" }}
-      className="fixed inset-0 z-[999] bg-[#030712] flex flex-col items-center justify-center overflow-hidden"
+      transition={{ duration: 0.8 }}
+      className="fixed inset-0 z-[999] bg-[#030712] flex flex-col items-center justify-center overflow-hidden font-mono"
     >
-      <div className="absolute w-[600px] h-[600px] bg-blue-600/10 blur-[150px] rounded-full animate-pulse" />
-      
-      <div className="relative z-10 w-full max-w-sm px-8 text-center">
-        <motion.div 
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          className="relative mx-auto w-24 h-24 mb-10"
-        >
-          <div className="absolute inset-0 rounded-[2rem] bg-gradient-to-tr from-blue-500 to-purple-500 animate-spin-slow opacity-20" />
-          <div className="relative w-full h-full rounded-[2rem] overflow-hidden border border-white/10 glass-panel p-1">
-             <img src={profileImage} alt="Loading..." className="w-full h-full object-cover rounded-[1.8rem]" />
-          </div>
-        </motion.div>
+      <div className="absolute w-[600px] h-[600px] bg-blue-600/5 blur-[150px] rounded-full animate-pulse" />
 
-        <h2 className="text-white text-2xl font-black tracking-tighter mb-1">Witness_OS</h2>
-        <p className="text-blue-500/60 text-[10px] font-mono mb-8 tracking-[0.3em] uppercase">Booting Digital Identity</p>
-
-        <div className="relative h-[1px] w-full bg-white/10 rounded-full mb-4">
+      <div className="relative z-10 w-full max-w-lg px-8">
+        <div className="relative p-10 border border-blue-500/10 bg-slate-900/30 backdrop-blur-xl rounded-3xl overflow-hidden shadow-[0_0_80px_-15px_rgba(59,130,246,0.2)]">
           <motion.div 
-            className="absolute top-0 left-0 h-full bg-blue-500 shadow-[0_0_15px_#3b82f6]"
-            style={{ width: `${progress}%` }}
+            animate={{ top: ["0%", "100%", "0%"] }}
+            transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
+            className="absolute left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-blue-500/40 to-transparent z-20"
           />
-        </div>
 
-        <div className="flex justify-between items-center font-mono text-[9px] text-gray-500 mb-10">
-          <span className="flex items-center gap-2">
-            <div className="w-1 h-1 bg-blue-500 rounded-full animate-ping" />
-            {Math.round(progress)}% LOADED
-          </span>
-          <span>SR_v2.6</span>
-        </div>
+          <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-blue-500 rounded-tl-2xl" />
+          <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-blue-500 rounded-br-2xl" />
 
-        <AnimatePresence mode="wait">
-          <motion.div 
-            key={currentTip}
-            initial={{ opacity: 0, x: 10 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -10 }}
-            className="flex items-center justify-center gap-3 text-gray-400 font-medium"
-          >
-            <CurrentTipIcon size={14} className="text-blue-500" />
-            <span className="text-xs">{tips[currentTip].text}</span>
-          </motion.div>
-        </AnimatePresence>
+          <div className="flex items-center gap-4 mb-10 border-b border-white/5 pb-6">
+            <div className="relative w-20 h-20 rounded-xl overflow-hidden border border-white/10 p-1 bg-slate-950">
+              <img src={profileImage} alt="Witness" className="w-full h-full object-cover rounded-lg" />
+            </div>
+            <div className="grow">
+              <h2 className="text-white text-3xl font-black tracking-tighter uppercase leading-none mb-1">Witness_OS</h2>
+              <p className="text-blue-500/70 text-[10px] font-bold tracking-[0.3em] uppercase mb-4">Core_Persona :: Init</p>
+              <div className="relative h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                <motion.div 
+                  className="absolute top-0 left-0 h-full bg-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.6)]"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="relative bg-black/40 rounded-xl p-6 border border-white/5 h-36 flex flex-col justify-center">
+            <AnimatePresence mode="wait">
+              <motion.div 
+                key={currentTip}
+                initial={{ opacity: 0, x: 5 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -5 }}
+                className="flex flex-col gap-2"
+              >
+                <div className="flex items-center gap-2">
+                  <CurrentIcon size={14} className="text-blue-400" />
+                  <span className="text-[10px] text-blue-500/60 font-black tracking-widest uppercase">
+                    {bioMessages[currentTip].category}
+                  </span>
+                </div>
+                <span className="text-[12px] md:text-[13px] text-slate-300 font-medium leading-relaxed">
+                  {bioMessages[currentTip].text}
+                </span>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        </div>
+        
+        <div className="mt-8 px-4 h-12">
+          {logs.map((log, i) => (
+            <p key={i} className="text-[9px] text-slate-600 uppercase tracking-tighter">{log}</p>
+          ))}
+        </div>
       </div>
     </motion.div>
   );
@@ -143,7 +185,7 @@ function App() {
               transition={{ duration: 1 }}
               className="min-h-screen bg-slate-50 dark:bg-[#030712] relative"
             >
-              <div className="bg-grain fixed inset-0 pointer-events-none z-50" />
+              <div className="bg-grain fixed inset-0 pointer-events-none z-50 opacity-[0.03]" />
               <div className="fixed inset-0 pointer-events-none z-[-1]">
                  <div className="absolute top-0 left-[20%] w-[50vw] h-[50vw] bg-blue-600/5 blur-[120px] rounded-full" />
                  <div className="absolute bottom-0 right-[10%] w-[40vw] h-[40vw] bg-purple-600/5 blur-[120px] rounded-full" />
@@ -163,7 +205,7 @@ function App() {
                   <Projects />
                   <SkillsGalaxy />
                   <Experience />
-                  <NewsFeed /> {/* ✅ ADDED NEWSFEED COMPONENT HERE */}
+                  <NewsFeed />
                   <Contact />
                 </Suspense>
               </main>
@@ -177,7 +219,7 @@ function App() {
                   animate={{ scale: 1 }}
                   whileHover={{ scale: 1.1, boxShadow: "0 0 20px rgba(59, 130, 246, 0.4)" }}
                   onClick={() => setShowVoiceAssistant(true)}
-                  className="fixed bottom-8 right-8 p-5 bg-blue-600 text-white rounded-[2rem] shadow-2xl z-40 transition-colors"
+                  className="fixed bottom-8 right-8 p-5 bg-blue-600 text-white rounded-[2rem] shadow-2xl z-40"
                 >
                   <Mic size={24} />
                 </motion.button>
@@ -194,7 +236,7 @@ const SectionLoader = () => (
   <div className="h-screen flex items-center justify-center bg-transparent">
     <div className="flex flex-col items-center gap-4">
       <Loader2 className="w-10 h-10 text-blue-500 animate-spin opacity-20" />
-      <span className="text-[10px] font-mono text-gray-500 tracking-[0.2em]">LOADING_SECTION</span>
+      <span className="text-[10px] font-mono text-gray-500 tracking-[0.2em]">LOADING_MODULE</span>
     </div>
   </div>
 );
