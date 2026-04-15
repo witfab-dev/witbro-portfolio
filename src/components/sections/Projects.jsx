@@ -60,6 +60,18 @@ const Projects = () => {
       year: '2025',
       featured: true
     },
+      {
+      id: 7,
+      title: 'Rwanda explorer game',
+      description: 'Rwanda Explorer is an educational game that takes players on a virtual journey."',
+      longDescription: '"Rwanda Explorer is an educational game that takes players on a virtual journey through the "Land of a Thousand Hills." Explore Rwanda"',
+      category: 'mobile',
+      image: 'https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=800&auto=format&fit=crop',
+      technologies: ['vue', 'CSS'],
+      links: { github: 'https://github.com/witfab-dev/rwanda-explorer-game', demo: 'https://rwanda-explorer-game.vercel.app/' },
+      year: '2024',
+      featured: true
+    }
     // ... add your other projects here
   ];
 

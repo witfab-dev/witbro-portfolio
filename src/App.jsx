@@ -10,11 +10,11 @@ import VoiceAssistant from './components/ui/VoiceAssistant';
 
 // Icons
 import { 
-  Loader2, CheckCircle2, Sparkles, Database, 
-  Code2, Zap, Bot, ShieldCheck, Target
+  Loader2, Bot, Terminal, Code2, ShieldCheck, 
+  Database, Sparkles, Target
 } from 'lucide-react';
 
-// Lazy load sections for optimized performance
+// Lazy load sections for performance
 const Hero = lazy(() => import('./components/sections/Hero'));
 const About = lazy(() => import('./components/sections/About'));
 const Projects = lazy(() => import('./components/sections/Projects'));
@@ -23,136 +23,127 @@ const Experience = lazy(() => import('./components/sections/Experience'));
 const NewsFeed = lazy(() => import('./components/sections/NewsFeed'));
 const Contact = lazy(() => import('./components/sections/Contact'));
 
-// Profile asset configuration
 const profileImage = '/wit.png'; 
 
 const LoadingScreen = ({ onFinished }) => {
   const [progress, setProgress] = useState(0);
-  const [currentTip, setCurrentTip] = useState(0);
+  const [showWelcome, setShowWelcome] = useState(false);
+  const [welcomeText, setWelcomeText] = useState("");
   const [logs, setLogs] = useState(["[SYSTEM] Witness_OS Initialization..."]);
+  
+  const fullWelcome = "Hello, I am Witness Fabrice. Welcome to my Digital Workspace.";
 
-  const bioMessages = [
-    { 
-      icon: Code2, 
-      category: "WITNESS_PROFILE", 
-      text: "I am a passionate full-stack developer building modern, user-friendly web applications." 
-    },
-    { 
-      icon: Database, 
-      category: "TECHNICAL_STACK", 
-      text: "Expertise in Node.js, MySQL, MongoDB, and Vue for complete end-to-end solutions." 
-    },
-    { 
-      icon: Target, 
-      category: "PERFORMANCE", 
-      text: "Specializing in system design, database management, and robust API development." 
-    },
-    { 
-      icon: Sparkles, 
-      category: "MISSION", 
-      text: "Solving real-world problems through code to create meaningful digital impact." 
-    },
-    { 
-      icon: ShieldCheck, 
-      category: "STATUS", 
-      text: "Witness: Detail-oriented and challenge-ready. IDENTITY_VERIFIED. ACCESS_GRANTED." 
-    }
-  ];
+  const manifesto = {
+    category: "WITNESS_MANIFESTO",
+    text: "Your career is not just a way to earn a living — it’s a way to leave your mark on the world. Choose growth over comfort. Choose learning over fear. Choose purpose over pressure. Success is not about being perfect; it’s about showing up every day and believing that your work matters. Build skills. Stay curious. Work hard. And never underestimate what you can become."
+  };
 
+  // Phase 1: Manifesto Progress
   useEffect(() => {
     const timer = setInterval(() => {
       setProgress(oldProgress => {
         if (oldProgress >= 100) {
           clearInterval(timer);
-          setTimeout(onFinished, 1200);
+          setTimeout(() => setShowWelcome(true), 800);
           return 100;
         }
-        const diff = Math.random() * 15;
-        return Math.min(oldProgress + diff, 100);
+        return Math.min(oldProgress + Math.random() * 12, 100);
       });
-    }, 180);
+    }, 150);
     return () => clearInterval(timer);
-  }, [onFinished]);
+  }, []);
 
+  // Phase 2: Auto-writing Welcome
   useEffect(() => {
-    const tipIndex = Math.floor((progress / 100) * bioMessages.length);
-    const index = Math.min(tipIndex, bioMessages.length - 1);
-    setCurrentTip(index);
-    
-    const newLog = `[FETCH] Load_Module::${bioMessages[index].category}... OK`;
-    if (!logs.includes(newLog)) {
-      setLogs(prev => [...prev.slice(-2), newLog]);
+    if (showWelcome && welcomeText.length < fullWelcome.length) {
+      const timeout = setTimeout(() => {
+        setWelcomeText(fullWelcome.slice(0, welcomeText.length + 1));
+      }, 35);
+      return () => clearTimeout(timeout);
+    } else if (showWelcome && welcomeText.length === fullWelcome.length) {
+      setTimeout(onFinished, 2000);
     }
-  }, [progress]);
-
-  const CurrentIcon = bioMessages[currentTip].icon;
+  }, [showWelcome, welcomeText, onFinished]);
 
   return (
     <motion.div 
-      initial={{ opacity: 1 }}
-      exit={{ opacity: 0, filter: "blur(20px)", scale: 1.1 }}
-      transition={{ duration: 0.8 }}
-      className="fixed inset-0 z-[999] bg-[#030712] flex flex-col items-center justify-center overflow-hidden font-mono"
+      exit={{ opacity: 0, filter: "blur(20px)" }}
+      className="fixed inset-0 z-[999] bg-[#030712] flex items-center justify-center overflow-hidden font-mono"
     >
-      <div className="absolute w-[600px] h-[600px] bg-blue-600/5 blur-[150px] rounded-full animate-pulse" />
-
-      <div className="relative z-10 w-full max-w-lg px-8">
-        <div className="relative p-10 border border-blue-500/10 bg-slate-900/30 backdrop-blur-xl rounded-3xl overflow-hidden shadow-[0_0_80px_-15px_rgba(59,130,246,0.2)]">
-          
+      {/* Background Code Layer (PC Screen Feel) */}
+      <AnimatePresence>
+        {showWelcome && (
           <motion.div 
-            animate={{ top: ["0%", "100%", "0%"] }}
-            transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
-            className="absolute left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-blue-500/40 to-transparent z-20"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.1 }}
+            className="absolute inset-0 z-0 bg-cover bg-center"
+            style={{ backgroundImage: "url('https://images.unsplash.com/photo-1516116216624-53e697fedbea?q=80&w=1920')" }}
           />
+        )}
+      </AnimatePresence>
 
-          <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-blue-500 rounded-tl-2xl shadow-[0_0_10px_#3b82f640]" />
-          <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-blue-500 rounded-br-2xl shadow-[0_0_10px_#3b82f640]" />
+      <AnimatePresence mode="wait">
+        {!showWelcome ? (
+          /* STAGE 1: THE MANIFESTO */
+          <motion.div 
+            key="manifesto"
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="relative z-10 w-full max-w-xl px-6"
+          >
+            <div className="relative p-8 md:p-10 border border-blue-500/10 bg-slate-900/40 backdrop-blur-2xl rounded-3xl overflow-hidden shadow-2xl">
+              <div className="flex flex-col md:flex-row items-center gap-6 mb-8 border-b border-white/5 pb-8">
+                <div className="relative w-24 h-24 rounded-2xl overflow-hidden border border-white/10 p-1 bg-slate-950">
+                  <img src={profileImage} alt="Witness" className="w-full h-full object-cover rounded-xl" />
+                </div>
+                <div className="grow w-full text-center md:text-left">
+                  <h2 className="text-white text-3xl font-black tracking-tighter mb-2 italic">WITNESS_OS</h2>
+                  <div className="relative h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                    <motion.div className="h-full bg-blue-500 shadow-[0_0_15px_#3b82f6]" style={{ width: `${progress}%` }} />
+                  </div>
+                </div>
+              </div>
 
-          <div className="flex items-center gap-4 mb-10 border-b border-white/5 pb-6">
-            <div className="relative w-20 h-20 rounded-xl overflow-hidden border border-white/10 p-1 bg-slate-950">
-              <img src={profileImage} alt="Witness" className="w-full h-full object-cover rounded-lg" />
-            </div>
-            <div className="grow">
-              <h2 className="text-white text-3xl font-black tracking-tighter uppercase leading-none mb-1">Witness_OS</h2>
-              <p className="text-blue-500/70 text-[10px] font-bold tracking-[0.3em] uppercase mb-4">Core_Persona :: Init</p>
-              <div className="relative h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                <motion.div 
-                  className="absolute top-0 left-0 h-full bg-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.6)]"
-                  style={{ width: `${progress}%` }}
-                />
+              <div className="relative bg-black/40 rounded-2xl p-6 border border-white/5">
+                <div className="flex items-center gap-2 mb-4">
+                  <Terminal size={14} className="text-blue-400" />
+                  <span className="text-[10px] text-blue-500/60 font-black tracking-widest uppercase">{manifesto.category}</span>
+                </div>
+                <p className="text-[13px] md:text-[14px] text-slate-300 font-medium leading-relaxed italic border-l-2 border-blue-500/30 pl-5">
+                  "{manifesto.text}"
+                </p>
+                <div className="mt-4 flex justify-end">
+                   <span className="text-[10px] text-slate-500 font-mono">— Witness Fabrice</span>
+                </div>
               </div>
             </div>
-          </div>
+          </motion.div>
+        ) : (
+          /* STAGE 2: TERMINAL WELCOME */
+          <motion.div 
+            key="welcome"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="relative z-20 text-center px-8"
+          >
+            <div className="inline-flex items-center gap-2 mb-6 bg-blue-500/10 px-4 py-1.5 rounded-full border border-blue-500/20">
+              <span className="w-2 h-2 bg-blue-500 rounded-full animate-ping" />
+              <span className="text-[10px] text-blue-500 font-black tracking-[0.3em]">SYSTEM_READY</span>
+            </div>
+            
+            <h1 className="text-2xl md:text-5xl font-black text-white tracking-tighter leading-tight max-w-3xl mx-auto">
+              {welcomeText}
+              <motion.span 
+                animate={{ opacity: [1, 0] }} 
+                transition={{ repeat: Infinity, duration: 0.6 }}
+                className="inline-block w-1.5 h-8 md:h-12 bg-blue-500 ml-3 align-middle"
+              />
+            </h1>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-          <div className="relative bg-black/40 rounded-xl p-6 border border-white/5 h-36 flex flex-col justify-center">
-            <AnimatePresence mode="wait">
-              <motion.div 
-                key={currentTip}
-                initial={{ opacity: 0, x: 5 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -5 }}
-                className="flex flex-col gap-2"
-              >
-                <div className="flex items-center gap-2">
-                  <CurrentIcon size={14} className="text-blue-400" />
-                  <span className="text-[10px] text-blue-500/60 font-black tracking-widest uppercase">
-                    {bioMessages[currentTip].category}
-                  </span>
-                </div>
-                <span className="text-[12px] md:text-[13px] text-slate-300 font-medium leading-relaxed">
-                  {bioMessages[currentTip].text}
-                </span>
-              </motion.div>
-            </AnimatePresence>
-          </div>
-        </div>
-        
-        <div className="mt-8 px-4 h-12">
-          {logs.map((log, i) => (
-            <p key={i} className="text-[9px] text-slate-600 uppercase tracking-tighter">{log}</p>
-          ))}
-        </div>
-      </div>
+      <div className="bg-grain fixed inset-0 pointer-events-none z-50 opacity-[0.04]" />
     </motion.div>
   );
 };
@@ -187,8 +178,8 @@ function App() {
               transition={{ duration: 1 }}
               className="min-h-screen bg-slate-50 dark:bg-[#030712] relative"
             >
-              <div className="bg-grain fixed inset-0 pointer-events-none z-50 opacity-[0.03]" />
-              <div className="fixed inset-0 pointer-events-none z-[-1]">
+              <div className="bg-grain fixed inset-0 pointer-events-none z-50 opacity-[0.02]" />
+              <div className="fixed inset-0 pointer-events-none z-[-1] overflow-hidden">
                  <div className="absolute top-0 left-[20%] w-[50vw] h-[50vw] bg-blue-600/5 blur-[120px] rounded-full" />
                  <div className="absolute bottom-0 right-[10%] w-[40vw] h-[40vw] bg-purple-600/5 blur-[120px] rounded-full" />
               </div>
@@ -214,25 +205,13 @@ function App() {
 
               <Footer />
 
-              {/* Floating Robot Trigger */}
               {!showVoiceAssistant && (
                 <motion.button
                   layoutId="assistant-btn"
                   initial={{ scale: 0, rotate: -20 }}
-                  animate={{ 
-                    scale: 1, 
-                    rotate: 0,
-                    y: [0, -8, 0] 
-                  }}
-                  transition={{
-                    y: { duration: 3, repeat: Infinity, ease: "easeInOut" },
-                    duration: 0.5
-                  }}
-                  whileHover={{ 
-                    scale: 1.1, 
-                    boxShadow: "0 0 30px rgba(59, 130, 246, 0.5)",
-                    rotate: 5 
-                  }}
+                  animate={{ scale: 1, rotate: 0, y: [0, -10, 0] }}
+                  transition={{ y: { duration: 4, repeat: Infinity, ease: "easeInOut" }, duration: 0.5 }}
+                  whileHover={{ scale: 1.1, boxShadow: "0 0 30px rgba(59, 130, 246, 0.5)", rotate: 5 }}
                   whileTap={{ scale: 0.9 }}
                   onClick={() => setShowVoiceAssistant(true)}
                   className="fixed bottom-8 right-8 p-5 bg-blue-600 text-white rounded-[2rem] shadow-2xl z-40 border border-blue-400/30 group"
@@ -256,7 +235,7 @@ const SectionLoader = () => (
   <div className="h-screen flex items-center justify-center bg-transparent">
     <div className="flex flex-col items-center gap-4">
       <Loader2 className="w-10 h-10 text-blue-500 animate-spin opacity-20" />
-      <span className="text-[10px] font-mono text-gray-500 tracking-[0.2em]">LOADING_MODULE</span>
+      <span className="text-[10px] font-mono text-gray-500 tracking-[0.2em]">LOADING_CORE_MODULE</span>
     </div>
   </div>
 );
