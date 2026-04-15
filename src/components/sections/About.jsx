@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-// ❌ Removed: import myCV from '/witness_fabrice_cv.pdf'; (This was causing the build crash)
 
 import { 
   User, Code2, Heart, Coffee, MapPin, Briefcase, 
-  GraduationCap, Award, Star, Globe, Users, BookOpen, 
-  Palette, Box, Database, Sparkles, Download, Mail, 
-  Smile, Rocket, ChevronDown, ChevronUp
+  GraduationCap, Globe, Users, Palette, Box, 
+  Database, Sparkles, Download, Mail, 
+  Smile, Rocket, ChevronDown, ChevronUp,
+  Eye, Compass, Target, Zap, ShieldCheck
 } from 'lucide-react';
 
 const About = () => {
@@ -22,26 +22,58 @@ const About = () => {
   };
 
   const bio = {
-    short: "I'm a passionate Full-Stack Developer with a focus on building impactful web and mobile applications. Based in Rwanda, I love creating digital solutions that bridge gaps and solve real-world problems.",
+    short: "I'm a dedicated Full-Stack Developer focused on building high-performance applications that solve real-world problems through clean code and modern design.",
     long: `My journey into tech began with a deep curiosity for how the web works. Since then, I've dedicated myself to mastering the MERN stack and modern UI/UX principles. I recently graduated from Kirehe Technical Secondary School, where I focused on Level 5 Software Development.\n\nI believe in writing clean, scalable code and constantly pushing the boundaries of what's possible with React and Node.js. When I'm not coding, you'll find me exploring 3D web graphics, participating in entrepreneurship challenges, or mentoring peers in my community.`
   };
 
-  const skills = {
-    frontend: [
-      { name: 'React', level: 95, icon: Code2, color: 'from-blue-400 to-blue-600' },
-      { name: 'Node.js', level: 90, icon: Code2, color: 'from-green-400 to-green-600' },
-      { name: 'Tailwind CSS', level: 92, icon: Palette, color: 'from-cyan-400 to-cyan-600' }
-    ],
-    backend: [
-      { name: 'MySQL/PostgreSQL', level: 85, icon: Database, color: 'from-blue-400 to-blue-600' },
-      { name: 'Express.js', level: 88, icon: Box, color: 'from-gray-500 to-gray-700' }
+  // ✅ REPLACED SKILLS WITH VISION
+  const vision = {
+    core: "Empowering Rwanda’s digital landscape through high-performance, scalable software solutions.",
+    pillars: [
+      { 
+        title: 'Technical Mastery', 
+        objective: 'Advancing the limits of Full-Stack architecture with React, Node.js, and modern database management.', 
+        icon: ShieldCheck, 
+        color: 'from-blue-400 to-blue-600' 
+      },
+      { 
+        title: 'User-Centric Innovation', 
+        objective: 'Crafting immersive digital environments that prioritize human experience and accessibility.', 
+        icon: Palette, 
+        color: 'from-cyan-400 to-cyan-600' 
+      },
+      { 
+        title: 'Problem-Solving Agility', 
+        objective: 'Transforming complex local challenges into streamlined, automated global opportunities.', 
+        icon: Zap, 
+        color: 'from-emerald-400 to-emerald-600' 
+      }
     ]
   };
 
-  const journey = [
-    { year: '2023', title: 'Full-Stack Learner', description: 'Started deep-diving into the MERN stack and professional project structures.', icon: Rocket, color: 'from-blue-500 to-indigo-600' },
-    { year: '2025', title: 'Technical Education', description: 'Focused on Level 5 Software Development at Kirehe Technical Secondary School.', icon: Briefcase, color: 'from-purple-500 to-pink-600' },
-    { year: '2026', title: 'Graduation & Launch', description: 'Completing formal education and launching professional portfolio and brand.', icon: GraduationCap, color: 'from-emerald-500 to-teal-600' }
+  // ✅ REPLACED JOURNEY WITH MISSION
+  const mission = [
+    { 
+      id: '01',
+      title: 'Continuous Growth', 
+      description: 'Relentlessly pursuing technical excellence and staying ahead of the architectural curve in system design.', 
+      icon: Rocket, 
+      color: 'from-blue-500 to-indigo-600' 
+    },
+    { 
+      id: '02',
+      title: 'Collaborative Excellence', 
+      description: 'Working alongside mentors and peers to build robust solutions that meet international standards.', 
+      icon: Compass, 
+      color: 'from-purple-500 to-pink-600' 
+    },
+    { 
+      id: '03',
+      title: 'Purposeful Impact', 
+      description: 'Dedicated to building software that is not just functional, but meaningful and transformative for the community.', 
+      icon: Target, 
+      color: 'from-emerald-500 to-teal-600' 
+    }
   ];
 
   const stats = [
@@ -67,7 +99,6 @@ const About = () => {
           <div className="h-1.5 w-20 bg-gradient-to-r from-blue-600 to-purple-600 mx-auto rounded-full" />
         </motion.div>
 
-        {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16">
           {stats.map((stat, idx) => (
             <motion.div
@@ -95,7 +126,7 @@ const About = () => {
               <div className="relative w-40 h-40 mx-auto mb-8">
                 <div className="absolute inset-0 bg-gradient-to-tr from-blue-600 to-purple-600 rounded-full animate-pulse blur-lg opacity-30" />
                 <img 
-                  src="/wit.png" // ✅ Uses public folder path
+                  src="/wit.png" 
                   alt="Profile" 
                   className="relative w-full h-full rounded-full object-cover border-4 border-white dark:border-gray-800 shadow-2xl"
                 />
@@ -122,7 +153,7 @@ const About = () => {
               </div>
 
               <a 
-                href="/witness_fabrice_cv.pdf" // ✅ Static path as string
+                href="/witness_fabrice_cv.pdf"
                 download="Witness_Fabrice_CV.pdf"
                 className="w-full py-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-2xl font-bold flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-all shadow-lg"
               >
@@ -135,7 +166,7 @@ const About = () => {
           {/* Main Content Area */}
           <div className="lg:col-span-8">
             <div className="flex p-1.5 bg-gray-100 dark:bg-gray-900 rounded-2xl mb-8">
-              {['bio', 'skills', 'journey'].map((tab) => (
+              {['bio', 'vision', 'mission'].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
@@ -204,10 +235,10 @@ const About = () => {
                     </div>
                     <div className="p-6 rounded-2xl bg-purple-50 dark:bg-purple-900/10 border border-purple-100 dark:border-purple-800/50">
                       <h4 className="font-bold flex items-center gap-2 mb-4 dark:text-white">
-                        <Heart className="w-5 h-5 text-purple-500" /> Interests
+                        <Heart className="w-5 h-5 text-purple-500" /> Focus Areas
                       </h4>
                       <div className="flex flex-wrap gap-2">
-                        {['Web3', 'UI Design', 'Open Source', '3D Graphics'].map(tag => (
+                        {['Architecture', 'UI Design', 'System Design', 'Open Source'].map(tag => (
                           <span key={tag} className="px-3 py-1 rounded-full bg-white dark:bg-gray-800 text-xs font-bold shadow-sm dark:text-gray-300">
                             {tag}
                           </span>
@@ -218,48 +249,46 @@ const About = () => {
                 </motion.div>
               )}
 
-              {activeTab === 'skills' && (
-                <motion.div key="skills" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
-                  {Object.entries(skills).map(([category, list]) => (
-                    <div key={category} className="space-y-4">
-                      <h4 className="text-lg font-bold capitalize dark:text-white">{category} Stack</h4>
-                      <div className="grid gap-4">
-                        {list.map((skill) => (
-                          <div key={skill.name} className="space-y-2">
-                            <div className="flex justify-between items-center text-sm font-bold dark:text-gray-300">
-                              <div className="flex items-center gap-2">
-                                <skill.icon className="w-4 h-4 text-blue-500" />
-                                {skill.name}
-                              </div>
-                              <span>{skill.level}%</span>
-                            </div>
-                            <div className="h-2.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-                              <motion.div 
-                                initial={{ width: 0 }}
-                                whileInView={{ width: `${skill.level}%` }}
-                                transition={{ duration: 1 }}
-                                className={`h-full bg-gradient-to-r ${skill.color}`}
-                              />
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
+              {activeTab === 'vision' && (
+                <motion.div key="vision" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
+                   <div className="p-6 rounded-2xl bg-gradient-to-r from-blue-600/10 to-purple-600/10 border border-blue-100 dark:border-blue-900/30">
+                     <p className="text-lg font-bold text-gray-800 dark:text-gray-100 leading-relaxed italic">
+                       "{vision.core}"
+                     </p>
+                   </div>
+                   <div className="grid gap-6">
+                     {vision.pillars.map((pillar) => (
+                       <div key={pillar.title} className="group p-6 rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 hover:border-blue-500 transition-all shadow-sm">
+                         <div className="flex items-start gap-4">
+                           <div className={`p-3 rounded-xl bg-gradient-to-br ${pillar.color} text-white`}>
+                             <pillar.icon size={24} />
+                           </div>
+                           <div>
+                             <h4 className="font-bold text-lg dark:text-white mb-1">{pillar.title}</h4>
+                             <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">{pillar.objective}</p>
+                           </div>
+                         </div>
+                       </div>
+                     ))}
+                   </div>
                 </motion.div>
               )}
 
-              {activeTab === 'journey' && (
-                <motion.div key="journey" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="relative pl-8 space-y-12 before:absolute before:left-0 before:top-2 before:bottom-2 before:w-0.5 before:bg-gray-200 dark:before:bg-gray-800">
-                  {journey.map((item, idx) => (
-                    <div key={idx} className="relative">
-                      <div className={`absolute -left-10 p-2 rounded-xl bg-gradient-to-br ${item.color} text-white shadow-lg`}>
-                        <item.icon className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <span className="text-xs font-black text-blue-600 uppercase tracking-widest">{item.year}</span>
-                        <h4 className="text-xl font-bold dark:text-white mt-1">{item.title}</h4>
-                        <p className="text-gray-600 dark:text-gray-400 mt-2 text-sm">{item.description}</p>
+              {activeTab === 'mission' && (
+                <motion.div key="mission" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+                  {mission.map((item) => (
+                    <div key={item.id} className="relative group">
+                      <div className="flex items-center gap-6 p-6 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-800 hover:bg-white dark:hover:bg-gray-900 transition-all">
+                        <div className="text-4xl font-black text-gray-200 dark:text-gray-800 group-hover:text-blue-500/20 transition-colors">
+                          {item.id}
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="text-lg font-bold dark:text-white flex items-center gap-2">
+                             <item.icon size={18} className="text-blue-500" />
+                             {item.title}
+                          </h4>
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{item.description}</p>
+                        </div>
                       </div>
                     </div>
                   ))}
