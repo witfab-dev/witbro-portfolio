@@ -97,7 +97,7 @@ const LoadingScreen = ({ onFinished }) => {
                   <img src={profileImage} alt="Witness" className="w-full h-full object-cover rounded-xl" />
                 </div>
                 <div className="grow w-full text-center md:text-left">
-                  <h2 className="text-white text-3xl font-black tracking-tighter mb-2 italic">WITNESS_OS</h2>
+                  <h2 className="text-white text-3xl font-black tracking-tighter mb-2 italic">WITNESS Fabrice</h2>
                   <div className="relative h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
                     <motion.div className="h-full bg-blue-500 shadow-[0_0_15px_#3b82f6]" style={{ width: `${progress}%` }} />
                   </div>
@@ -126,10 +126,6 @@ const LoadingScreen = ({ onFinished }) => {
             animate={{ opacity: 1, scale: 1 }}
             className="relative z-20 text-center px-8"
           >
-            <div className="inline-flex items-center gap-2 mb-6 bg-blue-500/10 px-4 py-1.5 rounded-full border border-blue-500/20">
-              <span className="w-2 h-2 bg-blue-500 rounded-full animate-ping" />
-              <span className="text-[10px] text-blue-500 font-black tracking-[0.3em]">SYSTEM_READY</span>
-            </div>
             
             <h1 className="text-2xl md:text-5xl font-black text-white tracking-tighter leading-tight max-w-3xl mx-auto">
               {welcomeText}
