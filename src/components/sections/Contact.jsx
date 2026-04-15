@@ -85,7 +85,7 @@ const Contact = () => {
             {t('letsCreate') || "Let's Create"} <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Something Great</span>
           </h2>
           <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto text-lg">
-            {t('contactSub') || "Whether you have a question or just want to say hi, my inbox is always open."}
+            {t("Whether you have a question or just want to say hi, my inbox is always open.")}
           </p>
         </motion.div>
 

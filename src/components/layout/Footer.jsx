@@ -55,7 +55,7 @@ const Footer = () => {
                 className="text-5xl font-black tracking-tighter mb-6 italic flex items-center gap-2"
                 whileHover={{ skewX: -10 }}
               >
-                WITNESS<span className="text-blue-500 animate-pulse">_</span>OS
+                WITNESS<span className="text-blue-500 animate-pulse">_</span>Fabrice
               </motion.h2>
               <p className="text-gray-400 text-lg leading-relaxed max-w-md">
                 Building the future of the web from the heart of <span className="text-white border-b border-blue-500/50 pb-1">Rwanda</span>. 
