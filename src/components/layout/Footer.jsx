@@ -103,35 +103,7 @@ const Footer = () => {
             transition={{ delay: 0.2 }}
             className="lg:col-span-7 grid md:grid-cols-2 gap-12"
           >
-            {/* VIRTUAL TERMINAL STATUS */}
-            <div className="p-6 rounded-3xl bg-white/[0.02] border border-white/5 backdrop-blur-sm">
-              <div className="flex items-center gap-2 mb-6">
-                <Terminal size={14} className="text-blue-500" />
-                <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Live System Monitor</span>
-              </div>
-              <div className="space-y-4 font-mono">
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-gray-500 flex items-center gap-2"><Cpu size={12}/> CPU LOAD</span>
-                  <span className="text-blue-400">{systemLoad}%</span>
-                </div>
-                <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
-                   <motion.div 
-                     animate={{ width: `${systemLoad}%` }} 
-                     className="h-full bg-blue-500 shadow-[0_0_10px_#3b82f6]" 
-                   />
-                </div>
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-gray-500 flex items-center gap-2"><Activity size={12}/> UPTIME</span>
-                  <span className="text-green-400">99.98%</span>
-                </div>
-                <div className="flex justify-between items-center text-xs pt-2 border-t border-white/5">
-                  <span className="text-gray-500 flex items-center gap-2"><Clock size={12}/> LOCAL TIME</span>
-                  <span className="text-gray-300">
-                    {currentTime.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-                  </span>
-                </div>
-              </div>
-            </div>
+      
 
             {/* QUICK LINKS GRID */}
             <div className="grid grid-cols-2 gap-4 text-sm font-medium">
