@@ -17,7 +17,7 @@ const Contact = () => {
 
   const contactInfo = [
     { id: 'email', icon: Mail, label: 'Email', value: 'witnessfabrice@gmail.com', copyable: true },
-    { id: 'phone', icon: Phone, label: 'Phone', value: '+250 789344402', copyable: true },
+    { id: 'phone', icon: Phone, label: 'Phone', value: '+250 783568337', copyable: true },
     { id: 'location', icon: MapPin, label: 'Location', value: 'Kigali, Rwanda', copyable: false }
   ];
 
