@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { 
   Heart, Coffee, Mail, MapPin, Globe, ArrowUp, Clock, 
@@ -8,6 +9,7 @@ import {
 } from 'lucide-react';
 
 const Footer = () => {
+  const { theme } = useTheme();
   const { t } = useLanguage();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [copied, setCopied] = useState(false);
@@ -35,7 +37,7 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="relative bg-[#030712] text-white pt-24 pb-12 overflow-hidden border-t border-white/5">
+    <footer className={`relative pt-24 pb-12 overflow-hidden border-t transition-colors duration-500 ${theme === 'dark' ? 'bg-[#030712] text-white border-white/5' : 'bg-white text-slate-900 border-slate-200'}`}>
       {/* BACKGROUND ELEMENTS */}
       <div className="absolute inset-0 z-0 pointer-events-none">
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/5 blur-[120px] rounded-full animate-pulse" />
@@ -59,8 +61,8 @@ const Footer = () => {
               >
                 WITNESS<span className="text-blue-500 animate-pulse">_</span>Fabrice
               </motion.h2>
-              <p className="text-gray-400 text-lg leading-relaxed max-w-md">
-                Building the future of the web from the heart of <span className="text-white border-b border-blue-500/50 pb-1">Rwanda</span>. 
+              <p className={`text-lg leading-relaxed max-w-md transition-colors duration-500 ${theme === 'dark' ? 'text-gray-400' : 'text-slate-600'}`}>
+                Building the future of the web from the heart of <span className={`${theme === 'dark' ? 'text-white' : 'text-slate-900'} border-b border-blue-500/50 pb-1`}>Rwanda</span>. 
                 Focused on immersive architecture and high-performance ecosystems.
               </p>
             </div>
@@ -68,7 +70,7 @@ const Footer = () => {
             {/* NEUMORPHIC CONTACT BOX */}
             <div className="relative group max-w-sm">
               <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-500" />
-              <div className="relative bg-gray-900/80 backdrop-blur-xl p-5 rounded-2xl border border-white/10 flex items-center justify-between">
+              <div className={`relative backdrop-blur-xl p-5 rounded-2xl border transition-colors duration-500 flex items-center justify-between ${theme === 'dark' ? 'bg-gray-900/80 border-white/10' : 'bg-slate-100/80 border-slate-200'}`}>
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
                     <Mail size={18} className="text-blue-400" />
@@ -114,7 +116,7 @@ const Footer = () => {
                    key={link}
                    href={`#${link.toLowerCase()}`}
                    whileHover={{ x: 5, color: '#3b82f6' }}
-                   className="text-gray-500 flex items-center gap-2 group"
+                   className={`flex items-center gap-2 group transition-colors duration-300 ${theme === 'dark' ? 'text-gray-400' : 'text-slate-600'}`}
                  >
                    <div className="w-1 h-1 bg-gray-800 rounded-full group-hover:bg-blue-500 transition-colors" />
                    {link}
@@ -137,7 +139,7 @@ const Footer = () => {
                 rel="noreferrer"
                 whileHover={{ y: -5, scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
-                className={`w-12 h-12 rounded-2xl flex items-center justify-center text-gray-400 border border-white/5 bg-white/[0.03] transition-all duration-300 ${link.color} hover:text-white hover:border-white/20`}
+                className={`w-12 h-12 rounded-2xl flex items-center justify-center border transition-all duration-300 ${theme === 'dark' ? 'text-gray-400 border-white/10 bg-white/[0.03]' : 'text-slate-600 border-slate-200 bg-slate-100/70'} ${link.color} hover:text-white hover:border-white/20`}
               >
                 <link.icon size={20} />
               </motion.a>

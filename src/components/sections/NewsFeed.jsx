@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { 
   Search, Calendar, ArrowUpRight, Newspaper, 
@@ -54,6 +55,7 @@ const NEWS_DATA = [
 ];
 
 const NewsFeed = () => {
+  const { theme } = useTheme();
   const { t } = useLanguage();
   const [filter, setFilter] = useState('All');
   const [search, setSearch] = useState('');
@@ -69,7 +71,7 @@ const NewsFeed = () => {
   }, [filter, search]);
 
   return (
-    <section className="min-h-screen bg-[#020617] text-white py-20 px-4 md:px-10 font-sans selection:bg-blue-500/30">
+    <section className={`min-h-screen py-20 px-4 md:px-10 font-sans selection:bg-blue-500/30 transition-colors duration-500 ${theme === 'dark' ? 'bg-[#020617] text-white' : 'bg-slate-50 text-slate-900'}`}>
       <div className="max-w-[1400px] mx-auto">
         
         {/* --- Navigation & Search Bar --- */}
@@ -88,21 +90,21 @@ const NewsFeed = () => {
 
           <div className="w-full lg:w-auto flex flex-col sm:flex-row gap-4">
             <div className="relative group">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-blue-400 transition-colors" size={20} />
+              <Search className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${theme === 'dark' ? 'text-slate-400 group-focus-within:text-blue-400' : 'text-slate-500 group-focus-within:text-blue-500'}`} size={20} />
               <input 
                 type="text"
                 placeholder={t('searchPlaceholder')}
-                className="w-full sm:w-80 bg-slate-900/40 border-b-2 border-white/5 py-4 pl-12 pr-4 focus:outline-none focus:border-blue-500 transition-all font-mono text-sm"
+                className={`w-full sm:w-80 py-4 pl-12 pr-4 focus:outline-none focus:border-blue-500 transition-all font-mono text-sm ${theme === 'dark' ? 'bg-slate-900/40 border-b-2 border-white/5 text-white' : 'bg-white border-b-2 border-slate-200 text-slate-900'}`}
                 onChange={(e) => setSearch(e.target.value)}
               />
             </div>
-            <div className="flex gap-2 bg-slate-900/30 p-1.5 rounded-2xl border border-white/5 backdrop-blur-xl">
+            <div className={`flex gap-2 p-1.5 rounded-2xl backdrop-blur-xl transition-colors duration-500 ${theme === 'dark' ? 'bg-slate-900/30 border border-white/5' : 'bg-slate-100/80 border border-slate-200'}`}>
               {categories.map(cat => (
                 <button
                   key={cat}
                   onClick={() => setFilter(cat)}
                   className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
-                    filter === cat ? 'bg-blue-600 shadow-[0_0_20px_rgba(37,99,235,0.4)]' : 'text-slate-500 hover:text-white'
+                    filter === cat ? 'bg-blue-600 shadow-[0_0_20px_rgba(37,99,235,0.4)] text-white' : theme === 'dark' ? 'text-slate-400 hover:text-white' : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
                   {cat}
@@ -125,9 +127,7 @@ const NewsFeed = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ delay: idx * 0.1 }}
-                  className={`group relative flex flex-col overflow-hidden bg-slate-900/20 border border-white/5 rounded-3xl transition-all hover:bg-slate-900/40 ${
-                    news.featured ? 'md:flex-row' : ''
-                  }`}
+                  className={`group relative flex flex-col overflow-hidden rounded-3xl transition-all ${news.featured ? 'md:flex-row' : ''} ${theme === 'dark' ? 'bg-slate-900/20 border border-white/5 hover:bg-slate-900/40' : 'bg-white border border-slate-200 hover:bg-slate-100'}`}
                 >
                   {/* Image Section */}
                   <div className={`relative overflow-hidden ${news.featured ? 'md:w-1/2 h-80 md:h-auto' : 'h-64'}`}>
@@ -143,7 +143,7 @@ const NewsFeed = () => {
                   <div className="p-8 md:p-10 flex flex-col justify-between grow">
                     <div>
                       <div className="flex items-center justify-between mb-6">
-                        <span className="px-3 py-1 rounded-md bg-white/5 border border-white/10 text-[9px] font-black uppercase tracking-[0.2em] text-blue-400">
+                        <span className={`px-3 py-1 rounded-md border text-[9px] font-black uppercase tracking-[0.2em] ${theme === 'dark' ? 'bg-white/5 border-white/10 text-blue-400' : 'bg-slate-100 border-slate-200 text-blue-600'}`}>
                           {news.category}
                         </span>
                         <div className="flex gap-4 text-slate-500">
@@ -155,13 +155,13 @@ const NewsFeed = () => {
                       }`}>
                         {news.title}
                       </h3>
-                      <p className="text-slate-400 text-sm leading-relaxed line-clamp-3 mb-8">
+                      <p className={`text-sm leading-relaxed line-clamp-3 mb-8 transition-colors duration-300 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
                         {news.excerpt}
                       </p>
                     </div>
 
                     <div className="flex items-center justify-between mt-auto">
-                      <div className="flex items-center gap-3 text-slate-500 text-[10px] font-black uppercase">
+                      <div className={`flex items-center gap-3 text-[10px] font-black uppercase transition-colors duration-300 ${theme === 'dark' ? 'text-slate-500' : 'text-slate-500'}`}>
                         <Calendar size={14} /> {news.date}
                       </div>
                       <button className="p-3 rounded-full bg-white/5 hover:bg-blue-600 transition-all text-white group/btn">
@@ -176,7 +176,7 @@ const NewsFeed = () => {
 
           {/* --- Sidebar (Trending & Info) --- */}
           <aside className="lg:col-span-4 space-y-8">
-            <div className="bg-slate-900/40 border border-white/5 p-8 rounded-3xl sticky top-10">
+            <div className={`p-8 rounded-3xl sticky top-10 transition-colors duration-500 ${theme === 'dark' ? 'bg-slate-900/40 border border-white/5' : 'bg-white border border-slate-200'}`}>
               <div className="flex items-center gap-2 mb-8 border-b border-white/5 pb-4">
                 <TrendingUp size={18} className="text-pink-500" />
                 <h4 className="text-xs font-black uppercase tracking-[0.3em]">{t('trendingDossiers')}</h4>
@@ -185,23 +185,23 @@ const NewsFeed = () => {
               <ul className="space-y-6">
                 {['React Server Components', 'Web3.0 Rebirth', 'Neural Branding', 'Edge Computing'].map((item, i) => (
                   <li key={i} className="group flex items-start gap-4 cursor-pointer">
-                    <span className="text-slate-700 font-mono text-xl group-hover:text-blue-500 transition-colors">0{i+1}</span>
+                    <span className={`font-mono text-xl transition-colors duration-300 ${theme === 'dark' ? 'text-slate-300 group-hover:text-blue-400' : 'text-slate-700 group-hover:text-blue-600'}`}>0{i+1}</span>
                     <div className="flex flex-col gap-1">
-                      <p className="text-sm font-bold uppercase group-hover:underline underline-offset-4">{item}</p>
-                      <span className="text-[10px] text-slate-500 font-black tracking-widest uppercase">7.2k Readers</span>
+                      <p className={`text-sm font-bold uppercase transition-colors duration-300 ${theme === 'dark' ? 'text-white' : 'text-slate-900'} group-hover:underline underline-offset-4`}>{item}</p>
+                      <span className={`text-[10px] font-black tracking-widest uppercase transition-colors duration-300 ${theme === 'dark' ? 'text-slate-500' : 'text-slate-500'}`}>7.2k Readers</span>
                     </div>
                   </li>
                 ))}
               </ul>
 
-              <div className="mt-12 p-6 rounded-2xl bg-gradient-to-br from-blue-600/20 to-purple-600/20 border border-blue-500/20">
+              <div className={`mt-12 p-6 rounded-2xl border transition-colors duration-500 ${theme === 'dark' ? 'bg-gradient-to-br from-blue-600/20 to-purple-600/20 border-blue-500/20' : 'bg-gradient-to-br from-blue-100 to-purple-100 border-blue-100'}`}>
                 <h5 className="text-sm font-black mb-2 uppercase italic">{t('subscribeTitle')}</h5>
-                <p className="text-xs text-slate-400 mb-6">{t('subscribeText')}</p>
+                <p className={`text-xs mb-6 transition-colors duration-300 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>{t('subscribeText')}</p>
                 <div className="relative">
                   <input 
                     type="email" 
                     placeholder="name@domain.tech"
-                    className="w-full bg-slate-950/50 border border-white/10 rounded-xl py-3 px-4 text-xs focus:outline-none focus:border-blue-500"
+                    className={`w-full rounded-xl py-3 px-4 text-xs focus:outline-none focus:border-blue-500 transition-colors duration-300 ${theme === 'dark' ? 'bg-slate-950/50 border border-white/10 text-white' : 'bg-white border border-slate-200 text-slate-900'}`}
                   />
                   <button className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-blue-400 hover:text-white transition-colors">
                     <ChevronRight size={18} />

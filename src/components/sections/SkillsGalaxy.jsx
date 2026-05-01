@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { Code2, Database, Braces, Terminal, Cpu, Layers, Zap, Palette, Box, Globe, ChevronLeft, Layout, Smartphone, Activity, Shield } from 'lucide-react';
 import skillsPayload from '../../data/skills.json';
@@ -34,6 +35,7 @@ const ICON_MAP = {
 };
 
 const GalaxySkills = () => {
+  const { theme } = useTheme();
   const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState(null);
@@ -78,20 +80,19 @@ const GalaxySkills = () => {
   const visibleSkills = activeCategoryData?.items || [];
 
   return (
-    <section id="skills" className="relative min-h-screen w-full bg-[#030712] overflow-hidden flex flex-col items-center justify-center py-20 font-sans">
+    <section id="skills" className={`relative min-h-screen w-full overflow-hidden flex flex-col items-center justify-center py-20 font-sans transition-colors duration-500 ${theme === 'dark' ? 'bg-[#030712]' : 'bg-slate-50'}`}>
       <div className="absolute inset-0 z-0">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_#1e293b_0%,_#030712_80%)] opacity-40" />
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10" />
+        <div className={`absolute inset-0 opacity-40 transition-colors duration-500 ${theme === 'dark' ? 'bg-[radial-gradient(circle_at_center,_#1e293b_0%,_#030712_80%)]' : 'bg-[radial-gradient(circle_at_center,_#e2e8f0_0%,_#f8fafc_80%)]'}`} />
+        <div className={`absolute inset-0 opacity-10 transition-colors duration-500 ${theme === 'dark' ? 'bg-[url("https://www.transparenttextures.com/patterns/carbon-fibre.png")]' : 'bg-[url("https://www.transparenttextures.com/patterns/white-carbon.png")]'}`} />
       </div>
-
       <div className="relative z-20 max-w-6xl w-full px-6">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-10">
           <div className="inline-flex items-center gap-2 mb-4">
             <Activity size={14} className="text-blue-400 animate-pulse" />
             <span className="text-[10px] text-blue-400 uppercase tracking-[0.35em] font-black">{t('discoverSkills')}</span>
           </div>
-          <h2 className="text-5xl md:text-6xl font-black tracking-tight text-white uppercase">{t('skills')}</h2>
-          <p className="mt-4 max-w-2xl mx-auto text-sm text-slate-400">{t('skillsDescription')}</p>
+          <h2 className={`text-5xl md:text-6xl font-black tracking-tight uppercase transition-colors duration-300 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{t('skills')}</h2>
+          <p className={`mt-4 max-w-2xl mx-auto text-sm transition-colors duration-300 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>{t('skillsDescription')}</p>
         </motion.div>
 
         <div className="mb-10 flex flex-wrap justify-center gap-3">
@@ -102,7 +103,7 @@ const GalaxySkills = () => {
               <button
                 key={id}
                 onClick={() => setActiveCategory(id)}
-                className={`px-5 py-3 rounded-full text-sm font-semibold transition-all ${active ? 'bg-blue-500 text-white shadow-xl' : 'bg-white/5 text-slate-300 hover:bg-white/10'}`}
+                className={`px-5 py-3 rounded-full text-sm font-semibold transition-all ${active ? 'bg-blue-500 text-white shadow-xl' : theme === 'dark' ? 'bg-white/5 text-slate-300 hover:bg-white/10' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
               >
                 {category.name}
               </button>
@@ -112,9 +113,9 @@ const GalaxySkills = () => {
 
         <div className="relative flex items-center justify-center w-full grow min-h-[520px]">
           {loading ? (
-            <div className="rounded-3xl border border-white/10 bg-slate-900/80 p-16 w-full max-w-3xl text-center">
+            <div className={`rounded-3xl border p-16 w-full max-w-3xl text-center transition-colors duration-500 ${theme === 'dark' ? 'border-white/10 bg-slate-900/80 text-white' : 'border-slate-200 bg-white text-slate-900'}`}>
               <div className="mx-auto mb-6 h-12 w-12 rounded-full border-4 border-blue-500 border-t-transparent animate-spin" />
-              <p className="text-slate-300 uppercase tracking-[0.25em] text-xs">{t('loadingSkills')}</p>
+              <p className={`uppercase tracking-[0.25em] text-xs transition-colors duration-300 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-500'}`}>{t('loadingSkills')}</p>
             </div>
           ) : (
             <div className="relative w-full">
@@ -156,10 +157,10 @@ const GalaxySkills = () => {
                             className="absolute"
                             style={{ top: '50%', left: '50%', transform: 'translate(120%, -50%)' }}
                           >
-                            <div className="relative p-4 rounded-3xl bg-slate-900/90 border border-white/10 shadow-xl transition duration-300 hover:border-blue-500/30" style={{ boxShadow: hoveredSkill === skill.name ? `0 0 30px ${skill.color}40` : undefined }}>
+                            <div className={`relative p-4 rounded-3xl border shadow-xl transition duration-300 hover:border-blue-500/30 ${theme === 'dark' ? 'bg-slate-900/90 border-white/10 text-white' : 'bg-white border-slate-200 text-slate-900'}`} style={{ boxShadow: hoveredSkill === skill.name ? `0 0 30px ${skill.color}40` : undefined }}>
                               <skill.icon size={isMobile ? 22 : 26} className="text-white" style={{ color: skill.color }} />
                             </div>
-                            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 text-[10px] uppercase tracking-[0.2em] text-slate-300">
+                            <div className={`absolute top-full left-1/2 -translate-x-1/2 mt-3 text-[10px] uppercase tracking-[0.2em] transition-colors duration-300 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>
                               {skill.name}
                             </div>
                           </motion.div>
@@ -214,7 +215,7 @@ const GalaxySkills = () => {
                   <p className="text-2xl font-bold text-white">{Math.min(activeSkill.level + 5, 100)}%</p>
                 </div>
               </div>
-              <button onClick={() => setActiveSkill(null)} className="mt-10 w-full py-4 bg-blue-500 text-slate-900 font-semibold rounded-3xl uppercase tracking-[0.25em] hover:bg-blue-400 transition-all">
+              <button onClick={() => setActiveSkill(null)} className="mt-10 w-full py-4 bg-blue-500 text-white font-semibold rounded-3xl uppercase tracking-[0.25em] hover:bg-blue-400 transition-all">
                 {t('backToRoot')}
               </button>
             </motion.div>
