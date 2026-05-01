@@ -1,7 +1,7 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ThemeProvider } from './contexts/ThemeContext';
-import { LanguageProvider } from './contexts/LanguageContext';
+import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 
 // Layout & UI Components
 import Header from './components/layout/Header';
@@ -227,13 +227,17 @@ function App() {
   );
 }
 
-const SectionLoader = () => (
-  <div className="h-screen flex items-center justify-center bg-transparent">
-    <div className="flex flex-col items-center gap-4">
-      <Loader2 className="w-10 h-10 text-blue-500 animate-spin opacity-20" />
-      <span className="text-[10px] font-mono text-gray-500 tracking-[0.2em]">LOADING_CORE_MODULE</span>
+const SectionLoader = () => {
+  const { t } = useLanguage();
+
+  return (
+    <div className="h-screen flex items-center justify-center bg-transparent">
+      <div className="flex flex-col items-center gap-4">
+        <Loader2 className="w-10 h-10 text-blue-500 animate-spin opacity-20" />
+        <span className="text-[10px] font-mono text-gray-500 tracking-[0.2em]">{t('loadingCoreModule')}</span>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default App;

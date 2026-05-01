@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { 
   Search, Calendar, ArrowUpRight, Newspaper, 
   Clock, TrendingUp, ChevronRight, Share2 
@@ -53,6 +54,7 @@ const NEWS_DATA = [
 ];
 
 const NewsFeed = () => {
+  const { t } = useLanguage();
   const [filter, setFilter] = useState('All');
   const [search, setSearch] = useState('');
 
@@ -77,10 +79,10 @@ const NewsFeed = () => {
               <div className="p-2 bg-blue-500/10 rounded-lg">
                 <Newspaper className="text-blue-500" size={24} />
               </div>
-              <span className="text-[10px] font-black tracking-[0.4em] uppercase text-slate-500">Global Archive 2026</span>
+              <span className="text-[10px] font-black tracking-[0.4em] uppercase text-slate-500">{t('newsFeedSubtitle')}</span>
             </div>
             <h2 className="text-6xl md:text-8xl font-black tracking-tighter uppercase italic leading-none">
-              The <span className="text-blue-500">Pulse</span>
+              {t('newsFeedTitle')}
             </h2>
           </motion.div>
 
@@ -89,7 +91,7 @@ const NewsFeed = () => {
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-blue-400 transition-colors" size={20} />
               <input 
                 type="text"
-                placeholder="Search encrypted files..."
+                placeholder={t('searchPlaceholder')}
                 className="w-full sm:w-80 bg-slate-900/40 border-b-2 border-white/5 py-4 pl-12 pr-4 focus:outline-none focus:border-blue-500 transition-all font-mono text-sm"
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -177,7 +179,7 @@ const NewsFeed = () => {
             <div className="bg-slate-900/40 border border-white/5 p-8 rounded-3xl sticky top-10">
               <div className="flex items-center gap-2 mb-8 border-b border-white/5 pb-4">
                 <TrendingUp size={18} className="text-pink-500" />
-                <h4 className="text-xs font-black uppercase tracking-[0.3em]">Trending Dossiers</h4>
+                <h4 className="text-xs font-black uppercase tracking-[0.3em]">{t('trendingDossiers')}</h4>
               </div>
               
               <ul className="space-y-6">
@@ -193,8 +195,8 @@ const NewsFeed = () => {
               </ul>
 
               <div className="mt-12 p-6 rounded-2xl bg-gradient-to-br from-blue-600/20 to-purple-600/20 border border-blue-500/20">
-                <h5 className="text-sm font-black mb-2 uppercase italic">Subscribe to the Core</h5>
-                <p className="text-xs text-slate-400 mb-6">Get weekly architectural insights directly in your terminal.</p>
+                <h5 className="text-sm font-black mb-2 uppercase italic">{t('subscribeTitle')}</h5>
+                <p className="text-xs text-slate-400 mb-6">{t('subscribeText')}</p>
                 <div className="relative">
                   <input 
                     type="email" 

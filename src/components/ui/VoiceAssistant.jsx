@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { 
   Mic, X, Terminal, Search, Navigation, 
   Volume2, VolumeX, Cpu, Sparkles, Zap, Bot, Mail, Phone, Info
 } from 'lucide-react';
 
 const VoiceAssistant = ({ autoOpen, onClose }) => {
+  const { t } = useLanguage();
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [displayText, setDisplayText] = useState("");
@@ -91,7 +93,7 @@ const VoiceAssistant = ({ autoOpen, onClose }) => {
   // 4. Speech Recognition (STT)
   const startListening = () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) return speak("Voice recognition is not supported in this browser.");
+    if (!SpeechRecognition) return speak(t('voiceAssistantNotSupported'));
 
     recognitionRef.current = new SpeechRecognition();
     recognitionRef.current.onstart = () => setIsListening(true);
@@ -107,11 +109,11 @@ const VoiceAssistant = ({ autoOpen, onClose }) => {
   // 5. Initial Welcome Trigger
   useEffect(() => {
     if (autoOpen) {
-      const welcomeMsg = "Witbri AI Assistant online. Systems synchronized with Witness Fabrice's professional portfolio. How may I assist your navigation?";
+      const welcomeMsg = t('voiceAssistantOnline') + " Systems synchronized with Witness Fabrice's professional portfolio. How may I assist your navigation?";
       const timer = setTimeout(() => speak(welcomeMsg), 1000);
       return () => clearTimeout(timer);
     }
-  }, [autoOpen, speak]);
+  }, [autoOpen, speak, t]);
 
   return (
     <AnimatePresence>
@@ -200,7 +202,7 @@ const VoiceAssistant = ({ autoOpen, onClose }) => {
               <div className="relative mb-6">
                 <input 
                   type="text"
-                  placeholder={isListening ? "Listening..." : "Execute Command..."}
+                  placeholder={isListening ? t('voiceAssistantListening') : t('voiceAssistantExecutePlaceholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={(e) => { 
@@ -229,25 +231,25 @@ const VoiceAssistant = ({ autoOpen, onClose }) => {
                   onClick={() => handleAction("about")}
                   className="flex items-center justify-center gap-3 py-4 bg-white/5 border border-white/5 rounded-2xl text-[10px] text-slate-400 font-black uppercase tracking-widest hover:bg-blue-600/10 hover:text-blue-400 hover:border-blue-500/20 transition-all"
                 >
-                  <Info size={14} /> Profile_Bio
+                  <Info size={14} /> {t('voiceAssistantProfile')}
                 </button>
                 <button 
                   onClick={() => handleAction("projects")}
                   className="flex items-center justify-center gap-3 py-4 bg-white/5 border border-white/5 rounded-2xl text-[10px] text-slate-400 font-black uppercase tracking-widest hover:bg-purple-600/10 hover:text-purple-400 hover:border-purple-500/20 transition-all"
                 >
-                  <Zap size={14} /> Work_Vault
+                  <Zap size={14} /> {t('voiceAssistantWorkVault')}
                 </button>
                 <button 
                   onClick={() => handleAction("email")}
                   className="flex items-center justify-center gap-3 py-4 bg-white/5 border border-white/5 rounded-2xl text-[10px] text-slate-400 font-black uppercase tracking-widest hover:bg-blue-600/10 hover:text-blue-400 hover:border-blue-500/20 transition-all"
                 >
-                  <Mail size={14} /> Send_Email
+                  <Mail size={14} /> {t('voiceAssistantSendEmail')}
                 </button>
                 <button 
                   onClick={() => handleAction("phone")}
                   className="flex items-center justify-center gap-3 py-4 bg-white/5 border border-white/5 rounded-2xl text-[10px] text-slate-400 font-black uppercase tracking-widest hover:bg-blue-600/10 hover:text-blue-400 hover:border-blue-500/20 transition-all"
                 >
-                  <Phone size={14} /> Voice_Link
+                  <Phone size={14} /> {t('voiceAssistantVoiceLink')}
                 </button>
               </div>
 
