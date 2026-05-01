@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import { motion, useScroll, useSpring } from 'framer-motion';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { Briefcase, Calendar, MapPin, Star } from 'lucide-react';
 
 const experiences = [
@@ -81,6 +82,7 @@ const ExperienceCard = ({ exp, index }) => {
 };
 
 const Experience = () => {
+  const { t } = useLanguage();
   const containerRef = useRef(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -97,8 +99,8 @@ const Experience = () => {
     <section id="experience" ref={containerRef} className="relative py-32 px-6">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-24">
-          <h2 className="text-4xl md:text-6xl font-black text-gradient">Career Path</h2>
-          <p className="text-gray-500 mt-4 font-mono uppercase tracking-widest text-xs">The journey so far</p>
+          <h2 className="text-4xl md:text-6xl font-black text-gradient">{t('experience')}</h2>
+          <p className="text-gray-500 mt-4 font-mono uppercase tracking-widest text-xs">{t('letsCreate')}</p>
         </div>
 
         <div className="relative">

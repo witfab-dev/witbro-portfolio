@@ -92,7 +92,7 @@ const Projects = () => {
             viewport={{ once: true }}
           >
             <h2 className="text-4xl md:text-5xl font-black mb-4">
-              {t('') || 'Selected'} <span className="text-blue-600 dark:text-blue-400">Works</span>
+              {t('selectedWorks')} <span className="text-blue-600 dark:text-blue-400">Works</span>
             </h2>
             <p className="text-gray-600 dark:text-gray-400 max-w-md">
               A collection of digital experiences I've crafted, ranging from mobile ecosystems to high-performance web apps.
@@ -145,12 +145,12 @@ const Projects = () => {
                       onClick={() => setSelectedProject(project)}
                       className="bg-white/20 backdrop-blur-md border border-white/30 text-white px-6 py-2 rounded-full font-bold flex items-center gap-2 hover:bg-white hover:text-black transition-all"
                     >
-                      <Eye size={18} /> View Case Study
+                      <Eye size={18} /> {t('viewCaseStudy')}
                     </button>
                   </div>
                   {project.featured && (
                     <div className="absolute top-4 left-4 bg-yellow-400 text-black text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full flex items-center gap-1 shadow-lg">
-                      <Star size={12} fill="currentColor" /> Featured
+                      <Star size={12} fill="currentColor" /> {t('featured')}
                     </div>
                   )}
                 </div>
@@ -253,10 +253,10 @@ const Projects = () => {
 
                   <div className="flex flex-col sm:flex-row gap-4">
                     <a href={selectedProject.links.demo} className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-center py-4 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-500/20">
-                      <Globe size={18} /> Live Website
+                      <Globe size={18} /> {t('liveWebsite')}
                     </a>
                     <a href={selectedProject.links.github} className="flex-1 bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-center py-4 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all">
-                      <Github size={18} /> Source Code
+                      <Github size={18} /> {t('sourceCode')}
                     </a>
                   </div>
                 </div>

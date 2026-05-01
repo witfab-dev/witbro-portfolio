@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 import { 
   User, Code2, Heart, Coffee, MapPin, Briefcase, 
@@ -10,6 +11,7 @@ import {
 } from 'lucide-react';
 
 const About = () => {
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState('bio');
   const [showFullBio, setShowFullBio] = useState(false);
 
@@ -94,7 +96,7 @@ const About = () => {
           className="text-center mb-16"
         >
           <h2 className="text-4xl md:text-6xl font-black mb-4 tracking-tight text-gray-900 dark:text-white">
-            About <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Me</span>
+            {t('about')} <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Me</span>
           </h2>
           <div className="h-1.5 w-20 bg-gradient-to-r from-blue-600 to-purple-600 mx-auto rounded-full" />
         </motion.div>
@@ -158,7 +160,7 @@ const About = () => {
                 className="w-full py-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-2xl font-bold flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-all shadow-lg"
               >
                 <Download className="w-5 h-5" />
-                Download CV
+                {t('downloadCV')}
               </a>
             </motion.div>
           </div>
@@ -212,7 +214,7 @@ const About = () => {
                       onClick={() => setShowFullBio(!showFullBio)}
                       className="mt-4 flex items-center gap-2 text-blue-600 font-bold hover:gap-3 transition-all"
                     >
-                      {showFullBio ? 'Show Less' : 'Read Full Story'}
+                      {showFullBio ? t('showLess') : t('readFullStory')}
                       {showFullBio ? <ChevronUp className="w-4 h-4"/> : <ChevronDown className="w-4 h-4"/>}
                     </button>
                   </div>

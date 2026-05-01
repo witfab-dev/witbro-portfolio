@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { 
   Heart, Coffee, Mail, MapPin, Globe, ArrowUp, Clock, 
   Github, Linkedin, Twitter, Instagram, Code2, 
@@ -7,6 +8,7 @@ import {
 } from 'lucide-react';
 
 const Footer = () => {
+  const { t } = useLanguage();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [copied, setCopied] = useState(false);
   const [systemLoad, setSystemLoad] = useState(24);
@@ -163,7 +165,7 @@ const Footer = () => {
             <div className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center group-hover:border-blue-500 transition-colors">
               <ArrowUp size={18} className="text-gray-500 group-hover:text-blue-500 transition-all group-hover:-translate-y-1" />
             </div>
-            <span className="text-[10px] font-bold tracking-widest text-gray-600 uppercase group-hover:text-white transition-colors">Execute_Top</span>
+            <span className="text-[10px] font-bold tracking-widest text-gray-600 uppercase group-hover:text-white transition-colors">{t('scrollTop')}</span>
           </motion.button>
         </div>
       </div>

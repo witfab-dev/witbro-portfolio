@@ -16,9 +16,9 @@ const Contact = () => {
   const [copiedField, setCopiedField] = useState(null);
 
   const contactInfo = [
-    { id: 'email', icon: Mail, label: 'Email', value: 'witnessfabrice@gmail.com', copyable: true },
-    { id: 'phone', icon: Phone, label: 'Phone', value: '+250 783568337', copyable: true },
-    { id: 'location', icon: MapPin, label: 'Location', value: 'Kigali, Rwanda', copyable: false }
+    { id: 'email', icon: Mail, label: t('emailLabel'), value: 'witnessfabrice@gmail.com', copyable: true },
+    { id: 'phone', icon: Phone, label: t('phoneLabel'), value: '+250 783568337', copyable: true },
+    { id: 'location', icon: MapPin, label: t('locationLabel'), value: 'Kigali, Rwanda', copyable: false }
   ];
 
   const socialLinks = [
@@ -85,7 +85,7 @@ const Contact = () => {
             {t('letsCreate') || "Let's Create"} <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Something Great</span>
           </h2>
           <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto text-lg">
-            {t("Whether you have a question or just want to say hi, my inbox is always open.")}
+            {t('contactSubtitle')}
           </p>
         </motion.div>
 
@@ -146,7 +146,7 @@ const Contact = () => {
             <form ref={formRef} onSubmit={handleSubmit} className="space-y-5">
               <div className="grid md:grid-cols-2 gap-5">
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold ml-1">Name</label>
+                  <label className="text-sm font-semibold ml-1">{t('nameLabel')}</label>
                   <input
                     name="from_name"
                     type="text"
@@ -154,11 +154,11 @@ const Contact = () => {
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
                     className="w-full px-5 py-4 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                    placeholder="Enter your name"
+                    placeholder={t('nameLabel')}
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold ml-1">Email</label>
+                  <label className="text-sm font-semibold ml-1">{t('emailLabel')}</label>
                   <input
                     name="reply_to"
                     type="email"
@@ -172,7 +172,7 @@ const Contact = () => {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-semibold ml-1">Message</label>
+                <label className="text-sm font-semibold ml-1">{t('messageLabel')}</label>
                 <textarea
                   name="message"
                   required
@@ -180,7 +180,7 @@ const Contact = () => {
                   value={formData.message}
                   onChange={(e) => setFormData({...formData, message: e.target.value})}
                   className="w-full px-5 py-4 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 outline-none transition-all resize-none"
-                  placeholder="How can I help you?"
+                  placeholder={t('messageLabel')}
                 />
               </div>
 
@@ -194,20 +194,20 @@ const Contact = () => {
                   {isSubmitting ? (
                     <motion.div key="loading" initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -20, opacity: 0 }} className="flex items-center justify-center gap-2">
                       <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      Sending...
+                      {t('loading')}
                     </motion.div>
                   ) : submitStatus === 'success' ? (
                     <motion.div key="success" initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="flex items-center justify-center gap-2">
-                      <Check size={20} /> Sent Successfully!
+                      <Check size={20} /> {t('sendSuccess')}
                     </motion.div>
                   ) : submitStatus === 'error' ? (
                     <motion.div key="error" initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="flex items-center justify-center gap-2">
-                      <AlertCircle size={20} /> Error (Check Console)
+                      <AlertCircle size={20} /> {t('sendError')}
                     </motion.div>
                   ) : (
                     <motion.div key="default" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center justify-center gap-2">
                       <Send size={18} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                      Send Message
+                      {t('sendMessage')}
                     </motion.div>
                   )}
                 </AnimatePresence>
