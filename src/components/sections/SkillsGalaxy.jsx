@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { 
-  Code2, Database, Braces, Terminal,Cpu, Layers, 
+  Code2, Database, Braces, Smartphone, Terminal,Cpu, Layers, 
   Zap, Palette, Box, Globe, Activity, Star 
 } from 'lucide-react';
 import skillsPayload from '../../data/skills.json';
