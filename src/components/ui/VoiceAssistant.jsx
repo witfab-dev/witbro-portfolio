@@ -975,32 +975,35 @@ const VoiceAssistant = ({ autoOpen, onClose }) => {
 
               {/* Witbri AI Quick Action Grid */}
               <div className="grid grid-cols-3 gap-2 mb-4">
-                {quickActions.map((action, i) => (
-                  <motion.button
-                    key={i}
-                    whileHover={{ scale: 1.02, y: -2 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={action.action}
-                    className={`relative flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl text-xs transition-all group ${
-                      theme === 'dark'
-                        ? 'bg-white/5 hover:bg-blue-500/10 hover:shadow-lg hover:shadow-blue-500/5 border border-white/5 hover:border-blue-500/20'
-                        : 'bg-slate-50 hover:bg-blue-50 hover:shadow-lg border border-slate-100 hover:border-blue-200'
-                    }`}
-                  >
-                    <Icons[action.icon] size={18} className="text-blue-500" />
-                    <span className={`font-semibold ${
-                      theme === 'dark' ? 'text-white' : 'text-slate-900'
-                    }`}>
-                      {action.label}
-                    </span>
-                    <span className="text-[9px] opacity-50">{action.desc}</span>
-                    
-                    {/* Hotkey indicator */}
-                    <span className="absolute top-1 right-1 text-[8px] opacity-0 group-hover:opacity-50 transition-opacity">
-                      ⌘{action.hotkey}
-                    </span>
-                  </motion.button>
-                ))}
+                {quickActions.map((action, i) => {
+                  const QuickIcon = Icons[action.icon] || Icons.Command;
+                  return (
+                    <motion.button
+                      key={i}
+                      whileHover={{ scale: 1.02, y: -2 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={action.action}
+                      className={`relative flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl text-xs transition-all group ${
+                        theme === 'dark'
+                          ? 'bg-white/5 hover:bg-blue-500/10 hover:shadow-lg hover:shadow-blue-500/5 border border-white/5 hover:border-blue-500/20'
+                          : 'bg-slate-50 hover:bg-blue-50 hover:shadow-lg border border-slate-100 hover:border-blue-200'
+                      }`}
+                    >
+                      <QuickIcon size={18} className="text-blue-500" />
+                      <span className={`font-semibold ${
+                        theme === 'dark' ? 'text-white' : 'text-slate-900'
+                      }`}>
+                        {action.label}
+                      </span>
+                      <span className="text-[9px] opacity-50">{action.desc}</span>
+
+                      {/* Hotkey indicator */}
+                      <span className="absolute top-1 right-1 text-[8px] opacity-0 group-hover:opacity-50 transition-opacity">
+                        ⌘{action.hotkey}
+                      </span>
+                    </motion.button>
+                  );
+                })}
               </div>
 
               {/* Witbri AI Status Footer */}
@@ -1047,30 +1050,33 @@ const VoiceAssistant = ({ autoOpen, onClose }) => {
                   </div>
                 </div>
                 <div className="max-h-[300px] overflow-y-auto">
-                  {quickActions.map((action, i) => (
-                    <motion.button
-                      key={i}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.05 }}
-                      onClick={() => {
-                        action.action();
-                        updateState({ showCommandPalette: false });
-                      }}
-                      className={`w-full flex items-center gap-3 p-3 rounded-xl text-sm transition-all ${
-                        theme === 'dark'
-                          ? 'hover:bg-white/5 text-slate-300'
-                          : 'hover:bg-slate-50 text-slate-700'
-                      }`}
-                    >
-                      <Icons[action.icon] size={18} className="text-blue-500" />
-                      <div className="text-left">
-                        <div className="font-medium">{action.label}</div>
-                        <div className="text-[10px] opacity-50">{action.desc}</div>
-                      </div>
-                      <span className="ml-auto text-[10px] opacity-30">⌘{action.hotkey}</span>
-                    </motion.button>
-                  ))}
+                  {quickActions.map((action, i) => {
+                    const QuickIcon = Icons[action.icon] || Icons.Command;
+                    return (
+                      <motion.button
+                        key={i}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: i * 0.05 }}
+                        onClick={() => {
+                          action.action();
+                          updateState({ showCommandPalette: false });
+                        }}
+                        className={`w-full flex items-center gap-3 p-3 rounded-xl text-sm transition-all ${
+                          theme === 'dark'
+                            ? 'hover:bg-white/5 text-slate-300'
+                            : 'hover:bg-slate-50 text-slate-700'
+                        }`}
+                      >
+                        <QuickIcon size={18} className="text-blue-500" />
+                        <div className="text-left">
+                          <div className="font-medium">{action.label}</div>
+                          <div className="text-[10px] opacity-50">{action.desc}</div>
+                        </div>
+                        <span className="ml-auto text-[10px] opacity-30">⌘{action.hotkey}</span>
+                      </motion.button>
+                    );
+                  })}
                 </div>
               </motion.div>
             )}

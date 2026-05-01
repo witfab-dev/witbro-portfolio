@@ -2,222 +2,236 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { Code2, Database, Braces, Terminal, Cpu, Layers, Zap, Palette, Box, Globe, ChevronLeft, Layout, Smartphone, Activity, Shield } from 'lucide-react';
+import { 
+  Code2, Database, Braces, Terminal, Cpu, Layers, 
+  Zap, Palette, Box, Globe, Activity, Star 
+} from 'lucide-react';
 import skillsPayload from '../../data/skills.json';
 
 const ICON_MAP = {
-  React: Code2,
-  'TypeScript': Braces,
-  'Next.js': Code2,
-  'Tailwind CSS': Layers,
-  'Node.js': Zap,
-  Python: Cpu,
-  PostgreSQL: Database,
-  Redis: Database,
-  Flutter: Smartphone,
-  'React Native': Smartphone,
-  Docker: Terminal,
-  AWS: Globe,
-  Git: Terminal,
-  'CI/CD': Terminal,
-  GraphQL: Globe,
-  WebSocket: Globe,
-  'Three.js': Code2,
-  'TensorFlow.js': Cpu,
-  Vue: Layout,
-  Laravel: Box,
-  MySQL: Database,
-  MongoDB: Database,
-  JavaScript: Braces,
-  PHP: Braces,
-  Dart: Smartphone,
-  Figma: Palette,
+  React: Code2, 'TypeScript': Braces, 'Next.js': Code2, 'Tailwind CSS': Layers,
+  'Node.js': Zap, Python: Cpu, PostgreSQL: Database, Redis: Database,
+  Flutter: Smartphone, 'React Native': Smartphone, Docker: Terminal,
+  AWS: Globe, Git: Terminal, 'CI/CD': Terminal, GraphQL: Globe,
+  WebSocket: Globe, 'Three.js': Code2, 'TensorFlow.js': Cpu, Vue: Layout,
+  Laravel: Box, MySQL: Database, MongoDB: Database, JavaScript: Braces,
+  PHP: Braces, Dart: Smartphone, Figma: Palette,
 };
 
 const GalaxySkills = () => {
   const { theme } = useTheme();
   const { t } = useLanguage();
-  const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState(null);
-  const [activeSkill, setActiveSkill] = useState(null);
   const [hoveredSkill, setHoveredSkill] = useState(null);
-  const [windowSize, setWindowSize] = useState({ width: 1200, height: 800 });
+  const [activeSkill, setActiveSkill] = useState(null);
 
+  // Initialize first category
   useEffect(() => {
-    const handleResize = () => setWindowSize({ width: window.innerWidth, height: window.innerHeight });
-    window.addEventListener('resize', handleResize, { passive: true });
-    handleResize();
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  useEffect(() => {
-    const loader = setTimeout(() => setLoading(false), 250);
-    return () => clearTimeout(loader);
-  }, []);
-
-  const isMobile = windowSize.width < 768;
-
-  const categories = useMemo(() => {
-    return skillsPayload.categories.map((category) => ({
-      ...category,
-      items: category.skills.map((skill, index) => ({
-        ...skill,
-        icon: ICON_MAP[skill.name] || Code2,
-        color: skill.color || '#60a5fa',
-        orbit: isMobile ? 90 + index * 14 : 140 + index * 22,
-        speed: skill.speed || 26,
-      }))
-    }));
-  }, [isMobile]);
-
-  useEffect(() => {
-    if (categories.length && !activeCategory) {
-      setActiveCategory(categories[0].name.toLowerCase());
+    if (skillsPayload.categories.length > 0) {
+      setActiveCategory(skillsPayload.categories[0].name.toLowerCase());
     }
-  }, [categories, activeCategory]);
+  }, []);
 
-  const activeCategoryData = categories.find((category) => category.name.toLowerCase() === activeCategory);
-  const visibleSkills = activeCategoryData?.items || [];
+  const activeCategoryData = useMemo(() => 
+    skillsPayload.categories.find(cat => cat.name.toLowerCase() === activeCategory),
+    [activeCategory]
+  );
+
+  const visibleSkills = useMemo(() => {
+    if (!activeCategoryData) return [];
+    return activeCategoryData.skills.map((skill, index) => ({
+      ...skill,
+      icon: ICON_MAP[skill.name] || Code2,
+      // Distribute orbits: inner skills closer, outer further
+      orbitRadius: 120 + (index * 45),
+      // Vary speeds: inner orbits faster (Kepler's Law vibe)
+      duration: 20 + (index * 8),
+      // Stagger start positions
+      initialRotation: (index / activeCategoryData.skills.length) * 360
+    }));
+  }, [activeCategoryData]);
 
   return (
-    <section id="skills" className={`relative min-h-screen w-full overflow-hidden flex flex-col items-center justify-center py-20 font-sans transition-colors duration-500 ${theme === 'dark' ? 'bg-[#030712]' : 'bg-slate-50'}`}>
-      <div className="absolute inset-0 z-0">
-        <div className={`absolute inset-0 opacity-40 transition-colors duration-500 ${theme === 'dark' ? 'bg-[radial-gradient(circle_at_center,_#1e293b_0%,_#030712_80%)]' : 'bg-[radial-gradient(circle_at_center,_#e2e8f0_0%,_#f8fafc_80%)]'}`} />
-        <div className={`absolute inset-0 opacity-10 transition-colors duration-500 ${theme === 'dark' ? 'bg-[url("https://www.transparenttextures.com/patterns/carbon-fibre.png")]' : 'bg-[url("https://www.transparenttextures.com/patterns/white-carbon.png")]'}`} />
+    <section className={`relative min-h-screen w-full flex flex-col items-center justify-center overflow-hidden py-20 transition-colors duration-700 ${
+      theme === 'dark' ? 'bg-[#030712] text-white' : 'bg-slate-50 text-slate-900'
+    }`}>
+      
+      {/* 1. COSMIC BACKGROUND */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className={`absolute inset-0 opacity-20 ${theme === 'dark' ? 'bg-[radial-gradient(#fff_1px,transparent_1px)]' : 'bg-[radial-gradient(#000_1px,transparent_1px)]'} [background-size:32px_32px]`} />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.4)_100%)]" />
       </div>
-      <div className="relative z-20 max-w-6xl w-full px-6">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 mb-4">
-            <Activity size={14} className="text-blue-400 animate-pulse" />
-            <span className="text-[10px] text-blue-400 uppercase tracking-[0.35em] font-black">{t('discoverSkills')}</span>
-          </div>
-          <h2 className={`text-5xl md:text-6xl font-black tracking-tight uppercase transition-colors duration-300 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{t('skills')}</h2>
-          <p className={`mt-4 max-w-2xl mx-auto text-sm transition-colors duration-300 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>{t('skillsDescription')}</p>
-        </motion.div>
 
-        <div className="mb-10 flex flex-wrap justify-center gap-3">
-          {categories.map((category) => {
-            const id = category.name.toLowerCase();
-            const active = activeCategory === id;
-            return (
-              <button
-                key={id}
-                onClick={() => setActiveCategory(id)}
-                className={`px-5 py-3 rounded-full text-sm font-semibold transition-all ${active ? 'bg-blue-500 text-white shadow-xl' : theme === 'dark' ? 'bg-white/5 text-slate-300 hover:bg-white/10' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
-              >
-                {category.name}
-              </button>
-            );
-          })}
+      {/* 2. HEADER SECTION */}
+      <motion.div 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="relative z-30 text-center mb-12 px-6"
+      >
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-blue-500/30 bg-blue-500/10 mb-4">
+          <Star size={12} className="text-blue-400 animate-pulse" />
+          <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-blue-400">{t('techStack')}</span>
         </div>
+        <h2 className="text-5xl md:text-7xl font-black tracking-tighter uppercase italic">{t('skills')}</h2>
+      </motion.div>
 
-        <div className="relative flex items-center justify-center w-full grow min-h-[520px]">
-          {loading ? (
-            <div className={`rounded-3xl border p-16 w-full max-w-3xl text-center transition-colors duration-500 ${theme === 'dark' ? 'border-white/10 bg-slate-900/80 text-white' : 'border-slate-200 bg-white text-slate-900'}`}>
-              <div className="mx-auto mb-6 h-12 w-12 rounded-full border-4 border-blue-500 border-t-transparent animate-spin" />
-              <p className={`uppercase tracking-[0.25em] text-xs transition-colors duration-300 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-500'}`}>{t('loadingSkills')}</p>
+      {/* 3. CATEGORY NAVIGATION */}
+      <div className="relative z-30 flex flex-wrap justify-center gap-3 mb-16 max-w-2xl px-4">
+        {skillsPayload.categories.map((cat) => {
+          const isActive = activeCategory === cat.name.toLowerCase();
+          return (
+            <button
+              key={cat.name}
+              onClick={() => setActiveCategory(cat.name.toLowerCase())}
+              className={`px-6 py-2 rounded-full text-xs font-bold transition-all duration-500 border ${
+                isActive 
+                ? 'bg-blue-600 border-blue-400 text-white shadow-[0_0_20px_rgba(37,99,235,0.5)] scale-110' 
+                : 'bg-white/5 border-white/10 text-slate-400 hover:border-white/20'
+              }`}
+            >
+              {cat.name}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* 4. THE GALAXY ENGINE */}
+      <div className="relative flex items-center justify-center w-full h-[600px]">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeCategory}
+            initial={{ opacity: 0, scale: 0.8, rotate: -10 }}
+            animate={{ opacity: 1, scale: 1, rotate: 0 }}
+            exit={{ opacity: 0, scale: 1.2, rotate: 10 }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            className="relative flex items-center justify-center w-full h-full"
+          >
+            {/* The Sun / Center Core */}
+            <div className="relative z-20 group cursor-pointer">
+              <div className="absolute inset-0 bg-blue-500 rounded-full blur-3xl opacity-20 group-hover:opacity-40 transition-opacity" />
+              <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-blue-600 to-cyan-400 flex items-center justify-center shadow-[0_0_50px_rgba(59,130,246,0.5)] border-4 border-white/10">
+                <Code2 size={40} className="text-white" />
+              </div>
             </div>
-          ) : (
-            <div className="relative w-full">
-              <AnimatePresence>
-                {visibleSkills.length ? (
-                  <motion.div
-                    key={activeCategory}
-                    initial={{ opacity: 0, y: 24 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -24 }}
-                    className="relative flex items-center justify-center"
+
+            {/* Orbital Rings & Planets */}
+            {visibleSkills.map((skill, idx) => (
+              <React.Fragment key={skill.name}>
+                {/* Visual Orbit Path */}
+                <div 
+                  className="absolute rounded-full border border-white/5 pointer-events-none"
+                  style={{ width: skill.orbitRadius * 2, height: skill.orbitRadius * 2 }}
+                />
+
+                {/* Orbit Animation Wrapper */}
+                <motion.div
+                  className="absolute"
+                  style={{ width: skill.orbitRadius * 2, height: skill.orbitRadius * 2 }}
+                  animate={{ rotate: [skill.initialRotation, skill.initialRotation + 360] }}
+                  transition={{
+                    repeat: Infinity,
+                    duration: skill.duration,
+                    ease: "linear"
+                  }}
+                >
+                  {/* Planet Positioning Wrapper (Moves along the edge of the circle) */}
+                  <div 
+                    className="absolute top-1/2 left-full -translate-x-1/2 -translate-y-1/2"
+                    style={{ width: 'auto' }}
                   >
-                    <div className="absolute inset-0 rounded-full bg-white/5 blur-2xl" />
-                    <div className="absolute inset-0 rounded-full border border-white/10" />
-                    <div className="relative flex items-center justify-center">
-                      <div className="relative z-10 w-36 h-36 rounded-full bg-gradient-to-tr from-blue-500/70 via-cyan-500/40 to-purple-500/70 shadow-[0_0_80px_rgba(59,130,246,0.25)] flex items-center justify-center">
-                        <div className="w-24 h-24 rounded-full bg-slate-950 border border-white/5 flex items-center justify-center">
-                          <Code2 size={42} className="text-white" />
-                        </div>
+                    {/* The Planet (Skill Card) */}
+                    <motion.div
+                      onMouseEnter={() => setHoveredSkill(skill.name)}
+                      onMouseLeave={() => setHoveredSkill(null)}
+                      onClick={() => setActiveSkill(skill)}
+                      // Counter-rotation: Keeps the icon vertical while it orbits
+                      animate={{ rotate: [-(skill.initialRotation), -(skill.initialRotation + 360)] }}
+                      transition={{ repeat: Infinity, duration: skill.duration, ease: "linear" }}
+                      className="relative cursor-pointer group"
+                    >
+                      <div 
+                        className={`p-4 rounded-2xl border backdrop-blur-md transition-all duration-300 group-hover:scale-125 ${
+                          theme === 'dark' ? 'bg-slate-900/80 border-white/10' : 'bg-white border-slate-200'
+                        }`}
+                        style={{ 
+                          boxShadow: hoveredSkill === skill.name ? `0 0 30px ${skill.color}50` : 'none',
+                          borderColor: hoveredSkill === skill.name ? skill.color : ''
+                        }}
+                      >
+                        <skill.icon size={24} style={{ color: skill.color }} />
                       </div>
 
-                      {visibleSkills.map((skill, idx) => (
-                        <motion.button
-                          key={skill.name}
-                          onMouseEnter={() => setHoveredSkill(skill.name)}
-                          onMouseLeave={() => setHoveredSkill(null)}
-                          onClick={() => setActiveSkill(skill)}
-                          whileHover={{ scale: 1.05 }}
-                          className="absolute flex items-center justify-center pointer-events-auto"
-                          style={{
-                            width: `${skill.orbit * 2}px`,
-                            height: `${skill.orbit * 2}px`,
-                            transform: `rotate(${(idx / visibleSkills.length) * 360}deg)`
-                          }}
-                        >
-                          <motion.div
-                            animate={{ rotate: -((idx / visibleSkills.length) * 360) }}
-                            transition={{ repeat: Infinity, duration: skill.speed, ease: 'linear' }}
-                            className="absolute"
-                            style={{ top: '50%', left: '50%', transform: 'translate(120%, -50%)' }}
-                          >
-                            <div className={`relative p-4 rounded-3xl border shadow-xl transition duration-300 hover:border-blue-500/30 ${theme === 'dark' ? 'bg-slate-900/90 border-white/10 text-white' : 'bg-white border-slate-200 text-slate-900'}`} style={{ boxShadow: hoveredSkill === skill.name ? `0 0 30px ${skill.color}40` : undefined }}>
-                              <skill.icon size={isMobile ? 22 : 26} className="text-white" style={{ color: skill.color }} />
-                            </div>
-                            <div className={`absolute top-full left-1/2 -translate-x-1/2 mt-3 text-[10px] uppercase tracking-[0.2em] transition-colors duration-300 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>
-                              {skill.name}
-                            </div>
-                          </motion.div>
-                        </motion.button>
-                      ))}
-                    </div>
-                  </motion.div>
-                ) : (
-                  <div className="text-center text-slate-400">No skills available</div>
-                )}
-              </AnimatePresence>
-            </div>
-          )}
-        </div>
+                      {/* Floating Label */}
+                      <div className={`absolute top-full left-1/2 -translate-x-1/2 mt-3 whitespace-nowrap transition-opacity duration-300 ${
+                        hoveredSkill === skill.name ? 'opacity-100' : 'opacity-0'
+                      }`}>
+                        <span className="text-[10px] font-black uppercase tracking-widest bg-blue-600 text-white px-2 py-0.5 rounded">
+                          {skill.name}
+                        </span>
+                      </div>
+                    </motion.div>
+                  </div>
+                </motion.div>
+              </React.Fragment>
+            ))}
+          </motion.div>
+        </AnimatePresence>
       </div>
 
+      {/* 5. SKILL DETAIL MODAL (Enhanced) */}
       <AnimatePresence>
         {activeSkill && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-950/95 backdrop-blur-xl"
+            className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-[#030712]/95 backdrop-blur-xl"
             onClick={() => setActiveSkill(null)}
           >
             <motion.div
-              initial={{ scale: 0.9, y: 30 }}
-              animate={{ scale: 1, y: 0 }}
+              initial={{ scale: 0.8, y: 50, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              exit={{ scale: 0.8, y: 50, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-slate-900 border border-white/10 p-8 rounded-[3rem] max-w-xl w-full overflow-hidden shadow-2xl"
+              className="bg-slate-900 border border-white/10 p-10 rounded-[3rem] max-w-xl w-full shadow-2xl relative overflow-hidden"
             >
-              <div className="flex flex-col md:flex-row gap-8 items-center">
-                <div className="w-28 h-28 rounded-3xl bg-slate-800 border border-white/10 flex items-center justify-center">
-                  <activeSkill.icon size={40} style={{ color: activeSkill.color }} />
-                </div>
-                <div className="space-y-3 text-left">
-                  <h3 className="text-4xl font-black text-white uppercase tracking-tight">{activeSkill.name}</h3>
-                  <p className="text-slate-400 text-sm leading-relaxed max-w-xl">{activeSkill.description}</p>
-                </div>
+              <div className="absolute top-0 right-0 p-8 opacity-10">
+                <activeSkill.icon size={120} style={{ color: activeSkill.color }} />
               </div>
-              <div className="mt-8 grid grid-cols-3 gap-4 text-sm text-slate-300">
-                <div className="rounded-3xl bg-slate-950/80 p-4 border border-white/10">
-                  <p className="text-xs uppercase tracking-[0.25em] text-slate-500">{t('skillGrowth')}</p>
-                  <p className="text-2xl font-bold text-white">{activeSkill.level}%</p>
+              
+              <div className="relative z-10">
+                <div className="flex items-center gap-6 mb-8">
+                  <div className="w-20 h-20 rounded-3xl bg-slate-800 border border-white/10 flex items-center justify-center">
+                    <activeSkill.icon size={40} style={{ color: activeSkill.color }} />
+                  </div>
+                  <div>
+                    <h3 className="text-4xl font-black text-white uppercase italic">{activeSkill.name}</h3>
+                    <p className="text-blue-400 font-bold tracking-widest text-xs uppercase">{activeSkill.category || 'Technology'}</p>
+                  </div>
                 </div>
-                <div className="rounded-3xl bg-slate-950/80 p-4 border border-white/10">
-                  <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Years</p>
-                  <p className="text-2xl font-bold text-white">{activeSkill.years || '—'}</p>
+
+                <p className="text-slate-400 text-lg leading-relaxed mb-8">{activeSkill.description || t('noDescription')}</p>
+
+                <div className="grid grid-cols-3 gap-4 mb-8">
+                  {[
+                    { label: t('proficiency'), value: `${activeSkill.level}%` },
+                    { label: 'Experience', value: `${activeSkill.years || '3+'}Y` },
+                    { label: 'Stability', value: 'High' }
+                  ].map((stat, i) => (
+                    <div key={i} className="bg-white/5 border border-white/5 p-4 rounded-2xl text-center">
+                      <p className="text-[10px] uppercase text-slate-500 mb-1">{stat.label}</p>
+                      <p className="text-xl font-bold text-white">{stat.value}</p>
+                    </div>
+                  ))}
                 </div>
-                <div className="rounded-3xl bg-slate-950/80 p-4 border border-white/10">
-                  <p className="text-xs uppercase tracking-[0.25em] text-slate-500">{t('performance')}</p>
-                  <p className="text-2xl font-bold text-white">{Math.min(activeSkill.level + 5, 100)}%</p>
-                </div>
+
+                <button 
+                  onClick={() => setActiveSkill(null)}
+                  className="w-full py-5 bg-gradient-to-r from-blue-600 to-blue-400 text-white font-black uppercase tracking-widest rounded-2xl hover:brightness-110 transition-all"
+                >
+                  {t('closeDiscovery')}
+                </button>
               </div>
-              <button onClick={() => setActiveSkill(null)} className="mt-10 w-full py-4 bg-blue-500 text-white font-semibold rounded-3xl uppercase tracking-[0.25em] hover:bg-blue-400 transition-all">
-                {t('backToRoot')}
-              </button>
             </motion.div>
           </motion.div>
         )}
