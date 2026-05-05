@@ -107,7 +107,7 @@ export default function Hero() {
             <div>
               <p className="flex items-center gap-2 text-[11px] font-semibold tracking-[0.2em] uppercase text-orange-500 mb-3">
                 <span className="block w-5 h-px bg-orange-500" />
-                {t("welcome') || 'Hello, I'm"}
+                {t("welcome") || "Hello, I'm"}
               </p>
               <h1 className="text-[clamp(52px,7vw,84px)] font-black leading-[0.9] tracking-tight text-stone-900 dark:text-stone-100">
                 Witness
