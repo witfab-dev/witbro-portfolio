@@ -75,7 +75,7 @@ const About = () => {
           <div className="lg:col-span-5 space-y-6">
             <div className="group relative aspect-square rounded-[2.5rem] overflow-hidden border border-white/5 bg-stone-900/50 backdrop-blur-sm p-2">
               <img 
-                src="/profile-alt.png" 
+                src="/wit.png" 
                 alt="Witness Fabrice" 
                 className="w-full h-full object-cover rounded-[2rem] grayscale group-hover:grayscale-0 transition-all duration-700"
               />
