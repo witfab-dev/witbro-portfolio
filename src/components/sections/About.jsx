@@ -1,197 +1,351 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Code2, Sparkles, Rocket, Compass, Target, 
-  ShieldCheck, ChevronRight, Zap, Coffee, 
-  Terminal, Layers, Cpu, Globe, ArrowUpRight
+import {
+  Layers, Globe, Zap, ShieldCheck, Terminal,
+  ArrowUpRight, Sparkles, Coffee, Code2,
+  BookOpen, Eye, Lightbulb,
 } from 'lucide-react';
 
-const About = () => {
+// ─── Data ──────────────────────────────────────────────────────
+const TABS = [
+  { id: 'story',      label: 'Story',      icon: BookOpen },
+  { id: 'philosophy', label: 'Philosophy', icon: Lightbulb },
+  { id: 'vision',     label: 'Vision',     icon: Eye },
+];
+
+const TAB_CONTENT = {
+  story: (
+    <div className="space-y-4 text-sm leading-relaxed text-stone-500 dark:text-stone-400">
+      <p>
+        I&apos;m a <span className="font-bold text-stone-900 dark:text-stone-100">Full-Stack Developer</span> and
+        Level 5 Software Student, bridging the gap between complex logic and fluid user
+        interfaces. My journey started with a deep curiosity for systems — how things
+        connect, communicate, and scale.
+      </p>
+      <p>
+        I mastered the{' '}
+        <span className="text-orange-500 font-semibold underline decoration-orange-500/30 underline-offset-4">
+          React, Node.js &amp; MySQL
+        </span>{' '}
+        stack and have since expanded into cloud infrastructure, 3D web experiences,
+        and AI integrations. Based in{' '}
+        <span className="font-semibold text-stone-900 dark:text-stone-100">Kigali, Rwanda</span>,
+        building products used across six countries.
+      </p>
+      <p>
+        I believe in "Project Archaeology" — digging into the root of a problem before
+        writing a single line of code. Whether it&apos;s a marketplace or a school
+        management system, my goal is software that feels genuinely human.
+      </p>
+    </div>
+  ),
+  philosophy: (
+    <div className="space-y-4 text-sm leading-relaxed text-stone-500 dark:text-stone-400">
+      <p>
+        Great software is invisible. It solves problems so naturally that users never
+        have to think about the tool — only the outcome. That philosophy drives every
+        decision I make, from API design to micro-animation timing.
+      </p>
+      <p>
+        I build with{' '}
+        <span className="font-bold text-stone-900 dark:text-stone-100">performance as a constraint</span>,
+        not an afterthought. Sub-2.5s LCP, accessible markup, and
+        offline-ready architectures are non-negotiable starting points, not bonus features.
+      </p>
+      <p>
+        Collaboration &gt; isolation. The best products emerge from honest feedback loops,
+        clear documentation, and a team that challenges each other respectfully. I&apos;d rather
+        ship a well-considered v1 than a perfect idea that never ships.
+      </p>
+    </div>
+  ),
+  vision: (
+    <div className="space-y-4 text-sm leading-relaxed text-stone-500 dark:text-stone-400">
+      <p>
+        My vision is to help East Africa produce world-class software talent and products.
+        Rwanda&apos;s tech ecosystem is growing rapidly — I want to be part of the generation
+        that puts it on the global map.
+      </p>
+      <p>
+        In the next three years I&apos;m focused on{' '}
+        <span className="font-bold text-stone-900 dark:text-stone-100">AI-native product development</span>,
+        building tools that lower the barrier to entrepreneurship for local founders, and
+        mentoring the next generation of developers in my community.
+      </p>
+      <p>
+        Long-term: a venture-backed product studio operating from Kigali — shipping software
+        that solves real African problems with world-class execution.
+      </p>
+    </div>
+  ),
+};
+
+const PILLARS = [
+  {
+    icon: Zap,
+    title: 'Performance First',
+    desc: 'Optimising for sub-2.5s LCP. Speed is a feature and a first principle.',
+    color: '#f97316',
+  },
+  {
+    icon: Layers,
+    title: 'Scalable Architecture',
+    desc: 'MERN + API-first design for systems that grow without breaking.',
+    color: '#3b82f6',
+  },
+  {
+    icon: Code2,
+    title: 'Visual Craft',
+    desc: 'Figma precision married to Three.js & Framer Motion storytelling.',
+    color: '#8b5cf6',
+  },
+];
+
+const STATS = [
+  { icon: ShieldCheck, label: 'Proficiency', value: 'Level 5' },
+  { icon: Zap,         label: 'Focus',       value: 'Full-Stack' },
+  { icon: Globe,       label: 'Location',    value: 'Kigali, RW' },
+];
+
+// ─── Component ─────────────────────────────────────────────────
+export default function About() {
   const [activeTab, setActiveTab] = useState('story');
 
-  const stats = [
-    { label: 'Technical Proficiency', value: 'Level 5', icon: ShieldCheck },
-    { label: 'Current Focus', value: 'Full-Stack / 3D', icon: Zap },
-    { label: 'Location', value: 'Kigali, Rwanda', icon: Globe }
-  ];
-
-  const pillars = [
-    { 
-      title: 'Performance First', 
-      desc: 'Optimizing for 2.5s LCP. Speed isn’t a feature; it’s a foundation.',
-      color: '#f97316' 
-    },
-    { 
-      title: 'Scalable Architecture', 
-      desc: 'Building with MERN and API-first design for future-proof growth.',
-      color: '#3b82f6' 
-    },
-    { 
-      title: 'Visual Storytelling', 
-      desc: 'Bridging Figma precision with Three.js & Framer Motion magic.',
-      color: '#10b981' 
-    }
-  ];
-
   return (
-    <section id="about" className="relative py-24 px-6 overflow-hidden bg-[#0c0b0a] text-stone-100">
-      {/* Background Orbital Glows */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-orange-500/10 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/4" />
-      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-blue-500/5 blur-[100px] rounded-full translate-y-1/2 -translate-x-1/4" />
+    <section
+      id="about"
+      className="relative py-24 px-4 sm:px-6 overflow-hidden
+                 bg-stone-100 dark:bg-[#0c0b0a] transition-colors duration-500"
+    >
+      {/* Ambient blobs */}
+      <div className="pointer-events-none absolute -top-40 -right-32 w-[420px] h-[420px] rounded-full bg-orange-500/[0.06] blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-40 -left-20 w-[360px] h-[360px] rounded-full bg-blue-500/[0.04] blur-3xl" />
 
-      <div className="max-w-7xl mx-auto relative z-10">
-        
-        {/* --- Section Header --- */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
-          <div className="space-y-4">
-            <motion.div 
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/20"
-            >
-              <div className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-orange-500">Identity 2026</span>
-            </motion.div>
-            <h2 className="text-5xl md:text-7xl font-black tracking-tighter leading-[0.85]">
-              CRAFTING THE <br />
-              <span className="text-orange-500 italic">NEXT-GEN</span> WEB.
+      <div className="relative max-w-[1200px] mx-auto">
+
+        {/* ── Header ─────────────────────────────────────────── */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-14">
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.55 }}
+          >
+            <p className="flex items-center gap-2 text-[11px] font-semibold tracking-[0.2em] uppercase text-orange-500 mb-3">
+              <span className="block w-5 h-px bg-orange-500" />
+              Identity 2026
+            </p>
+            <h2 className="text-[clamp(38px,5.5vw,64px)] font-black leading-[0.93] tracking-tight text-stone-900 dark:text-stone-100">
+              Crafting the{' '}
+              <span className="text-orange-500 italic">Next-Gen</span>
+              <br />Web.
             </h2>
-          </div>
-          
-          <motion.div 
+          </motion.div>
+
+          <motion.p
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
-            className="hidden md:block text-right max-w-[300px]"
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.15 }}
+            className="hidden md:block text-sm leading-relaxed text-stone-500 dark:text-stone-500 max-w-xs text-right"
           >
-            <p className="text-stone-500 text-sm font-medium leading-relaxed">
-              Based in Rwanda, building worldwide. Specializing in the intersection of robust backend logic and immersive frontend motion.
-            </p>
-          </motion.div>
+            Based in Rwanda, building worldwide. Specialising in robust backend logic
+            and immersive frontend motion.
+          </motion.p>
         </div>
 
-        <div className="grid lg:grid-cols-12 gap-12 items-start">
-          
-          {/* --- LEFT: The Interactive Dashboard --- */}
-          <div className="lg:col-span-5 space-y-6">
-            <div className="group relative aspect-square rounded-[2.5rem] overflow-hidden border border-white/5 bg-stone-900/50 backdrop-blur-sm p-2">
-              <img 
-                src="/wit.png" 
-                alt="Witness Fabrice" 
-                className="w-full h-full object-cover rounded-[2rem] grayscale group-hover:grayscale-0 transition-all duration-700"
+        {/* ── Main grid ──────────────────────────────────────── */}
+        <div className="grid lg:grid-cols-12 gap-8 items-start">
+
+          {/* ── LEFT col ──────────────────────────────────────── */}
+          <div className="lg:col-span-5 flex flex-col gap-5">
+
+            {/* Photo card */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="group relative aspect-square rounded-3xl overflow-hidden border border-stone-200 dark:border-stone-800/60 bg-stone-200 dark:bg-stone-800"
+            >
+              <img
+                src="/wit.png"
+                alt="Witness Fabrice"
+                className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 scale-100 group-hover:scale-105"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0c0b0a] via-transparent to-transparent opacity-60" />
-              
-              {/* Floating Badge */}
-              <motion.div 
-                animate={{ y: [0, -10, 0] }}
-                transition={{ duration: 4, repeat: Infinity }}
-                className="absolute bottom-8 right-8 p-4 rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 shadow-2xl"
+              {/* gradient polish */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+
+              {/* Floating status badge */}
+              <motion.div
+                animate={{ y: [0, -8, 0] }}
+                transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                className="absolute bottom-5 right-5 flex items-center gap-3 px-3.5 py-2.5 rounded-2xl
+                           bg-white/10 backdrop-blur-md border border-white/20 shadow-xl"
               >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-orange-500 flex items-center justify-center text-white">
-                    <Terminal size={20} />
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-black uppercase text-stone-400">Status</p>
-                    <p className="text-xs font-bold text-white tracking-wide">Building "Student Manager v2"</p>
-                  </div>
+                <div className="w-8 h-8 rounded-xl bg-orange-500 flex items-center justify-center shrink-0">
+                  <Terminal size={15} className="text-white" />
+                </div>
+                <div>
+                  <p className="text-[9px] font-bold uppercase tracking-widest text-white/60">Building now</p>
+                  <p className="text-[11px] font-bold text-white leading-tight">Student Manager v2</p>
                 </div>
               </motion.div>
-            </div>
 
-            {/* Quick Stats Grid */}
+              {/* Corner accent */}
+              <div className="absolute top-4 left-4 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/40 backdrop-blur-sm border border-white/10">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="animate-ping absolute h-full w-full rounded-full bg-green-400 opacity-70" />
+                  <span className="relative rounded-full h-1.5 w-1.5 bg-green-500" />
+                </span>
+                <span className="text-[9px] font-bold uppercase tracking-widest text-white/70">Available</span>
+              </div>
+            </motion.div>
+
+            {/* Stats row */}
             <div className="grid grid-cols-3 gap-3">
-              {stats.map((stat, i) => (
-                <div key={i} className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 text-center group hover:bg-orange-500/5 transition-colors">
-                  <stat.icon size={16} className="mx-auto mb-2 text-stone-500 group-hover:text-orange-500 transition-colors" />
-                  <p className="text-[9px] font-black uppercase tracking-tighter text-stone-500">{stat.label}</p>
-                  <p className="text-[11px] font-bold text-stone-200">{stat.value}</p>
-                </div>
+              {STATS.map(({ icon: Ic, label, value }, i) => (
+                <motion.div
+                  key={label}
+                  initial={{ opacity: 0, y: 12 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.07 }}
+                  className="group flex flex-col items-center gap-1.5 p-4 rounded-2xl text-center
+                             bg-white dark:bg-[#161513] border border-stone-200 dark:border-stone-800/60
+                             hover:border-orange-400 transition-all duration-300"
+                >
+                  <Ic size={15} className="text-stone-400 group-hover:text-orange-500 transition-colors" />
+                  <p className="text-[9px] font-bold uppercase tracking-widest text-stone-400 dark:text-stone-600">{label}</p>
+                  <p className="text-[11px] font-black text-stone-900 dark:text-stone-100">{value}</p>
+                </motion.div>
               ))}
             </div>
           </div>
 
-          {/* --- RIGHT: Content Strategy --- */}
-          <div className="lg:col-span-7 space-y-10">
-            
-            {/* Tabbed Bio Switcher */}
-            <div className="space-y-6">
-              <div className="flex gap-8 border-b border-white/5">
-                {['story', 'philosophy', 'vision'].map((tab) => (
-                  <button 
-                    key={tab}
-                    onClick={() => setActiveTab(tab)}
-                    className={`pb-4 text-xs font-black uppercase tracking-widest transition-all relative ${
-                      activeTab === tab ? 'text-orange-500' : 'text-stone-600 hover:text-stone-400'
-                    }`}
+          {/* ── RIGHT col ─────────────────────────────────────── */}
+          <div className="lg:col-span-7 flex flex-col gap-8">
+
+            {/* Tab switcher */}
+            <div>
+              {/* Tab nav */}
+              <div className="flex gap-1 p-1 rounded-xl bg-stone-200/60 dark:bg-stone-800/40 w-fit mb-6">
+                {TABS.map(({ id, label, icon: Ic }) => (
+                  <button
+                    key={id}
+                    onClick={() => setActiveTab(id)}
+                    className={`relative flex items-center gap-1.5 px-4 py-2 rounded-lg text-[11px] font-bold uppercase tracking-widest transition-all duration-250
+                      ${activeTab === id
+                        ? 'text-white'
+                        : 'text-stone-500 dark:text-stone-500 hover:text-stone-800 dark:hover:text-stone-300'
+                      }`}
                   >
-                    {tab}
-                    {activeTab === tab && (
-                      <motion.div layoutId="tab-underline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-500" />
+                    {activeTab === id && (
+                      <motion.div
+                        layoutId="tab-pill"
+                        className="absolute inset-0 bg-orange-500 rounded-lg shadow-md shadow-orange-500/25"
+                        transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                      />
                     )}
+                    <Ic size={12} className="relative z-10" />
+                    <span className="relative z-10">{label}</span>
                   </button>
                 ))}
               </div>
 
+              {/* Tab content */}
               <div className="min-h-[160px]">
                 <AnimatePresence mode="wait">
-                  {activeTab === 'story' && (
-                    <motion.div 
-                      key="story" 
-                      initial={{ opacity: 0, y: 10 }} 
-                      animate={{ opacity: 1, y: 0 }} 
-                      exit={{ opacity: 0, y: -10 }}
-                      className="space-y-4 text-stone-400 leading-relaxed text-sm"
-                    >
-                      <p>
-                        I am a <span className="text-white font-bold">Full-Stack Developer</span> and Level 5 Software Student, bridging the gap between complex logic and fluid user interfaces. My journey began with a curiosity for systems, leading me to master the <span className="text-orange-500 underline decoration-orange-500/30 underline-offset-4">React, Node.js, and MySQL</span> stack.
-                      </p>
-                      <p>
-                        Beyond the syntax, I focus on "Project Archaeology"—the process of digging deep into a problem's roots before writing a single line of code. Whether it's an RPG interactive map or a School Management System, my goal is to create software that feels human.
-                      </p>
-                    </motion.div>
-                  )}
-                  {/* ... other tabs follow same pattern ... */}
+                  <motion.div
+                    key={activeTab}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.28 }}
+                  >
+                    {TAB_CONTENT[activeTab]}
+                  </motion.div>
                 </AnimatePresence>
               </div>
             </div>
 
-            {/* Pillar Grid */}
-            <div className="grid md:grid-cols-3 gap-6">
-              {pillars.map((pillar, i) => (
-                <div key={i} className="group relative p-6 rounded-3xl bg-white/[0.02] border border-white/5 hover:border-orange-500/20 transition-all">
-                  <div 
-                    className="w-8 h-8 rounded-lg flex items-center justify-center mb-4"
-                    style={{ background: `${pillar.color}20`, color: pillar.color }}
+            {/* Pillars */}
+            <div className="grid sm:grid-cols-3 gap-4">
+              {PILLARS.map(({ icon: Ic, title, desc, color }, i) => (
+                <motion.div
+                  key={title}
+                  initial={{ opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.08 }}
+                  whileHover={{ y: -4 }}
+                  className="group relative p-5 rounded-2xl bg-white dark:bg-[#161513]
+                             border border-stone-200 dark:border-stone-800/60
+                             hover:border-orange-400 hover:shadow-[0_0_0_1px_rgba(249,115,22,0.25)]
+                             transition-all duration-300"
+                >
+                  <div
+                    className="w-9 h-9 rounded-xl flex items-center justify-center mb-4"
+                    style={{ background: `${color}18`, border: `1px solid ${color}30` }}
                   >
-                    <Layers size={16} />
+                    <Ic size={16} style={{ color }} />
                   </div>
-                  <h4 className="text-xs font-black uppercase mb-2 tracking-widest">{pillar.title}</h4>
-                  <p className="text-[11px] leading-relaxed text-stone-500 group-hover:text-stone-300 transition-colors">{pillar.desc}</p>
-                </div>
+                  <h4 className="text-xs font-black uppercase tracking-wider text-stone-900 dark:text-stone-100 mb-2">
+                    {title}
+                  </h4>
+                  <p className="text-[11px] leading-relaxed text-stone-500 dark:text-stone-500 group-hover:text-stone-600 dark:group-hover:text-stone-400 transition-colors">
+                    {desc}
+                  </p>
+                </motion.div>
               ))}
             </div>
 
-            {/* CTA / Contact Strip */}
-            <div className="flex flex-col sm:flex-row items-center gap-6 p-1 rounded-full bg-white/[0.03] border border-white/5 pr-6 group">
-              <div className="flex -space-x-3 p-2">
-                {[1, 2, 3].map(i => (
-                  <div key={i} className="w-10 h-10 rounded-full border-2 border-[#0c0b0a] bg-stone-800 flex items-center justify-center text-[10px] font-bold">
-                    {i === 3 ? <Sparkles size={14} className="text-orange-500" /> : <Coffee size={14} />}
+            {/* CTA strip */}
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.45 }}
+              className="flex flex-col sm:flex-row items-center gap-5 p-4 rounded-2xl
+                         bg-white dark:bg-[#161513]
+                         border border-stone-200 dark:border-stone-800/60
+                         hover:border-orange-400 transition-all duration-300"
+            >
+              {/* Avatars */}
+              <div className="flex -space-x-2.5 shrink-0">
+                {[Coffee, Coffee, Sparkles].map((Ic, i) => (
+                  <div
+                    key={i}
+                    className="w-9 h-9 rounded-full border-2 border-white dark:border-[#161513]
+                               bg-stone-100 dark:bg-stone-800 flex items-center justify-center"
+                  >
+                    <Ic size={13} className={i === 2 ? 'text-orange-500' : 'text-stone-400'} />
                   </div>
                 ))}
               </div>
-              <p className="text-xs font-bold text-stone-400 flex-1">Available for new collaborations and full-stack projects.</p>
-              <a href="#contact" className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-orange-500 group-hover:translate-x-1 transition-transform">
-                Let's Talk <ArrowUpRight size={14} />
+
+              <p className="flex-1 text-xs text-stone-500 dark:text-stone-500 text-center sm:text-left">
+                <span className="font-bold text-stone-900 dark:text-stone-100">Available for hire</span>
+                {' '}— open to freelance work, collaborations, and exciting full-time roles.
+              </p>
+
+              <a
+                href="#contact"
+                className="group/cta shrink-0 flex items-center gap-1.5 px-5 py-2.5 rounded-xl
+                           bg-orange-500 hover:bg-orange-600 text-white text-[11px] font-bold
+                           uppercase tracking-widest transition-all shadow-md shadow-orange-500/20"
+              >
+                Let&apos;s Talk
+                <ArrowUpRight
+                  size={13}
+                  className="group-hover/cta:translate-x-0.5 group-hover/cta:-translate-y-0.5 transition-transform"
+                />
               </a>
-            </div>
+            </motion.div>
 
           </div>
         </div>
       </div>
     </section>
   );
-};
-
-export default About;
+}
