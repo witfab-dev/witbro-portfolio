@@ -102,7 +102,6 @@ const LoadingScreen = ({ onFinished }) => {
                   <img src={PROFILE_IMG} alt="Witness" className="w-full h-full object-cover" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[10px] font-semibold tracking-[0.2em] uppercase text-orange-500 mb-1">Loading workspace</p>
                   <h2 className="font-black text-xl text-stone-100 tracking-tight">WITNESS Fabrice</h2>
                 </div>
               </div>
