@@ -104,15 +104,6 @@ const LoadingScreen = ({ onFinished }) => {
                 <div className="flex-1 min-w-0">
                   <p className="text-[10px] font-semibold tracking-[0.2em] uppercase text-orange-500 mb-1">Loading workspace</p>
                   <h2 className="font-black text-xl text-stone-100 tracking-tight">WITNESS Fabrice</h2>
-                  {/* Progress bar */}
-                  <div className="mt-2.5 h-1 w-full bg-stone-800 rounded-full overflow-hidden">
-                    <motion.div
-                      className="h-full rounded-full bg-orange-500"
-                      style={{ width: `${progress}%` }}
-                      transition={{ ease: 'linear' }}
-                    />
-                  </div>
-                  <p className="mt-1 text-[10px] font-mono text-stone-600">{Math.floor(progress)}%</p>
                 </div>
               </div>
 
@@ -138,7 +129,6 @@ const LoadingScreen = ({ onFinished }) => {
                     transition={{ duration: 1.2, repeat: Infinity, delay: d }}
                   />
                 ))}
-                <span className="ml-2 text-[10px] font-mono text-stone-700">Initialising modules…</span>
               </div>
             </div>
           </motion.div>
@@ -179,7 +169,7 @@ const LoadingScreen = ({ onFinished }) => {
                 animate={{ opacity: 1, y: 0 }}
                 className="mt-4 text-[11px] font-mono tracking-widest uppercase text-stone-600"
               >
-                Launching portfolio…
+                
               </motion.p>
             )}
           </motion.div>
