@@ -33,7 +33,7 @@ const TAB_CONTENT = {
         building products used across six countries.
       </p>
       <p>
-        I believe in "Project Archaeology" — digging into the root of a problem before
+        I believe in &quot;Project Archaeology&quot; — digging into the root of a problem before
         writing a single line of code. Whether it&apos;s a marketplace or a school
         management system, my goal is software that feels genuinely human.
       </p>
@@ -160,28 +160,29 @@ export default function About() {
           {/* ── LEFT col ──────────────────────────────────────── */}
           <div className="lg:col-span-5 flex flex-col gap-5">
 
-            {/* Photo card */}
+            {/* Photo card — NO gradient overlay */}
             <motion.div
               initial={{ opacity: 0, scale: 0.96 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
-              className="group relative aspect-square rounded-3xl overflow-hidden border border-stone-200 dark:border-stone-800/60 bg-stone-200 dark:bg-stone-800"
+              className="group relative aspect-square rounded-3xl overflow-hidden
+                         border border-stone-200 dark:border-stone-800/60
+                         bg-stone-200 dark:bg-stone-800"
             >
               <img
                 src="/wit.png"
                 alt="Witness Fabrice"
-                className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 scale-100 group-hover:scale-105"
+                className="w-full h-full object-cover grayscale group-hover:grayscale-0
+                           transition-all duration-700 scale-100 group-hover:scale-105"
               />
-              {/* gradient polish */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
 
               {/* Floating status badge */}
               <motion.div
                 animate={{ y: [0, -8, 0] }}
                 transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-                className="absolute bottom-5 right-5 flex items-center gap-3 px-3.5 py-2.5 rounded-2xl
-                           bg-white/10 backdrop-blur-md border border-white/20 shadow-xl"
+                className="absolute bottom-5 right-5 flex items-center gap-3 px-3.5 py-2.5
+                           rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-xl"
               >
                 <div className="w-8 h-8 rounded-xl bg-orange-500 flex items-center justify-center shrink-0">
                   <Terminal size={15} className="text-white" />
@@ -192,8 +193,9 @@ export default function About() {
                 </div>
               </motion.div>
 
-              {/* Corner accent */}
-              <div className="absolute top-4 left-4 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/40 backdrop-blur-sm border border-white/10">
+              {/* Available pill */}
+              <div className="absolute top-4 left-4 flex items-center gap-1.5 px-2.5 py-1 rounded-full
+                              bg-black/40 backdrop-blur-sm border border-white/10">
                 <span className="relative flex h-1.5 w-1.5">
                   <span className="animate-ping absolute h-full w-full rounded-full bg-green-400 opacity-70" />
                   <span className="relative rounded-full h-1.5 w-1.5 bg-green-500" />
@@ -212,7 +214,8 @@ export default function About() {
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.07 }}
                   className="group flex flex-col items-center gap-1.5 p-4 rounded-2xl text-center
-                             bg-white dark:bg-[#161513] border border-stone-200 dark:border-stone-800/60
+                             bg-white dark:bg-[#161513]
+                             border border-stone-200 dark:border-stone-800/60
                              hover:border-orange-400 transition-all duration-300"
                 >
                   <Ic size={15} className="text-stone-400 group-hover:text-orange-500 transition-colors" />
@@ -234,7 +237,8 @@ export default function About() {
                   <button
                     key={id}
                     onClick={() => setActiveTab(id)}
-                    className={`relative flex items-center gap-1.5 px-4 py-2 rounded-lg text-[11px] font-bold uppercase tracking-widest transition-all duration-250
+                    className={`relative flex items-center gap-1.5 px-4 py-2 rounded-lg text-[11px]
+                                font-bold uppercase tracking-widest transition-all duration-250
                       ${activeTab === id
                         ? 'text-white'
                         : 'text-stone-500 dark:text-stone-500 hover:text-stone-800 dark:hover:text-stone-300'
@@ -254,7 +258,7 @@ export default function About() {
               </div>
 
               {/* Tab content */}
-              <div className="min-h-[160px]">
+              <div className="min-h-[168px]">
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={activeTab}
@@ -279,9 +283,11 @@ export default function About() {
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.08 }}
                   whileHover={{ y: -4 }}
-                  className="group relative p-5 rounded-2xl bg-white dark:bg-[#161513]
+                  className="group relative p-5 rounded-2xl
+                             bg-white dark:bg-[#161513]
                              border border-stone-200 dark:border-stone-800/60
-                             hover:border-orange-400 hover:shadow-[0_0_0_1px_rgba(249,115,22,0.25)]
+                             hover:border-orange-400
+                             hover:shadow-[0_0_0_1px_rgba(249,115,22,0.25)]
                              transition-all duration-300"
                 >
                   <div
@@ -293,7 +299,8 @@ export default function About() {
                   <h4 className="text-xs font-black uppercase tracking-wider text-stone-900 dark:text-stone-100 mb-2">
                     {title}
                   </h4>
-                  <p className="text-[11px] leading-relaxed text-stone-500 dark:text-stone-500 group-hover:text-stone-600 dark:group-hover:text-stone-400 transition-colors">
+                  <p className="text-[11px] leading-relaxed text-stone-500 dark:text-stone-500
+                                group-hover:text-stone-600 dark:group-hover:text-stone-400 transition-colors">
                     {desc}
                   </p>
                 </motion.div>
@@ -326,7 +333,7 @@ export default function About() {
 
               <p className="flex-1 text-xs text-stone-500 dark:text-stone-500 text-center sm:text-left">
                 <span className="font-bold text-stone-900 dark:text-stone-100">Available for hire</span>
-                {' '}— open to freelance work, collaborations, and exciting full-time roles.
+                {' '}— open to freelance, collaborations, and exciting full-time roles.
               </p>
 
               <a
