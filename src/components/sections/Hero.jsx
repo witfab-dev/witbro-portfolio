@@ -39,19 +39,6 @@ export default function Hero() {
     return () => clearInterval(id);
   }, []);
 
-  /* fake view counter — keep in localStorage */
-  useEffect(() => {
-    const saved = localStorage.getItem('portfolioViews');
-    if (saved) setViewCount(Number(saved));
-    const id = setInterval(() => {
-      setViewCount(prev => {
-        const next = prev + Math.floor(Math.random() * 2) + 1;
-        localStorage.setItem('portfolioViews', next);
-        return next;
-      });
-    }, 5000);
-    return () => clearInterval(id);
-  }, []);
 
   const achievements = [
     { icon: Award, label: t('experience') || 'Experience', value: 3,  suffix: '+', color: '#f97316' },
@@ -91,17 +78,6 @@ export default function Hero() {
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
             className="flex flex-col gap-7"
           >
-            {/* Status pill */}
-            <div className="flex items-center gap-2.5 px-4 py-2 rounded-full border border-stone-200 dark:border-stone-800 bg-white/70 dark:bg-stone-900/50 backdrop-blur-sm w-fit shadow-sm">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute h-full w-full rounded-full bg-green-400 opacity-70" />
-                <span className="relative rounded-full h-2 w-2 bg-green-500" />
-              </span>
-              <span className="text-[10px] font-mono uppercase tracking-widest text-stone-400 dark:text-stone-500">
-                {t('portfolioViews') || 'Views'}:{' '}
-                <span className="text-orange-500 font-bold">{viewCount.toLocaleString()}</span>
-              </span>
-            </div>
 
             {/* Headline */}
             <div>
