@@ -71,12 +71,10 @@ const ICON_MAP = {
 };
 
 // ─── 3D Orbital Animation System ──────────────────────────────
-function ThreeJSOrbitalSystem({ skills, categoryColor, isDark }) {
+function ThreeJSOrbitalSystem({ skills, categoryColor, isDark, onSkillClick }) {
   const mountRef = useRef(null);
   const frameRef = useRef(null);
-  const groupRef = useRef(null);
-  const planetsRef = useRef([]);
-  const ringsRef = useRef([]);
+  const tooltipRef = useRef(null);
 
   useEffect(() => {
     const el = mountRef.current;
@@ -97,8 +95,12 @@ function ThreeJSOrbitalSystem({ skills, categoryColor, isDark }) {
     // Scene & Camera
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(45, W / H, 0.1, 100);
-    camera.position.set(0, 3, 12);
+    camera.position.set(0, 2, 10);
     camera.lookAt(0, 0, 0);
+
+    // Raycaster for click detection
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
 
     // Lighting
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
@@ -114,23 +116,22 @@ function ThreeJSOrbitalSystem({ skills, categoryColor, isDark }) {
 
     // Main group
     const mainGroup = new THREE.Group();
-    groupRef.current = mainGroup;
     scene.add(mainGroup);
 
     // Central glowing core
-    const coreGeo = new THREE.SphereGeometry(0.4, 32, 32);
+    const coreGeo = new THREE.SphereGeometry(0.35, 32, 32);
     const coreMat = new THREE.MeshPhongMaterial({
       color: categoryColor,
       emissive: categoryColor,
-      emissiveIntensity: 0.5,
+      emissiveIntensity: 0.6,
       transparent: true,
-      opacity: 0.8,
+      opacity: 0.9,
     });
     const core = new THREE.Mesh(coreGeo, coreMat);
     mainGroup.add(core);
 
     // Core glow
-    const glowGeo = new THREE.SphereGeometry(0.6, 32, 32);
+    const glowGeo = new THREE.SphereGeometry(0.55, 32, 32);
     const glowMat = new THREE.MeshBasicMaterial({
       color: categoryColor,
       transparent: true,
@@ -142,14 +143,14 @@ function ThreeJSOrbitalSystem({ skills, categoryColor, isDark }) {
 
     // Core particles
     const coreParticlesGeo = new THREE.BufferGeometry();
-    const coreParticlesCount = 50;
+    const coreParticlesCount = 60;
     const corePositions = new Float32Array(coreParticlesCount * 3);
     for (let i = 0; i < coreParticlesCount; i++) {
       const angle = Math.random() * Math.PI * 2;
-      const radius = 0.45 + Math.random() * 0.3;
+      const radius = 0.4 + Math.random() * 0.35;
       corePositions[i * 3] = Math.cos(angle) * radius;
       corePositions[i * 3 + 1] = Math.sin(angle) * radius;
-      corePositions[i * 3 + 2] = (Math.random() - 0.5) * 0.4;
+      corePositions[i * 3 + 2] = (Math.random() - 0.5) * 0.5;
     }
     coreParticlesGeo.setAttribute('position', new THREE.BufferAttribute(corePositions, 3));
     const coreParticlesMat = new THREE.PointsMaterial({
@@ -170,19 +171,56 @@ function ThreeJSOrbitalSystem({ skills, categoryColor, isDark }) {
       const ringMat = new THREE.MeshBasicMaterial({
         color: skill.color,
         transparent: true,
-        opacity: 0.3,
+        opacity: 0.25,
       });
       const ring = new THREE.Mesh(ringGeo, ringMat);
       ring.rotation.x = Math.PI / 2 + (Math.random() - 0.5) * 0.3;
       ring.rotation.y = Math.random() * 0.5;
       ring.userData = {
         baseRotationSpeed: 0.2 + Math.random() * 0.3,
-        tiltAxis: new THREE.Vector3(Math.random(), Math.random(), Math.random()).normalize(),
       };
       rings.push(ring);
       mainGroup.add(ring);
     });
-    ringsRef.current = rings;
+
+    // Create canvas for text labels
+    const createSkillLabel = (skill) => {
+      const canvas = document.createElement('canvas');
+      canvas.width = 256;
+      canvas.height = 64;
+      const ctx = canvas.getContext('2d');
+      
+      // Background glow
+      const gradient = ctx.createRadialGradient(128, 32, 0, 128, 32, 120);
+      gradient.addColorStop(0, `${skill.color}40`);
+      gradient.addColorStop(1, 'transparent');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, 256, 64);
+      
+      // Text
+      ctx.font = 'bold 20px Inter, system-ui, sans-serif';
+      ctx.fillStyle = skill.color;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(skill.name, 128, 32);
+      
+      // Level indicator
+      ctx.font = 'bold 14px Inter, system-ui, sans-serif';
+      ctx.fillStyle = `${skill.color}99`;
+      ctx.fillText(`${skill.level}%`, 128, 50);
+      
+      const texture = new THREE.CanvasTexture(canvas);
+      texture.minFilter = THREE.LinearFilter;
+      
+      const spriteMaterial = new THREE.SpriteMaterial({
+        map: texture,
+        transparent: true,
+        blending: THREE.NormalBlending,
+      });
+      const sprite = new THREE.Sprite(spriteMaterial);
+      sprite.scale.set(1.8, 0.45, 1);
+      return sprite;
+    };
 
     // Skill planets
     const planets = [];
@@ -190,7 +228,7 @@ function ThreeJSOrbitalSystem({ skills, categoryColor, isDark }) {
       const planetGroup = new THREE.Group();
       
       // Planet sphere
-      const radius = 0.12 + (skill.level / 100) * 0.15;
+      const radius = 0.1 + (skill.level / 100) * 0.12;
       const planetGeo = new THREE.SphereGeometry(radius, 16, 16);
       const planetMat = new THREE.MeshStandardMaterial({
         color: skill.color,
@@ -200,30 +238,24 @@ function ThreeJSOrbitalSystem({ skills, categoryColor, isDark }) {
         emissiveIntensity: 0.3,
       });
       const planet = new THREE.Mesh(planetGeo, planetMat);
+      planet.name = skill.name; // For raycasting
       planetGroup.add(planet);
 
-      // Orbital trail
-      const trailGeo = new THREE.RingGeometry(radius + 0.05, radius + 0.08, 32);
-      const trailMat = new THREE.MeshBasicMaterial({
-        color: skill.color,
-        side: THREE.DoubleSide,
-        transparent: true,
-        opacity: 0.4,
-      });
-      const trail = new THREE.Mesh(trailGeo, trailMat);
-      trail.rotation.x = Math.PI / 2;
-      planetGroup.add(trail);
-
       // Glow effect
-      const planetGlowGeo = new THREE.SphereGeometry(radius * 1.5, 16, 16);
+      const planetGlowGeo = new THREE.SphereGeometry(radius * 1.8, 16, 16);
       const planetGlowMat = new THREE.MeshBasicMaterial({
         color: skill.color,
         transparent: true,
-        opacity: 0.15,
+        opacity: 0.2,
         side: THREE.BackSide,
       });
       const planetGlow = new THREE.Mesh(planetGlowGeo, planetGlowMat);
       planetGroup.add(planetGlow);
+
+      // Label sprite
+      const label = createSkillLabel(skill);
+      label.position.y = radius + 0.3;
+      planetGroup.add(label);
 
       // Position in orbit
       const orbitRadius = 1.5 + index * 0.9;
@@ -241,12 +273,12 @@ function ThreeJSOrbitalSystem({ skills, categoryColor, isDark }) {
         skill,
         planet,
         planetGlow,
+        label,
       };
 
       planets.push(planetGroup);
       mainGroup.add(planetGroup);
     });
-    planetsRef.current = planets;
 
     // Background stars
     const starsGeo = new THREE.BufferGeometry();
@@ -267,7 +299,6 @@ function ThreeJSOrbitalSystem({ skills, categoryColor, isDark }) {
     });
     const stars = new THREE.Points(starsGeo, starsMat);
     mainGroup.add(stars);
-    stars.userData = { points: stars };
 
     // Mouse interaction
     let mouseX = 0;
@@ -279,9 +310,29 @@ function ThreeJSOrbitalSystem({ skills, categoryColor, isDark }) {
       const rect = el.getBoundingClientRect();
       mouseX = ((event.clientX - rect.left) / rect.width) * 2 - 1;
       mouseY = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      
+      // Update mouse for raycasting
+      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    };
+
+    const onClick = (event) => {
+      raycaster.setFromCamera(mouse, camera);
+      
+      const planetMeshes = planets.map(p => p.children[0]); // Get planet meshes
+      const intersects = raycaster.intersectObjects(planetMeshes);
+      
+      if (intersects.length > 0) {
+        const clickedPlanet = intersects[0].object;
+        const planetGroup = planets.find(p => p.children[0] === clickedPlanet);
+        if (planetGroup && onSkillClick) {
+          onSkillClick(planetGroup.userData.skill);
+        }
+      }
     };
 
     el.addEventListener('mousemove', onMouseMove);
+    el.addEventListener('click', onClick);
 
     // Resize handler
     const onResize = () => {
@@ -306,7 +357,7 @@ function ThreeJSOrbitalSystem({ skills, categoryColor, isDark }) {
       targetRotationY += (mouseX * 0.5 - targetRotationY) * 0.05;
 
       mainGroup.rotation.x = targetRotationX * 0.3;
-      mainGroup.rotation.y += 0.005;
+      mainGroup.rotation.y += 0.003;
       mainGroup.rotation.y += targetRotationY * 0.002;
 
       // Animate core
@@ -328,7 +379,7 @@ function ThreeJSOrbitalSystem({ skills, categoryColor, isDark }) {
       // Animate planets
       planets.forEach(planetGroup => {
         const data = planetGroup.userData;
-        data.angle += data.speed * 0.01;
+        data.angle += data.speed * 0.008;
         planetGroup.position.x = Math.cos(data.angle) * data.orbitRadius;
         planetGroup.position.z = Math.sin(data.angle) * data.orbitRadius;
         
@@ -336,13 +387,18 @@ function ThreeJSOrbitalSystem({ skills, categoryColor, isDark }) {
         data.planet.rotation.y += 0.02;
         data.planet.rotation.x += 0.01;
 
-        // Pulse glow based on proximity to front
+        // Pulse glow
         const frontAngle = mainGroup.rotation.y;
         const distanceFromFront = Math.abs(Math.sin(data.angle - frontAngle));
-        data.planetGlow.material.opacity = 0.15 + distanceFromFront * 0.1;
+        data.planetGlow.material.opacity = 0.15 + distanceFromFront * 0.15;
+
+        // Make labels always face camera
+        if (data.label) {
+          data.label.lookAt(camera.position);
+        }
       });
 
-      // Rotate stars slowly
+      // Rotate stars
       stars.rotation.y += 0.0005;
       stars.rotation.x += 0.0003;
 
@@ -353,18 +409,19 @@ function ThreeJSOrbitalSystem({ skills, categoryColor, isDark }) {
     return () => {
       cancelAnimationFrame(frameRef.current);
       el.removeEventListener('mousemove', onMouseMove);
+      el.removeEventListener('click', onClick);
       window.removeEventListener('resize', onResize);
       renderer.dispose();
       if (el.contains(renderer.domElement)) {
         el.removeChild(renderer.domElement);
       }
     };
-  }, [skills, categoryColor, isDark]);
+  }, [skills, categoryColor, isDark, onSkillClick]);
 
   return (
     <div 
       ref={mountRef} 
-      className="absolute inset-0"
+      className="absolute inset-0 cursor-pointer"
       style={{ minHeight: '500px' }}
     />
   );
@@ -519,7 +576,7 @@ export default function SkillsGalaxy() {
   const [activeCategory, setActiveCategory] = useState(skillsPayload.categories[0].name);
   const [hoveredSkill,   setHoveredSkill]   = useState(null);
   const [activeSkill,    setActiveSkill]    = useState(null);
-  const [viewMode,       setViewMode]       = useState('grid');
+  const [viewMode,       setViewMode]       = useState('3d'); // Default to 3D view
 
   const activeCategoryData = useMemo(
     () => skillsPayload.categories.find(c => c.name === activeCategory),
@@ -544,6 +601,10 @@ export default function SkillsGalaxy() {
   const ink     = 'text-stone-900 dark:text-stone-100';
   const muted   = 'text-stone-400 dark:text-stone-600';
   const subtle  = 'text-stone-500 dark:text-stone-500';
+
+  const handleSkillClick = (skill) => {
+    setActiveSkill(skill);
+  };
 
   return (
     <section
@@ -572,7 +633,7 @@ export default function SkillsGalaxy() {
               My <span className="text-orange-500 italic">Tech</span> Stack
             </h2>
             <p className={`mt-3 text-sm leading-relaxed max-w-xs ${subtle}`}>
-              Tools and technologies I use to build fast, scalable, and beautiful products.
+              Click on any planet to explore skill details in the interactive 3D orbit.
             </p>
           </motion.div>
 
@@ -655,14 +716,14 @@ export default function SkillsGalaxy() {
               transition={{ duration: 0.5 }}
               className="relative"
             >
-              {/* 3D Canvas Container */}
               <div className="relative w-full rounded-3xl overflow-hidden border border-stone-200 dark:border-stone-800/60"
-                   style={{ height: '500px', background: dark ? 'radial-gradient(circle at center, #1a1917 0%, #0c0b0a 100%)' : 'radial-gradient(circle at center, #fafaf9 0%, #f5f3ee 100%)' }}>
+                   style={{ height: '550px', background: dark ? 'radial-gradient(circle at center, #1a1917 0%, #0c0b0a 100%)' : 'radial-gradient(circle at center, #fafaf9 0%, #f5f3ee 100%)' }}>
                 
                 <ThreeJSOrbitalSystem 
                   skills={visibleSkills} 
                   categoryColor={activeCategoryData?.color || '#f97316'} 
-                  isDark={dark} 
+                  isDark={dark}
+                  onSkillClick={handleSkillClick}
                 />
 
                 {/* Overlay UI */}
@@ -677,7 +738,7 @@ export default function SkillsGalaxy() {
                   </div>
                   <div className="absolute bottom-4 left-4">
                     <div className="text-[10px] text-white/50 uppercase tracking-widest">
-                      Drag to rotate • Scroll to zoom
+                      🖱️ Drag to rotate • Click planets to explore
                     </div>
                   </div>
                 </div>
@@ -691,9 +752,15 @@ export default function SkillsGalaxy() {
                     <button
                       key={skill.name}
                       onClick={() => setActiveSkill(skill)}
+                      onMouseEnter={() => setHoveredSkill(skill.name)}
+                      onMouseLeave={() => setHoveredSkill(null)}
                       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all border
                         bg-white dark:bg-[#161513] border-stone-200 dark:border-stone-800/60
-                        hover:border-orange-400 hover:shadow-md`}
+                        hover:border-orange-400 hover:shadow-md hover:scale-105`}
+                      style={{
+                        borderColor: hoveredSkill === skill.name ? skill.color : undefined,
+                        boxShadow: hoveredSkill === skill.name ? `0 0 12px ${skill.color}30` : undefined,
+                      }}
                     >
                       <Icon size={11} style={{ color: skill.color }} />
                       <span style={{ color: skill.color }}>{skill.name}</span>
