@@ -335,20 +335,17 @@ export default function Contact() {
   };
 
   const inputBase =
-    'w-full px-4 py-3.5 rounded-xl bg-white/10 dark:bg-black/20 backdrop-blur-sm border text-white placeholder:text-white/50 focus:outline-none transition-all duration-200 text-sm';
+    'w-full px-4 py-3.5 rounded-xl bg-white/10 backdrop-blur-md border text-white placeholder:text-white/40 focus:outline-none transition-all duration-200 text-sm';
 
   return (
     <section
       id="contact"
       className="relative min-h-screen py-24 px-4 sm:px-6 overflow-hidden bg-[#0a0a0a]"
     >
-      {/* Full visible globe background */}
+      {/* Full visible globe background - NO overlay */}
       <GlobeBackground />
 
-      {/* Subtle overlay for readability */}
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
-
-      <div className="relative max-w-[1200px] mx-auto">
+      <div className="relative z-10 max-w-[1200px] mx-auto">
 
         {/* ══ HEADER ═══════════════════════════════════════════ */}
         <motion.div
@@ -358,7 +355,7 @@ export default function Contact() {
           transition={{ duration: 0.55 }}
           className="text-center mb-16"
         >
-          <p className="inline-flex items-center gap-2 text-[11px] font-semibold tracking-[0.2em] uppercase text-orange-500 mb-4 px-4 py-2 rounded-full bg-orange-500/10 border border-orange-500/20">
+          <p className="inline-flex items-center gap-2 text-[11px] font-semibold tracking-[0.2em] uppercase text-orange-500 mb-4 px-4 py-2 rounded-full bg-orange-500/10 backdrop-blur-sm border border-orange-500/20">
             <Globe size={12} />
             Get in touch
           </p>
@@ -369,7 +366,7 @@ export default function Contact() {
               great together.
             </span>
           </h2>
-          <p className="text-white/60 text-sm max-w-md mx-auto">
+          <p className="text-white/70 text-sm max-w-md mx-auto">
             Have a project in mind? Drop me a message — I reply within 24 hours, from Kigali to anywhere on the globe.
           </p>
 
@@ -384,11 +381,11 @@ export default function Contact() {
                 transition={{ delay: i * 0.1 }}
                 className="text-center"
               >
-                <div className="w-12 h-12 mx-auto mb-2 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center">
+                <div className="w-12 h-12 mx-auto mb-2 rounded-xl bg-orange-500/10 backdrop-blur-sm border border-orange-500/20 flex items-center justify-center">
                   <stat.icon size={18} className="text-orange-500" />
                 </div>
                 <div className="text-white font-black text-lg">{stat.value}</div>
-                <div className="text-white/50 text-[10px] uppercase tracking-wider">{stat.label}</div>
+                <div className="text-white/60 text-[10px] uppercase tracking-wider">{stat.label}</div>
               </motion.div>
             ))}
           </div>
@@ -412,9 +409,9 @@ export default function Contact() {
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
                 className="group flex items-center gap-4 p-4
-                           bg-white/5 backdrop-blur-md
+                           bg-black/30 backdrop-blur-md
                            border border-white/10 rounded-2xl
-                           hover:bg-orange-500/10 hover:border-orange-500/30
+                           hover:bg-orange-500/20 hover:border-orange-500/40
                            transition-all duration-300 cursor-pointer"
               >
                 <div className="w-12 h-12 shrink-0 flex items-center justify-center rounded-xl bg-orange-500/20 border border-orange-500/30 text-orange-400 group-hover:bg-orange-500 group-hover:text-white transition-all">
@@ -441,7 +438,7 @@ export default function Contact() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.3 }}
-              className="p-5 bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl"
+              className="p-5 bg-black/30 backdrop-blur-md border border-white/10 rounded-2xl"
             >
               <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-white/50 mb-4">Follow me</p>
               <div className="flex flex-wrap gap-2">
@@ -454,7 +451,7 @@ export default function Contact() {
                     aria-label={label}
                     whileHover={{ y: -3, scale: 1.08 }}
                     whileTap={{ scale: 0.92 }}
-                    className={`w-11 h-11 flex items-center justify-center rounded-xl border border-white/10 text-white/50 ${color} hover:text-white hover:border-transparent transition-all duration-300`}
+                    className={`w-11 h-11 flex items-center justify-center rounded-xl border border-white/10 text-white/50 ${color} hover:text-white hover:border-transparent transition-all duration-300 bg-white/5 backdrop-blur-sm`}
                   >
                     <Icon size={18} />
                   </motion.a>
@@ -469,14 +466,14 @@ export default function Contact() {
               viewport={{ once: true }}
               transition={{ delay: 0.4 }}
               className="flex items-center gap-3 px-4 py-3
-                         bg-white/5 backdrop-blur-md
+                         bg-black/30 backdrop-blur-md
                          border border-white/10 rounded-2xl"
             >
               <span className="relative flex h-2.5 w-2.5 shrink-0">
                 <span className="animate-ping absolute h-full w-full rounded-full bg-green-400 opacity-60" />
                 <span className="relative rounded-full h-2.5 w-2.5 bg-green-500" />
               </span>
-              <p className="text-xs text-white/60">
+              <p className="text-xs text-white/70">
                 <span className="font-bold text-green-400">Available</span> for new projects & collaborations
               </p>
             </motion.div>
@@ -488,7 +485,7 @@ export default function Contact() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="lg:col-span-2 bg-white/5 backdrop-blur-md
+            className="lg:col-span-2 bg-black/40 backdrop-blur-md
                        border border-white/10 rounded-2xl
                        p-6 sm:p-8"
           >
