@@ -70,7 +70,7 @@ const CategoryDot = ({ color }) => (
 
 export default function NewsFeed() {
   const { theme } = useTheme();
-  const { t }     = useLanguage();
+  const { t } = useLanguage();
   const dark = theme === 'dark';
 
   const [filter, setFilter] = useState('All');
@@ -98,6 +98,12 @@ export default function NewsFeed() {
   const featured    = filteredNews.find(n => n.featured);
   const secondary   = filteredNews.filter(n => !n.featured);
 
+  const handleArticleClick = (newsId) => {
+    // Add your navigation logic here
+    console.log('Navigate to article:', newsId);
+    // Example: navigate(`/news/${newsId}`);
+  };
+
   return (
     <section
       id="news"
@@ -119,14 +125,14 @@ export default function NewsFeed() {
           >
             <p className="flex items-center gap-2 text-[11px] font-semibold tracking-[0.2em] uppercase text-orange-500 mb-3">
               <span className="block w-5 h-px bg-orange-500" />
-              Latest updates
+              {t('news.header.label', 'Latest updates')}
             </p>
             <h2 className={`text-[clamp(38px,5.5vw,64px)] font-black leading-[0.93] tracking-tight ${ink}`}>
-              News &amp;{' '}
-              <span className="text-orange-500 italic">Insights</span>
+              {t('news.header.title1', 'News &')}{' '}
+              <span className="text-orange-500 italic">{t('news.header.title2', 'Insights')}</span>
             </h2>
             <p className={`mt-3 text-sm leading-relaxed max-w-xs ${subtle}`}>
-              Curated deep-dives into development, design, and emerging tech.
+              {t('news.header.subtitle', 'Curated deep-dives into development, design, and emerging tech.')}
             </p>
           </motion.div>
 
@@ -143,7 +149,7 @@ export default function NewsFeed() {
               <Search size={14} className={`shrink-0 ${muted} group-focus-within:text-orange-400 transition-colors`} />
               <input
                 type="text"
-                placeholder="Search articles…"
+                placeholder={t('news.search.placeholder', 'Search articles…')}
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 className={`w-full text-sm bg-transparent focus:outline-none ${ink} placeholder:${muted}`}
@@ -167,7 +173,7 @@ export default function NewsFeed() {
                       : `${subtle} hover:${ink}`
                   }`}
                 >
-                  {cat}
+                  {t(`news.categories.${cat.toLowerCase()}`, cat)}
                 </button>
               ))}
             </div>
@@ -190,6 +196,7 @@ export default function NewsFeed() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.96 }}
                   transition={{ duration: 0.4 }}
+                  onClick={() => handleArticleClick(featured.id)}
                   className={`group relative overflow-hidden rounded-2xl border ${surface} ${border} cursor-pointer
                     hover:border-orange-400 hover:shadow-[0_0_0_1px_rgba(249,115,22,0.3),0_16px_40px_rgba(0,0,0,0.1)]
                     transition-all duration-300`}
@@ -200,18 +207,19 @@ export default function NewsFeed() {
                       src={featured.image}
                       alt={featured.title}
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      loading="lazy"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
 
                     {/* Featured label */}
                     <div className="absolute top-4 left-4 flex items-center gap-1.5 bg-orange-500 text-white text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full">
-                      <Rss size={9} /> Featured
+                      <Rss size={9} /> {t('news.featured', 'Featured')}
                     </div>
 
                     {/* Overlay meta */}
                     <div className="absolute bottom-5 left-5 right-5">
-                      <span className={`inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-white/70 mb-2`}>
-                        <CategoryDot color={featured.accent} /> {featured.category}
+                      <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-white/70 mb-2">
+                        <CategoryDot color={featured.accent} /> {t(`news.categories.${featured.category.toLowerCase()}`, featured.category)}
                       </span>
                       <h3 className="font-black text-2xl sm:text-3xl text-white leading-tight tracking-tight group-hover:text-orange-300 transition-colors">
                         {featured.title}
@@ -249,6 +257,7 @@ export default function NewsFeed() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.96 }}
                   transition={{ duration: 0.35, delay: i * 0.05 }}
+                  onClick={() => handleArticleClick(news.id)}
                   className={`group flex gap-0 overflow-hidden rounded-2xl border ${surface} ${border} cursor-pointer
                     hover:border-orange-400 hover:shadow-[0_0_0_1px_rgba(249,115,22,0.25),0_12px_32px_rgba(0,0,0,0.08)]
                     transition-all duration-300`}
@@ -259,6 +268,7 @@ export default function NewsFeed() {
                       src={news.image}
                       alt={news.title}
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      loading="lazy"
                     />
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent to-black/20" />
                   </div>
@@ -267,9 +277,9 @@ export default function NewsFeed() {
                   <div className="flex flex-col justify-between p-4 sm:p-5 flex-1 min-w-0">
                     <div>
                       <div className="flex items-center gap-2 mb-2">
-                        <span className={`inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider`}
+                        <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider"
                           style={{ color: news.accent }}>
-                          <CategoryDot color={news.accent} /> {news.category}
+                          <CategoryDot color={news.accent} /> {t(`news.categories.${news.category.toLowerCase()}`, news.category)}
                         </span>
                       </div>
                       <h3 className={`font-black text-base sm:text-lg leading-tight tracking-tight ${ink} group-hover:text-orange-500 transition-colors line-clamp-2 mb-2`}>
@@ -306,12 +316,12 @@ export default function NewsFeed() {
                   className={`flex flex-col items-center justify-center py-20 rounded-2xl border border-dashed ${border} ${muted} text-center`}
                 >
                   <Search size={28} className="mb-3 opacity-40" />
-                  <p className="text-sm font-medium">No articles match your search.</p>
+                  <p className="text-sm font-medium">{t('news.empty.title', 'No articles match your search.')}</p>
                   <button
                     onClick={() => { setSearch(''); setFilter('All'); }}
                     className="mt-3 text-[11px] font-bold text-orange-500 hover:underline"
                   >
-                    Clear filters
+                    {t('news.empty.clear', 'Clear filters')}
                   </button>
                 </motion.div>
               )}
@@ -332,13 +342,13 @@ export default function NewsFeed() {
               <div className={`flex items-center gap-2 mb-5 pb-4 border-b ${border}`}>
                 <TrendingUp size={15} className="text-orange-500" />
                 <h4 className={`text-[10px] font-black uppercase tracking-[0.22em] ${ink}`}>
-                  Trending
+                  {t('news.trending', 'Trending')}
                 </h4>
               </div>
 
               <ul className="space-y-4">
                 {TRENDING.map((item, i) => (
-                  <li key={i} className="group flex items-center gap-3 cursor-pointer">
+                  <li key={i} className="group flex items-center gap-3 cursor-pointer hover:bg-stone-50 dark:hover:bg-stone-800/30 p-2 rounded-lg transition-colors">
                     <span className={`font-mono text-xs font-bold ${muted} group-hover:text-orange-500 transition-colors shrink-0`}>
                       0{i + 1}
                     </span>
@@ -346,7 +356,7 @@ export default function NewsFeed() {
                       <p className={`text-sm font-bold ${ink} group-hover:text-orange-500 transition-colors truncate`}>
                         {item.label}
                       </p>
-                      <span className={`text-[10px] ${muted}`}>{item.readers} readers</span>
+                      <span className={`text-[10px] ${muted}`}>{item.readers} {t('news.readers', 'readers')}</span>
                     </div>
                     <ArrowUpRight size={13} className={`shrink-0 ${muted} opacity-0 group-hover:opacity-100 group-hover:text-orange-500 transition-all`} />
                   </li>
@@ -368,10 +378,10 @@ export default function NewsFeed() {
 
               <Rss size={20} className="text-orange-500 mb-3" />
               <h5 className={`font-black text-base mb-1 ${ink}`}>
-                Stay in the loop
+                {t('news.newsletter.title', 'Stay in the loop')}
               </h5>
               <p className={`text-xs leading-relaxed mb-4 ${subtle}`}>
-                Get the freshest articles delivered straight to your inbox. No noise, just signal.
+                {t('news.newsletter.description', 'Get the freshest articles delivered straight to your inbox. No noise, just signal.')}
               </p>
 
               <AnimatePresence mode="wait">
@@ -382,13 +392,13 @@ export default function NewsFeed() {
                     animate={{ opacity: 1, scale: 1 }}
                     className="flex items-center gap-2 py-3 px-4 rounded-xl bg-green-500/10 border border-green-500/20 text-green-500 text-xs font-bold"
                   >
-                    ✓ You're subscribed!
+                    ✓ {t('news.newsletter.success', "You're subscribed!")}
                   </motion.div>
                 ) : (
                   <motion.div key="form" className="flex gap-2">
                     <input
                       type="email"
-                      placeholder="your@email.com"
+                      placeholder={t('news.newsletter.placeholder', 'your@email.com')}
                       value={email}
                       onChange={e => setEmail(e.target.value)}
                       onKeyDown={e => e.key === 'Enter' && email && setSubbed(true)}
@@ -408,14 +418,14 @@ export default function NewsFeed() {
             {/* Article count badge */}
             <div className={`flex items-center justify-between px-4 py-3 rounded-xl border ${surface} ${border}`}>
               <span className={`text-xs font-medium ${subtle}`}>
-                Showing <span className={`font-bold ${ink}`}>{filteredNews.length}</span> of {NEWS_DATA.length} articles
+                {t('news.showing', 'Showing')} <span className={`font-bold ${ink}`}>{filteredNews.length}</span> {t('news.of', 'of')} {NEWS_DATA.length} {t('news.articles', 'articles')}
               </span>
               {(filter !== 'All' || search) && (
                 <button
                   onClick={() => { setFilter('All'); setSearch(''); }}
                   className="text-[10px] font-bold text-orange-500 hover:underline"
                 >
-                  Clear
+                  {t('news.clear', 'Clear')}
                 </button>
               )}
             </div>
