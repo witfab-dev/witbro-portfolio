@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import * as THREE from 'three';
 import {
   Code2, Database, Braces, Terminal, Cpu, Layers,
   Zap, Palette, Box, Globe, Activity, Smartphone,
@@ -69,98 +70,305 @@ const ICON_MAP = {
   Dart: Smartphone,   Figma: Palette,        'Cyber Security': Shield,
 };
 
-// ─── Orbital ring ──────────────────────────────────────────────
-const OrbitalRing = ({ radius }) => (
-  <svg
-    className="absolute pointer-events-none"
-    style={{
-      width: radius * 2 + 4, height: radius * 2 + 4,
-      left: '50%', top: '50%',
-      transform: 'translate(-50%, -50%)',
-    }}
-  >
-    <circle
-      cx={radius + 2} cy={radius + 2} r={radius}
-      fill="none" stroke="rgba(249,115,22,0.08)"
-      strokeWidth="1" strokeDasharray="4 10"
-    />
-  </svg>
-);
+// ─── 3D Orbital Animation System ──────────────────────────────
+function ThreeJSOrbitalSystem({ skills, categoryColor, isDark }) {
+  const mountRef = useRef(null);
+  const frameRef = useRef(null);
+  const groupRef = useRef(null);
+  const planetsRef = useRef([]);
+  const ringsRef = useRef([]);
 
-// ─── Orbital planet ────────────────────────────────────────────
-const Planet = ({ skill, isHovered, onHover, onLeave, onClick }) => {
-  const Icon = skill.icon;
+  useEffect(() => {
+    const el = mountRef.current;
+    if (!el) return;
+    const W = el.clientWidth;
+    const H = el.clientHeight;
+
+    // Renderer
+    const renderer = new THREE.WebGLRenderer({ 
+      antialias: true, 
+      alpha: true 
+    });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(W, H);
+    renderer.setClearColor(0x000000, 0);
+    el.appendChild(renderer.domElement);
+
+    // Scene & Camera
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, W / H, 0.1, 100);
+    camera.position.set(0, 3, 12);
+    camera.lookAt(0, 0, 0);
+
+    // Lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+    scene.add(ambientLight);
+
+    const pointLight = new THREE.PointLight(categoryColor, 1, 30);
+    pointLight.position.set(0, 0, 0);
+    scene.add(pointLight);
+
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+    directionalLight.position.set(5, 5, 5);
+    scene.add(directionalLight);
+
+    // Main group
+    const mainGroup = new THREE.Group();
+    groupRef.current = mainGroup;
+    scene.add(mainGroup);
+
+    // Central glowing core
+    const coreGeo = new THREE.SphereGeometry(0.4, 32, 32);
+    const coreMat = new THREE.MeshPhongMaterial({
+      color: categoryColor,
+      emissive: categoryColor,
+      emissiveIntensity: 0.5,
+      transparent: true,
+      opacity: 0.8,
+    });
+    const core = new THREE.Mesh(coreGeo, coreMat);
+    mainGroup.add(core);
+
+    // Core glow
+    const glowGeo = new THREE.SphereGeometry(0.6, 32, 32);
+    const glowMat = new THREE.MeshBasicMaterial({
+      color: categoryColor,
+      transparent: true,
+      opacity: 0.2,
+      side: THREE.BackSide,
+    });
+    const glow = new THREE.Mesh(glowGeo, glowMat);
+    mainGroup.add(glow);
+
+    // Core particles
+    const coreParticlesGeo = new THREE.BufferGeometry();
+    const coreParticlesCount = 50;
+    const corePositions = new Float32Array(coreParticlesCount * 3);
+    for (let i = 0; i < coreParticlesCount; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const radius = 0.45 + Math.random() * 0.3;
+      corePositions[i * 3] = Math.cos(angle) * radius;
+      corePositions[i * 3 + 1] = Math.sin(angle) * radius;
+      corePositions[i * 3 + 2] = (Math.random() - 0.5) * 0.4;
+    }
+    coreParticlesGeo.setAttribute('position', new THREE.BufferAttribute(corePositions, 3));
+    const coreParticlesMat = new THREE.PointsMaterial({
+      color: categoryColor,
+      size: 0.02,
+      transparent: true,
+      opacity: 0.6,
+      blending: THREE.AdditiveBlending,
+    });
+    const coreParticles = new THREE.Points(coreParticlesGeo, coreParticlesMat);
+    mainGroup.add(coreParticles);
+
+    // Orbital rings
+    const rings = [];
+    skills.forEach((skill, index) => {
+      const radius = 1.5 + index * 0.9;
+      const ringGeo = new THREE.TorusGeometry(radius, 0.01, 16, 100);
+      const ringMat = new THREE.MeshBasicMaterial({
+        color: skill.color,
+        transparent: true,
+        opacity: 0.3,
+      });
+      const ring = new THREE.Mesh(ringGeo, ringMat);
+      ring.rotation.x = Math.PI / 2 + (Math.random() - 0.5) * 0.3;
+      ring.rotation.y = Math.random() * 0.5;
+      ring.userData = {
+        baseRotationSpeed: 0.2 + Math.random() * 0.3,
+        tiltAxis: new THREE.Vector3(Math.random(), Math.random(), Math.random()).normalize(),
+      };
+      rings.push(ring);
+      mainGroup.add(ring);
+    });
+    ringsRef.current = rings;
+
+    // Skill planets
+    const planets = [];
+    skills.forEach((skill, index) => {
+      const planetGroup = new THREE.Group();
+      
+      // Planet sphere
+      const radius = 0.12 + (skill.level / 100) * 0.15;
+      const planetGeo = new THREE.SphereGeometry(radius, 16, 16);
+      const planetMat = new THREE.MeshStandardMaterial({
+        color: skill.color,
+        metalness: 0.6,
+        roughness: 0.2,
+        emissive: skill.color,
+        emissiveIntensity: 0.3,
+      });
+      const planet = new THREE.Mesh(planetGeo, planetMat);
+      planetGroup.add(planet);
+
+      // Orbital trail
+      const trailGeo = new THREE.RingGeometry(radius + 0.05, radius + 0.08, 32);
+      const trailMat = new THREE.MeshBasicMaterial({
+        color: skill.color,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.4,
+      });
+      const trail = new THREE.Mesh(trailGeo, trailMat);
+      trail.rotation.x = Math.PI / 2;
+      planetGroup.add(trail);
+
+      // Glow effect
+      const planetGlowGeo = new THREE.SphereGeometry(radius * 1.5, 16, 16);
+      const planetGlowMat = new THREE.MeshBasicMaterial({
+        color: skill.color,
+        transparent: true,
+        opacity: 0.15,
+        side: THREE.BackSide,
+      });
+      const planetGlow = new THREE.Mesh(planetGlowGeo, planetGlowMat);
+      planetGroup.add(planetGlow);
+
+      // Position in orbit
+      const orbitRadius = 1.5 + index * 0.9;
+      const angle = (index / skills.length) * Math.PI * 2;
+      planetGroup.position.set(
+        Math.cos(angle) * orbitRadius,
+        0,
+        Math.sin(angle) * orbitRadius
+      );
+
+      planetGroup.userData = {
+        orbitRadius,
+        angle,
+        speed: 0.3 + Math.random() * 0.5,
+        skill,
+        planet,
+        planetGlow,
+      };
+
+      planets.push(planetGroup);
+      mainGroup.add(planetGroup);
+    });
+    planetsRef.current = planets;
+
+    // Background stars
+    const starsGeo = new THREE.BufferGeometry();
+    const starsCount = 500;
+    const starsPositions = new Float32Array(starsCount * 3);
+    for (let i = 0; i < starsCount; i++) {
+      starsPositions[i * 3] = (Math.random() - 0.5) * 20;
+      starsPositions[i * 3 + 1] = (Math.random() - 0.5) * 20;
+      starsPositions[i * 3 + 2] = (Math.random() - 0.5) * 20;
+    }
+    starsGeo.setAttribute('position', new THREE.BufferAttribute(starsPositions, 3));
+    const starsMat = new THREE.PointsMaterial({
+      color: 0xffffff,
+      size: 0.03,
+      transparent: true,
+      opacity: 0.5,
+      blending: THREE.AdditiveBlending,
+    });
+    const stars = new THREE.Points(starsGeo, starsMat);
+    mainGroup.add(stars);
+    stars.userData = { points: stars };
+
+    // Mouse interaction
+    let mouseX = 0;
+    let mouseY = 0;
+    let targetRotationX = 0;
+    let targetRotationY = 0;
+
+    const onMouseMove = (event) => {
+      const rect = el.getBoundingClientRect();
+      mouseX = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      mouseY = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+    };
+
+    el.addEventListener('mousemove', onMouseMove);
+
+    // Resize handler
+    const onResize = () => {
+      const w = el.clientWidth;
+      const h = el.clientHeight;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+    };
+    window.addEventListener('resize', onResize);
+
+    // Animation
+    const clock = new THREE.Clock();
+
+    const animate = () => {
+      frameRef.current = requestAnimationFrame(animate);
+      
+      const elapsedTime = clock.getElapsedTime();
+
+      // Smooth mouse follow
+      targetRotationX += (mouseY * 0.5 - targetRotationX) * 0.05;
+      targetRotationY += (mouseX * 0.5 - targetRotationY) * 0.05;
+
+      mainGroup.rotation.x = targetRotationX * 0.3;
+      mainGroup.rotation.y += 0.005;
+      mainGroup.rotation.y += targetRotationY * 0.002;
+
+      // Animate core
+      core.rotation.y += 0.01;
+      core.rotation.x += 0.005;
+      const corePulse = 1 + Math.sin(elapsedTime * 2) * 0.1;
+      core.scale.setScalar(corePulse);
+      glow.scale.setScalar(corePulse * 1.2);
+      coreParticles.rotation.y += 0.02;
+      coreParticles.rotation.x += 0.01;
+      pointLight.intensity = 0.8 + Math.sin(elapsedTime * 3) * 0.3;
+
+      // Animate rings
+      rings.forEach(ring => {
+        ring.rotation.z += 0.002 * ring.userData.baseRotationSpeed;
+        ring.rotation.x += 0.001 * ring.userData.baseRotationSpeed;
+      });
+
+      // Animate planets
+      planets.forEach(planetGroup => {
+        const data = planetGroup.userData;
+        data.angle += data.speed * 0.01;
+        planetGroup.position.x = Math.cos(data.angle) * data.orbitRadius;
+        planetGroup.position.z = Math.sin(data.angle) * data.orbitRadius;
+        
+        // Planet rotation
+        data.planet.rotation.y += 0.02;
+        data.planet.rotation.x += 0.01;
+
+        // Pulse glow based on proximity to front
+        const frontAngle = mainGroup.rotation.y;
+        const distanceFromFront = Math.abs(Math.sin(data.angle - frontAngle));
+        data.planetGlow.material.opacity = 0.15 + distanceFromFront * 0.1;
+      });
+
+      // Rotate stars slowly
+      stars.rotation.y += 0.0005;
+      stars.rotation.x += 0.0003;
+
+      renderer.render(scene, camera);
+    };
+    animate();
+
+    return () => {
+      cancelAnimationFrame(frameRef.current);
+      el.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('resize', onResize);
+      renderer.dispose();
+      if (el.contains(renderer.domElement)) {
+        el.removeChild(renderer.domElement);
+      }
+    };
+  }, [skills, categoryColor, isDark]);
+
   return (
-    <motion.div
-      className="absolute"
-      style={{
-        width: skill.orbitRadius * 2, height: skill.orbitRadius * 2,
-        left: '50%', top: '50%',
-        marginLeft: -skill.orbitRadius, marginTop: -skill.orbitRadius,
-      }}
-      animate={{ rotate: [skill.initialRotation, skill.initialRotation + 360] }}
-      transition={{ repeat: Infinity, duration: skill.duration, ease: 'linear' }}
-    >
-      <div className="absolute top-1/2 right-0 -translate-y-1/2">
-        <motion.div
-          animate={{ rotate: [-skill.initialRotation, -(skill.initialRotation + 360)] }}
-          transition={{ repeat: Infinity, duration: skill.duration, ease: 'linear' }}
-          onMouseEnter={onHover} onMouseLeave={onLeave}
-          onClick={onClick}
-          className="relative cursor-pointer"
-          whileHover={{ scale: 1.3 }}
-          whileTap={{ scale: 0.92 }}
-        >
-          {/* glow */}
-          <motion.div
-            className="absolute inset-0 rounded-2xl"
-            animate={{ opacity: isHovered ? 1 : 0 }}
-            transition={{ duration: 0.2 }}
-            style={{ boxShadow: `0 0 24px 6px ${skill.color}55`, borderRadius: '1rem' }}
-          />
-          {/* node */}
-          <div
-            className="relative flex items-center justify-center rounded-2xl border transition-colors duration-300"
-            style={{
-              width: 48, height: 48,
-              background: isHovered
-                ? `radial-gradient(circle, ${skill.color}25, #0a0f1e)`
-                : 'rgba(22,21,19,0.9)',
-              borderColor: isHovered ? `${skill.color}80` : 'rgba(255,255,255,0.08)',
-              backdropFilter: 'blur(12px)',
-            }}
-          >
-            <Icon size={20} style={{ color: skill.color }} />
-          </div>
-
-          {/* tooltip */}
-          <AnimatePresence>
-            {isHovered && (
-              <motion.div
-                initial={{ opacity: 0, y: 6, scale: 0.88 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 6, scale: 0.88 }}
-                transition={{ duration: 0.15 }}
-                className="absolute top-full left-1/2 -translate-x-1/2 mt-2.5 pointer-events-none z-50 whitespace-nowrap"
-              >
-                <div
-                  className="px-2.5 py-1 rounded-lg text-[10px] font-bold tracking-widest uppercase"
-                  style={{
-                    background: `linear-gradient(135deg, ${skill.color}dd, ${skill.color}99)`,
-                    color: '#000',
-                    boxShadow: `0 4px 16px ${skill.color}44`,
-                  }}
-                >
-                  {skill.name} · {skill.level}%
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </motion.div>
-      </div>
-    </motion.div>
+    <div 
+      ref={mountRef} 
+      className="absolute inset-0"
+      style={{ minHeight: '500px' }}
+    />
   );
-};
+}
 
 // ─── Skill card (grid view) ────────────────────────────────────
 const SkillCard = ({ skill, onClick, delay }) => {
@@ -177,7 +385,6 @@ const SkillCard = ({ skill, onClick, delay }) => {
                  hover:border-orange-400 hover:shadow-[0_0_0_1px_rgba(249,115,22,0.3),0_12px_32px_rgba(0,0,0,0.08)]
                  transition-all duration-300"
     >
-      {/* icon */}
       <div
         className="w-10 h-10 rounded-xl flex items-center justify-center"
         style={{ background: `${skill.color}18`, border: `1px solid ${skill.color}30` }}
@@ -185,7 +392,6 @@ const SkillCard = ({ skill, onClick, delay }) => {
         <Icon size={18} style={{ color: skill.color }} />
       </div>
 
-      {/* name + years */}
       <div>
         <p className="font-black text-sm text-stone-900 dark:text-stone-100 tracking-tight group-hover:text-orange-500 transition-colors">
           {skill.name}
@@ -193,7 +399,6 @@ const SkillCard = ({ skill, onClick, delay }) => {
         <p className="text-[10px] text-stone-400 dark:text-stone-600 mt-0.5">{skill.years}+ yrs</p>
       </div>
 
-      {/* progress bar */}
       <div className="w-full h-1 bg-stone-100 dark:bg-stone-800 rounded-full overflow-hidden">
         <motion.div
           initial={{ width: 0 }}
@@ -204,7 +409,6 @@ const SkillCard = ({ skill, onClick, delay }) => {
         />
       </div>
 
-      {/* level badge */}
       <span
         className="absolute top-3 right-3 text-[9px] font-black px-2 py-0.5 rounded-full"
         style={{ background: `${skill.color}18`, color: skill.color }}
@@ -236,11 +440,9 @@ const SkillModal = ({ skill, onClose }) => {
         className="relative w-full max-w-md bg-white dark:bg-[#161513] rounded-3xl overflow-hidden
                    border border-stone-200 dark:border-stone-800 shadow-2xl"
       >
-        {/* accent stripe */}
         <div className="h-1 w-full" style={{ background: `linear-gradient(90deg, transparent, ${skill.color}, transparent)` }} />
 
         <div className="p-6 sm:p-8">
-          {/* header */}
           <div className="flex items-start justify-between mb-6">
             <div className="flex items-center gap-4">
               <div
@@ -263,13 +465,11 @@ const SkillModal = ({ skill, onClose }) => {
             </button>
           </div>
 
-          {/* description */}
           <p className="text-sm leading-relaxed text-stone-500 dark:text-stone-400 mb-6">
             Deep expertise in {skill.name}, building high-performance, production-ready solutions
             with modern architectural patterns and best practices.
           </p>
 
-          {/* mastery bar */}
           <div className="mb-6">
             <div className="flex justify-between items-center mb-2">
               <span className="text-[10px] uppercase tracking-widest text-stone-400">Mastery</span>
@@ -286,7 +486,6 @@ const SkillModal = ({ skill, onClose }) => {
             </div>
           </div>
 
-          {/* stats */}
           <div className="grid grid-cols-2 gap-3 mb-6">
             {[
               { label: 'Mastery',    value: `${skill.level}%` },
@@ -315,12 +514,12 @@ const SkillModal = ({ skill, onClose }) => {
   );
 };
 
-// ─── Main ──────────────────────────────────────────────────────
+// ─── Main Component ────────────────────────────────────────────
 export default function SkillsGalaxy() {
   const [activeCategory, setActiveCategory] = useState(skillsPayload.categories[0].name);
   const [hoveredSkill,   setHoveredSkill]   = useState(null);
   const [activeSkill,    setActiveSkill]    = useState(null);
-  const [viewMode,       setViewMode]       = useState('grid'); // 'grid' | 'orbit'
+  const [viewMode,       setViewMode]       = useState('grid');
 
   const activeCategoryData = useMemo(
     () => skillsPayload.categories.find(c => c.name === activeCategory),
@@ -329,12 +528,9 @@ export default function SkillsGalaxy() {
 
   const visibleSkills = useMemo(() => {
     if (!activeCategoryData) return [];
-    return activeCategoryData.skills.map((skill, i) => ({
+    return activeCategoryData.skills.map(skill => ({
       ...skill,
       icon: ICON_MAP[skill.name] || Code2,
-      orbitRadius: 100 + i * 42,
-      duration: 20 + i * 8,
-      initialRotation: (i / activeCategoryData.skills.length) * 360,
     }));
   }, [activeCategoryData]);
 
@@ -384,7 +580,7 @@ export default function SkillsGalaxy() {
           <div className={`flex items-center gap-1 p-1 rounded-xl border ${surface} ${border}`}>
             {[
               { mode: 'grid',  Icon: LayoutGrid, label: 'Grid'  },
-              { mode: 'orbit', Icon: Orbit,      label: 'Orbit' },
+              { mode: '3d',    Icon: Orbit,      label: '3D Orbit' },
             ].map(({ mode, Icon: Ic, label }) => (
               <button
                 key={mode}
@@ -449,81 +645,59 @@ export default function SkillsGalaxy() {
             </motion.div>
           )}
 
-          {/* ORBIT VIEW */}
-          {viewMode === 'orbit' && (
+          {/* 3D ORBIT VIEW */}
+          {viewMode === '3d' && (
             <motion.div
-              key={`orbit-${activeCategory}`}
-              initial={{ opacity: 0, scale: 0.9 }}
+              key={`3d-${activeCategory}`}
+              initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ duration: 0.4 }}
-              className="relative flex flex-col items-center"
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.5 }}
+              className="relative"
             >
-              {/* Galaxy stage */}
-              <div className="relative flex items-center justify-center w-full"
-                style={{ height: Math.min(640, 200 + visibleSkills.length * 80) }}>
+              {/* 3D Canvas Container */}
+              <div className="relative w-full rounded-3xl overflow-hidden border border-stone-200 dark:border-stone-800/60"
+                   style={{ height: '500px', background: dark ? 'radial-gradient(circle at center, #1a1917 0%, #0c0b0a 100%)' : 'radial-gradient(circle at center, #fafaf9 0%, #f5f3ee 100%)' }}>
+                
+                <ThreeJSOrbitalSystem 
+                  skills={visibleSkills} 
+                  categoryColor={activeCategoryData?.color || '#f97316'} 
+                  isDark={dark} 
+                />
 
-                {/* Orbital rings */}
-                {visibleSkills.map(s => <OrbitalRing key={s.name} radius={s.orbitRadius} />)}
-
-                {/* Central node */}
-                <div className="relative z-20 flex items-center justify-center">
-                  <motion.div
-                    animate={{ scale: [1, 1.15, 1], opacity: [0.15, 0.3, 0.15] }}
-                    transition={{ repeat: Infinity, duration: 3.5 }}
-                    className="absolute rounded-full"
-                    style={{
-                      width: 130, height: 130,
-                      background: `radial-gradient(circle, ${activeCategoryData?.color || '#f97316'}60, transparent)`,
-                      filter: 'blur(24px)',
-                    }}
-                  />
-                  <div
-                    className="relative w-20 h-20 rounded-full flex items-center justify-center"
-                    style={{
-                      background: dark ? 'linear-gradient(135deg,#1a1917,#0c0b0a)' : 'linear-gradient(135deg,#fff,#f5f3ee)',
-                      border: `1.5px solid ${activeCategoryData?.color || '#f97316'}40`,
-                      boxShadow: `0 0 32px ${activeCategoryData?.color || '#f97316'}20`,
-                    }}
-                  >
-                    {activeCategoryData && (
-                      <activeCategoryData.icon size={28} style={{ color: activeCategoryData.color }} />
-                    )}
+                {/* Overlay UI */}
+                <div className="absolute inset-0 pointer-events-none">
+                  <div className="absolute top-4 left-4">
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-black/20 backdrop-blur-sm border border-white/10">
+                      <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                      <span className="text-[10px] font-bold text-white/80 uppercase tracking-wider">
+                        {activeCategoryData?.name || ''} Orbit
+                      </span>
+                    </div>
+                  </div>
+                  <div className="absolute bottom-4 left-4">
+                    <div className="text-[10px] text-white/50 uppercase tracking-widest">
+                      Drag to rotate • Scroll to zoom
+                    </div>
                   </div>
                 </div>
-
-                {/* Planets */}
-                {visibleSkills.map(skill => (
-                  <Planet
-                    key={skill.name}
-                    skill={skill}
-                    isHovered={hoveredSkill === skill.name}
-                    onHover={() => setHoveredSkill(skill.name)}
-                    onLeave={() => setHoveredSkill(null)}
-                    onClick={() => setActiveSkill(skill)}
-                  />
-                ))}
               </div>
 
-              {/* Legend */}
-              <div className="flex flex-wrap justify-center gap-2 mt-6 max-w-2xl">
+              {/* Skill Legend */}
+              <div className="flex flex-wrap justify-center gap-2 mt-4 max-w-2xl mx-auto">
                 {visibleSkills.map(skill => {
                   const Icon = skill.icon;
                   return (
                     <button
                       key={skill.name}
                       onClick={() => setActiveSkill(skill)}
-                      onMouseEnter={() => setHoveredSkill(skill.name)}
-                      onMouseLeave={() => setHoveredSkill(null)}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all border`}
-                      style={{
-                        background: hoveredSkill === skill.name ? `${skill.color}15` : 'transparent',
-                        borderColor: hoveredSkill === skill.name ? `${skill.color}40` : 'rgba(0,0,0,0.08)',
-                        color: hoveredSkill === skill.name ? skill.color : undefined,
-                      }}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all border
+                        bg-white dark:bg-[#161513] border-stone-200 dark:border-stone-800/60
+                        hover:border-orange-400 hover:shadow-md`}
                     >
                       <Icon size={11} style={{ color: skill.color }} />
-                      {skill.name}
+                      <span style={{ color: skill.color }}>{skill.name}</span>
+                      <span className="text-stone-400">{skill.level}%</span>
                     </button>
                   );
                 })}
