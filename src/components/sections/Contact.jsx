@@ -235,8 +235,8 @@ function GlobeBackground() {
     );
     globeGroup.add(particles);
 
-    // Position globe to the right (background decoration)
-    globeGroup.position.set(2.2, 0, -1);
+    // Position globe at center
+    globeGroup.position.set(0, 0, -0.5);
     scene.add(globeGroup);
 
     // Resize
