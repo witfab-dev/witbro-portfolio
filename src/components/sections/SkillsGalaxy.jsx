@@ -1,6 +1,10 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+<<<<<<< HEAD
 import * as THREE from 'three';
+=======
+import { useLanguage } from '../../contexts/LanguageContext';
+>>>>>>> 8f2bd04 (language support)
 import {
   Code2, Database, Braces, Terminal, Cpu, Layers,
   Zap, Palette, Box, Globe, Activity, Smartphone,
@@ -452,7 +456,7 @@ const SkillCard = ({ skill, onClick, delay }) => {
       <div>
         <p className="font-black text-sm text-stone-900 dark:text-stone-100 tracking-tight group-hover:text-orange-500 transition-colors">
           {skill.name}
-        </p>
+        </p>{t('years')}
         <p className="text-[10px] text-stone-400 dark:text-stone-600 mt-0.5">{skill.years}+ yrs</p>
       </div>
 
@@ -509,7 +513,7 @@ const SkillModal = ({ skill, onClose }) => {
                 <Icon size={28} style={{ color: skill.color }} />
               </div>
               <div>
-                <h3 className="text-xl font-black text-stone-900 dark:text-stone-100 tracking-tight">{skill.name}</h3>
+                <h3 className="text-xl font-black text-stone-900 dark:text-stone-100 tracking-tight">{skill.years} {t('yearsExperience')}
                 <p className="text-[10px] text-stone-400 mt-0.5 uppercase tracking-widest">{skill.years}+ years experience</p>
               </div>
             </div>
@@ -522,8 +526,13 @@ const SkillModal = ({ skill, onClose }) => {
             </button>
           </div>
 
+<<<<<<< HEAD
           <p className="text-sm leading-relaxed text-stone-500 dark:text-stone-400 mb-6">
             Deep expertise in {skill.name}, building high-performance, production-ready solutions
+=======
+          {/* description */}
+          <p{t('deepExpertise')} {skill.name}, {t('buildingSolutions')}nce, production-ready solutions
+>>>>>>> 8f2bd04 (language support)
             with modern architectural patterns and best practices.
           </p>
 
@@ -545,12 +554,12 @@ const SkillModal = ({ skill, onClose }) => {
 
           <div className="grid grid-cols-2 gap-3 mb-6">
             {[
-              { label: 'Mastery',    value: `${skill.level}%` },
-              { label: 'Experience', value: `${skill.years}+ yrs` },
-            ].map(({ label, value }) => (
-              <div key={label} className="px-4 py-3 rounded-2xl bg-stone-50 dark:bg-stone-800/40
+              { labelKey: 'mastery',    value: `${skill.level}%` },
+              { labelKey: 'experience', value: `${skill.years}+ ${t('years')}` },
+            ].map(({ labelKey, value }) => (
+              <div key={t(labelKey)} className="px-4 py-3 rounded-2xl bg-stone-50 dark:bg-stone-800/40
                                           border border-stone-100 dark:border-stone-800">
-                <p className="text-[9px] uppercase tracking-widest text-stone-400 mb-1">{label}</p>
+                <p className="text-[9px] uppercase tracking-widest text-stone-400 mb-1">{t(labelKey)}</p>
                 <p className="text-xl font-black text-stone-900 dark:text-stone-100">{value}</p>
               </div>
             ))}
@@ -562,7 +571,7 @@ const SkillModal = ({ skill, onClose }) => {
                        text-xs font-black uppercase tracking-widest text-white transition-all active:scale-95"
             style={{ background: `linear-gradient(135deg, ${skill.color}dd, ${skill.color}aa)` }}
           >
-            Close
+            {t('close')}
             <ChevronRight size={13} className="group-hover:translate-x-1 transition-transform" />
           </button>
         </div>
@@ -571,8 +580,14 @@ const SkillModal = ({ skill, onClose }) => {
   );
 };
 
+<<<<<<< HEAD
 // ─── Main Component ────────────────────────────────────────────
 export default function SkillsGalaxy() {
+=======
+// ─── Main ──────────────────────────────────────────────────────
+export d{ t } = useLanguage();
+  const efault function SkillsGalaxy() {
+>>>>>>> 8f2bd04 (language support)
   const [activeCategory, setActiveCategory] = useState(skillsPayload.categories[0].name);
   const [hoveredSkill,   setHoveredSkill]   = useState(null);
   const [activeSkill,    setActiveSkill]    = useState(null);
@@ -625,24 +640,34 @@ export default function SkillsGalaxy() {
             viewport={{ once: true }}
             transition={{ duration: 0.55 }}
           >
-            <p className="flex items-center gap-2 text-[11px] font-semibold tracking-[0.2em] uppercase text-orange-500 mb-3">
-              <span className="block w-5 h-px bg-orange-500" />
-              Technical skills
+            <p{t('technicalSkills')}
             </p>
             <h2 className={`text-[clamp(38px,5.5vw,64px)] font-black leading-[0.93] tracking-tight ${ink}`}>
-              My <span className="text-orange-500 italic">Tech</span> Stack
+              {t('myTechStack')}
             </h2>
             <p className={`mt-3 text-sm leading-relaxed max-w-xs ${subtle}`}>
+<<<<<<< HEAD
               Click on any planet to explore skill details in the interactive 3D orbit.
+=======
+              {t('skillsSubtitle')}
+            <p className={`mt-3 text-sm leading-relaxed max-w-xs ${subtle}`}>
+              Tools and technologies I use to build fast, scalable, and beautiful products.
+>>>>>>> 8f2bd04 (language support)
             </p>
           </motion.div>
 
           {/* View toggle */}
+<<<<<<< HEAD
           <div className={`flex items-center gap-1 p-1 rounded-xl border ${surface} ${border}`}>
             {[
               { mode: 'grid',  Icon: LayoutGrid, label: 'Grid'  },
               { mode: '3d',    Icon: Orbit,      label: '3D Orbit' },
             ].map(({ mode, Icon: Ic, label }) => (
+=======
+          <div className={`flex items-center gap-1 p-1Key: 'grid'  },
+              { mode: 'orbit', Icon: Orbit,      labelKey: 'orbit' },
+            ].map(({ mode, Icon: Ic, labelKey }) => (
+>>>>>>> 8f2bd04 (language support)
               <button
                 key={mode}
                 onClick={() => setViewMode(mode)}
@@ -651,6 +676,8 @@ export default function SkillsGalaxy() {
                     ? 'bg-orange-500 text-white shadow-md shadow-orange-500/25'
                     : `${muted} hover:${ink}`
                   }`}
+              >
+                <Ic size={13} /> {t(labelKey)
               >
                 <Ic size={13} /> {label}
               </button>

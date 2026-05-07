@@ -1,20 +1,61 @@
+<<<<<<< HEAD
 import React, { useRef, useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import * as THREE from 'three';
+=======
+import React, { useRef, useState, useMemo } from 'react';
+import { motion, useScroll, useSpring, AnimatePresence } from 'framer-motion';
+import { useLanguage } from '../../contexts/LanguageContext';
+>>>>>>> 8f2bd04 (language support)
 import {
   MapPin, Calendar, Briefcase, ChevronDown,
   Star, TrendingUp, Users, Clock, Zap, ArrowUpRight,
 } from 'lucide-react';
 
 // ─── Data ──────────────────────────────────────────────────────
-const experiences = [
+const getExperiences = (t) => [
   {
     company: 'Kirehe Adventist TVET School',
+<<<<<<< HEAD
+=======
+    role: 'Senior Full-Stack Developer',
+    period: '2025 – Present',
+    location: 'Kigali, Rwanda',
+    type: t('fullTime'),
+    current: true,
+    descriptionKey: 'architectureMicroservices',
+    skills: ['React', 'Go', 'AWS', 'Docker', 'PostgreSQL', 'Redis'],
+    achievements: [
+      { icon: TrendingUp, labelKey: 'performanceGain', value: '+40%' },
+      { icon: Clock,      labelKey: 'uptime',           value: '99.9%' },
+      { icon: Users,      labelKey: 'teamSize',         value: '8 devs' },
+    ],
+    accent: '#f97316',
+  },
+  {
+    company: 'Kirehe Adventist TVET School',
+    role: 'Frontend Engineer',
+    period: '2024 – 2025',
+    location: 'Kigali, Rwanda',
+    type: t('fullTime'),
+    current: false,
+    descriptionKey: 'interactiveDashboards',
+    skills: ['TypeScript', 'D3.js', 'Tailwind CSS', 'GraphQL', 'Framer Motion'],
+    achievements: [
+      { icon: TrendingUp, labelKey: 'navTimeSaved',     value: '35%' },
+      { icon: Users,      labelKey: 'dashboardsShipped', value: '12' },
+    ],
+    accent: '#3b82f6',
+  },
+  {
+    company: 'Kirehe Adventist TVET School',
+>>>>>>> 8f2bd04 (language support)
     role: 'Junior Developer',
     period: '2023 – 2024',
     location: 'Kigali, Rwanda',
-    type: 'Internship',
+    type: t('internship'),
     current: false,
+<<<<<<< HEAD
     description:
       'Built responsive landing pages and managed CMS integrations for international clients across 6 countries. Delivered 20+ production sites on time and under budget.',
     skills: ['JavaScript', 'PHP', 'WordPress', 'MySQL', 'Sass'],
@@ -23,6 +64,12 @@ const experiences = [
       { icon: TrendingUp, label: 'Sites',     value: '20+' },
       { icon: Users,      label: 'Countries', value: '6'   },
       { icon: Star,       label: 'Rating',    value: '4.9★'},
+=======
+    descriptionKey: 'juniorDeveloper',
+    skills: ['HTML', 'CSS', 'JavaScript', 'React', 'Node.js', 'MySQL'],
+    achievements: [
+      { icon: Star, label: 'Learning Focus', value: 'Modern Dev' },
+>>>>>>> 8f2bd04 (language support)
     ],
     accent: '#8b5cf6',
     highlight: '20+ production sites across 6 countries',
@@ -70,7 +117,11 @@ const experiences = [
   },
 ];
 
-const FILTERS = ['All', 'Full-time', 'Internship'];
+const FILTERS = [
+  { key: 'all', label: 'All' },
+  { key: 'fullTime', label: 'Full-time' },
+  { key: 'internship', label: 'Internship' }
+];
 
 // ─── Mountain 3D scene ─────────────────────────────────────────
 function MountainScene({ activeIdx, onPeakClick }) {
@@ -441,6 +492,7 @@ const ExpCard = ({ exp, index, isActive, onClick }) => (
         style={{ background: `linear-gradient(to top, ${exp.accent}, transparent)` }} />
     )}
 
+<<<<<<< HEAD
     <div className="bg-white dark:bg-[#161513] p-5">
       {/* Step number */}
       <div className="flex items-start justify-between mb-3">
@@ -454,6 +506,53 @@ const ExpCard = ({ exp, index, isActive, onClick }) => (
         >
           {String(index + 1).padStart(2, '0')}
         </div>
+=======
+    {/* Description */}
+    <p className="text-xs leading-relaxed text-stone-500 dark:text-stone-400 mb-4">
+      {t(exp.descriptionKey)}
+    </p>
+
+    {/* Skills */}
+    <div className="flex flex-wrap gap-1.5 mb-1">
+      {exp.skills.map(s => <Badge key={s} label={s} accent={exp.accent} />)}
+    </div>
+
+    {/* Achievements expandable */}
+    <AnimatePresence>
+      {isActive && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          exit={{ opacity: 0, height: 0 }}
+          transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+          className="overflow-hidden"
+        >
+          <div className="mt-4 pt-4 border-t" style={{ borderColor: `${exp.accent}22` }}>
+            <p className="text-[9px] uppercase tracking-widest text-stone-400 dark:text-stone-600 mb-3">
+              {t('keyMetrics')}
+            </p>
+            <div className="grid grid-cols-3 gap-2">
+              {exp.achievements.map(({ icon: Icon, labelKey, value }) => (
+                <div
+                  key={t(labelKey)}
+                  className="flex flex-col items-center px-2 py-3 rounded-xl text-center"
+                  style={{ background: `${exp.accent}0d`, border: `1px solid ${exp.accent}20` }}
+                >
+                  <Icon size={12} style={{ color: exp.accent }} className="mb-1 opacity-70" />
+                  <span className="text-base font-black leading-none" style={{ color: exp.accent }}>
+                    {value}
+                  </span>
+                  <span className="text-[8px] text-stone-400 uppercase tracking-widest mt-1 leading-tight">
+                    {t(labelKey)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+>>>>>>> 8f2bd04 (language support)
 
         <div className="flex flex-col items-end gap-1 ml-2">
           <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest"
@@ -551,16 +650,24 @@ const ExpCard = ({ exp, index, isActive, onClick }) => (
 
 // ─── Main ──────────────────────────────────────────────────────
 export default function Experience() {
+<<<<<<< HEAD
   const [activeIdx, setActiveIdx] = useState(2); // default to tallest/current
   const [filter,    setFilter]    = useState('All');
+=======
+  const { t } = useLanguage();
+  const experiences = getExperiences(t);
+  const containerRef              = useRef(null);
+  const [activeIdx, setActiveIdx] = useState(0);
+  const [filter,    setFilter]    = useState(t('all'));
+>>>>>>> 8f2bd04 (language support)
 
   const handlePeakClick = React.useCallback((i) => {
     setActiveIdx(prev => prev === i ? -1 : i);
   }, []);
 
   const filtered = useMemo(
-    () => filter === 'All' ? experiences : experiences.filter(e => e.type === filter),
-    [filter]
+    () => filter === t('all') ? experiences : experiences.filter(e => e.type === filter),
+    [filter, t, experiences]
   );
 
   const startYear   = 2023;
@@ -600,6 +707,7 @@ export default function Experience() {
             </p>
           </motion.div>
 
+<<<<<<< HEAD
           <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.1 }} className="flex gap-2 flex-wrap">
             {FILTERS.map(f => (
               <button key={f} onClick={() => setFilter(f)}
@@ -608,6 +716,20 @@ export default function Experience() {
                     ? 'bg-orange-500 border-orange-500 text-white shadow-lg shadow-orange-500/25'
                     : 'bg-transparent border-stone-300 dark:border-stone-700 text-stone-400 dark:text-stone-500 hover:border-stone-500 hover:text-stone-800 dark:hover:text-stone-200'
                   }`}>
+=======
+          {/* Filters .key}
+                onClick={() => setFilter(t(f.key))}
+                className={`px-5 py-2.5 rounded-full text-[11px] font-bold uppercase tracking-widest border transition-all duration-250
+                  ${filter === t(f.key)
+                key={f}
+                onClick={() => setFilter(f)}
+                className={`px-5 py-2.5 rounded-full text-[11px] font-bold uppercase tracking-widest border transition-all duration-250
+                  ${filter === f
+                 t(f.key)}
+                <span className="ml-1.5 opacity-60 text-[9px]">
+                  {f.key === 'all' ? experiences.length : experiences.filter(e => e.type === t(f.key)
+              >
+>>>>>>> 8f2bd04 (language support)
                 {f}
                 <span className="ml-1.5 opacity-60 text-[9px]">
                   {f === 'All' ? experiences.length : experiences.filter(e => e.type === f).length}
@@ -689,6 +811,7 @@ export default function Experience() {
             </div>
           ))}
         </div>
+<<<<<<< HEAD
 
         {/* ── Experience cards — aligned under each peak ── */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -734,5 +857,8 @@ export default function Experience() {
         </motion.div>
       </div>
     </section>
+=======
+      </section>
+>>>>>>> 8f2bd04 (language support)
   );
 }

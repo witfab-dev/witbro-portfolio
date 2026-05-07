@@ -122,18 +122,16 @@ const Projects = () => {
             {/* Eyebrow */}
             <p className="flex items-center gap-2 text-[11px] font-semibold tracking-[0.2em] uppercase text-orange-500 mb-3">
               <span className="block w-5 h-px bg-orange-500" />
-              Selected Works
+              {t('selectedWorks')}
             </p>
 
             {/* Headline */}
             <h2 className="text-[clamp(38px,5.5vw,66px)] font-black leading-[0.93] tracking-tight text-stone-900 dark:text-stone-100">
-              My{' '}
-              <span className="italic text-orange-500 not-italic">Creative</span>
-              <br />Projects
+              {t('myCreativeProjects')}
             </h2>
 
             <p className="mt-4 text-sm leading-relaxed text-stone-500 dark:text-stone-500 max-w-xs">
-              A curated collection of digital experiences — from mobile apps to high-performance web platforms.
+              {t('projectsSubtitle')}
             </p>
           </motion.div>
 
@@ -157,7 +155,7 @@ const Projects = () => {
                       : 'bg-transparent border-stone-300 dark:border-stone-700 text-stone-400 dark:text-stone-500 hover:border-stone-500 hover:text-stone-800 dark:hover:text-stone-200'
                   }`}
                 >
-                  {cat}
+                  {t(cat)}
                   <span className="ml-1.5 opacity-60 text-[9px]">{count}</span>
                 </button>
               );
@@ -200,7 +198,7 @@ const Projects = () => {
                   {/* Featured badge */}
                   {project.featured && (
                     <div className="absolute top-3 left-3 flex items-center gap-1 bg-yellow-400 text-yellow-950 text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full shadow">
-                      <Star size={9} fill="currentColor" /> Featured
+                      <Star size={9} fill="currentColor" /> {t('featured')}
                     </div>
                   )}
 
@@ -342,7 +340,7 @@ const Projects = () => {
                   {/* Meta grid */}
                   <div className="grid grid-cols-2 gap-6 mb-8 p-5 bg-stone-200/60 dark:bg-stone-800/40 rounded-2xl">
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-2">Tech Stack</p>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-2">{t('techStack')}</p>
                       <div className="flex flex-wrap gap-1.5">
                         {selectedProject.technologies.map((tech) => (
                           <span
@@ -355,7 +353,7 @@ const Projects = () => {
                       </div>
                     </div>
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-2">Year</p>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-2">{t('year')}</p>
                       <p className="font-bold text-stone-900 dark:text-stone-100">{selectedProject.year}</p>
                     </div>
                   </div>
@@ -368,7 +366,7 @@ const Projects = () => {
                       rel="noreferrer"
                       className="flex-1 flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-bold py-3.5 rounded-2xl text-sm transition-all shadow-lg shadow-orange-500/25"
                     >
-                      <Globe size={15} /> Live Website
+                      <Globe size={15} /> {t('liveDemo')}
                     </a>
                     <a
                       href={selectedProject.links.github}
@@ -376,7 +374,7 @@ const Projects = () => {
                       rel="noreferrer"
                       className="flex-1 flex items-center justify-center gap-2 bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 font-bold py-3.5 rounded-2xl text-sm hover:opacity-80 transition-all"
                     >
-                      <Github size={15} /> Source Code
+                      <Github size={15} /> {t('sourceCode')}
                     </a>
                   </div>
                 </div>
