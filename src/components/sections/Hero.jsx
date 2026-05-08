@@ -1,9 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+// components/sections/Hero.jsx
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import * as THREE from 'three';
-import { useLanguage } from '../../contexts/LanguageContext';
+import { useLanguage } from '../contexts/LanguageContext';
+import { useThreeJS } from '../hooks/useThreeJS';
 import AnimatedCounter from '../shared/AnimatedCounter';
-import Typewriter from '../shared/Typewriter';
+import LazyThreeJS from '../shared/LazyThreeJS';
 import {
   Github, Linkedin, Twitter, Mail,
   MapPin, ChevronDown, Award, Code2,
@@ -28,284 +30,256 @@ const SOCIAL_LINKS = [
   { icon: Mail,     href: 'mailto:witnessfabrice@gmail.com',            label: 'Email' },
 ];
 
-// ─── Professional 3D Background ─────────────────────────────────
-function Professional3DBackground() {
-  const mountRef = useRef(null);
-  const frameRef = useRef(null);
+// ─── 3D Background Component ──────────────────────────────────
+function Professional3DBackground({ isDark }) {
+  const { 
+    mountRef, 
+    isReady, 
+    error,
+    startAnimationLoop,
+    handleResize,
+    useMouseInteraction 
+  } = useThreeJS('hero-3d-bg', {
+    cameraPosition: [0, 0, 8],
+    fov: 60,
+    enableShadows: false,
+    onInit: ({ scene, camera, renderer }) => {
+      // Group for all objects
+      const mainGroup = new THREE.Group();
+      scene.add(mainGroup);
 
-  useEffect(() => {
-    const el = mountRef.current;
-    if (!el) return;
-    const W = el.clientWidth;
-    const H = el.clientHeight;
+      // ── Lighting ──
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+      scene.add(ambientLight);
 
-    // Renderer
-    const renderer = new THREE.WebGLRenderer({ 
-      antialias: true, 
-      alpha: true,
-      powerPreference: "high-performance"
-    });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setSize(W, H);
-    renderer.setClearColor(0x000000, 0);
-    el.appendChild(renderer.domElement);
+      const keyLight = new THREE.DirectionalLight(0xf97316, 1.5);
+      keyLight.position.set(10, 10, 10);
+      scene.add(keyLight);
 
-    // Scene & Camera
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(60, W / H, 0.1, 100);
-    camera.position.set(0, 0, 8);
+      const fillLight = new THREE.DirectionalLight(0x3b82f6, 0.8);
+      fillLight.position.set(-10, -5, -5);
+      scene.add(fillLight);
 
-    // Lighting
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
-    scene.add(ambientLight);
+      const rimLight = new THREE.DirectionalLight(0x8b5cf6, 0.6);
+      rimLight.position.set(0, 10, -5);
+      scene.add(rimLight);
 
-    const keyLight = new THREE.DirectionalLight(0xf97316, 1.5);
-    keyLight.position.set(10, 10, 10);
-    scene.add(keyLight);
-
-    const fillLight = new THREE.DirectionalLight(0x3b82f6, 0.8);
-    fillLight.position.set(-10, -5, -5);
-    scene.add(fillLight);
-
-    const rimLight = new THREE.DirectionalLight(0x8b5cf6, 0.6);
-    rimLight.position.set(0, 10, -5);
-    scene.add(rimLight);
-
-    // Main floating geometric shapes
-    const mainGroup = new THREE.Group();
-
-    // Central torus knot (professional tech feel)
-    const torusKnotGeo = new THREE.TorusKnotGeometry(1.2, 0.25, 128, 16);
-    const torusKnotMat = new THREE.MeshPhysicalMaterial({
-      color: 0xf97316,
-      metalness: 0.4,
-      roughness: 0.2,
-      transparent: true,
-      opacity: 0.15,
-      wireframe: false,
-    });
-    const torusKnot = new THREE.Mesh(torusKnotGeo, torusKnotMat);
-    mainGroup.add(torusKnot);
-
-    // Wireframe overlay for tech feel
-    const wireframeGeo = new THREE.TorusKnotGeometry(1.25, 0.08, 64, 12);
-    const wireframeMat = new THREE.MeshBasicMaterial({
-      color: 0xf97316,
-      wireframe: true,
-      transparent: true,
-      opacity: 0.08,
-    });
-    const wireframe = new THREE.Mesh(wireframeGeo, wireframeMat);
-    mainGroup.add(wireframe);
-
-    // Orbiting rings
-    const rings = [];
-    [
-      { radius: 1.8, tube: 0.015, color: 0xf97316, rotation: 0.3, speed: 0.4 },
-      { radius: 2.2, tube: 0.01, color: 0x3b82f6, rotation: -0.5, speed: -0.3 },
-      { radius: 2.6, tube: 0.008, color: 0x8b5cf6, rotation: 0.8, speed: 0.25 },
-    ].forEach(({ radius, tube, color, rotation, speed }) => {
-      const ringGeo = new THREE.TorusGeometry(radius, tube, 32, 100);
-      const ringMat = new THREE.MeshBasicMaterial({
-        color,
-        transparent: true,
-        opacity: 0.3,
-      });
-      const ring = new THREE.Mesh(ringGeo, ringMat);
-      ring.rotation.x = rotation;
-      ring.rotation.y = rotation * 0.5;
-      ring.userData = { speed, axis: new THREE.Vector3(Math.random(), Math.random(), Math.random()).normalize() };
-      rings.push(ring);
-      mainGroup.add(ring);
-    });
-
-    // Floating geometric particles
-    const particlesGroup = new THREE.Group();
-    const particleCount = 200;
-    const particlesGeo = new THREE.BufferGeometry();
-    const positions = new Float32Array(particleCount * 3);
-    const colors = new Float32Array(particleCount * 3);
-    const sizes = new Float32Array(particleCount);
-
-    for (let i = 0; i < particleCount; i++) {
-      // Spherical distribution
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos(2 * Math.random() - 1);
-      const radius = 3 + Math.random() * 4;
-      
-      positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
-      positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
-      positions[i * 3 + 2] = radius * Math.cos(phi);
-
-      // Color gradient from orange to blue
-      const mix = Math.random();
-      colors[i * 3] = 0.98;     // R
-      colors[i * 3 + 1] = 0.45 * (1 - mix) + 0.5 * mix; // G
-      colors[i * 3 + 2] = 0.09 * (1 - mix) + 0.96 * mix; // B
-
-      sizes[i] = Math.random() * 3;
-    }
-
-    particlesGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    particlesGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-    particlesGeo.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
-
-    const particlesMat = new THREE.PointsMaterial({
-      size: 0.02,
-      vertexColors: true,
-      transparent: true,
-      opacity: 0.6,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false,
-    });
-
-    const particles = new THREE.Points(particlesGeo, particlesMat);
-    particlesGroup.add(particles);
-
-    // Floating cubes/diamonds
-    for (let i = 0; i < 15; i++) {
-      const size = 0.08 + Math.random() * 0.15;
-      const geo = new THREE.OctahedronGeometry(size, 0);
-      const mat = new THREE.MeshStandardMaterial({
-        color: new THREE.Color().setHSL(0.08, 0.8, 0.5 + Math.random() * 0.3),
-        metalness: 0.8,
+      // ── Central Torus Knot ──
+      const torusKnotGeo = new THREE.TorusKnotGeometry(1.2, 0.25, 128, 16);
+      const torusKnotMat = new THREE.MeshPhysicalMaterial({
+        color: 0xf97316,
+        metalness: 0.4,
         roughness: 0.2,
         transparent: true,
-        opacity: 0.4,
+        opacity: 0.15,
+        wireframe: false,
       });
-      const mesh = new THREE.Mesh(geo, mat);
-      
-      const radius = 2 + Math.random() * 3;
-      const angle = Math.random() * Math.PI * 2;
-      const height = (Math.random() - 0.5) * 4;
-      
-      mesh.position.set(
-        Math.cos(angle) * radius,
-        height,
-        Math.sin(angle) * radius
-      );
-      mesh.userData = {
-        speed: 0.2 + Math.random() * 0.5,
-        amplitude: 0.5 + Math.random() * 1,
-        phase: Math.random() * Math.PI * 2,
-        rotationSpeed: (Math.random() - 0.5) * 0.02,
-      };
-      particlesGroup.add(mesh);
-    }
+      const torusKnot = new THREE.Mesh(torusKnotGeo, torusKnotMat);
+      mainGroup.add(torusKnot);
 
-    mainGroup.add(particlesGroup);
+      // Wireframe overlay
+      const wireframeGeo = new THREE.TorusKnotGeometry(1.25, 0.08, 64, 12);
+      const wireframeMat = new THREE.MeshBasicMaterial({
+        color: 0xf97316,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.08,
+      });
+      const wireframe = new THREE.Mesh(wireframeGeo, wireframeMat);
+      mainGroup.add(wireframe);
 
-    // Position the entire scene
-    mainGroup.position.set(3, 0.5, -3);
-    scene.add(mainGroup);
-
-    // Soft grid plane
-    const gridHelper = new THREE.PolarGridHelper(5, 32, 24, 100, 0x3b82f6, 0x3b82f6);
-    gridHelper.position.y = -3;
-    scene.add(gridHelper);
-
-    // Mouse interaction
-    let mouseX = 0;
-    let mouseY = 0;
-    let targetX = 0;
-    let targetY = 0;
-
-    const onMouseMove = (event) => {
-      mouseX = (event.clientX / window.innerWidth) * 2 - 1;
-      mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
-    };
-
-    window.addEventListener('mousemove', onMouseMove);
-
-    // Resize handler
-    const onResize = () => {
-      const w = el.clientWidth;
-      const h = el.clientHeight;
-      camera.aspect = w / h;
-      camera.updateProjectionMatrix();
-      renderer.setSize(w, h);
-    };
-    window.addEventListener('resize', onResize);
-
-    // Animation loop
-    const clock = new THREE.Clock();
-    
-    const animate = () => {
-      frameRef.current = requestAnimationFrame(animate);
-      
-      const elapsedTime = clock.getElapsedTime();
-
-      // Smooth mouse follow
-      targetX += (mouseX - targetX) * 0.05;
-      targetY += (mouseY - targetY) * 0.05;
-
-      mainGroup.rotation.y += 0.002;
-      mainGroup.rotation.x += 0.001;
-      mainGroup.rotation.x += targetY * 0.002;
-      mainGroup.rotation.y += targetX * 0.002;
-
-      // Animate rings
-      rings.forEach(ring => {
-        ring.rotation.z += ring.userData.speed * 0.003;
-        ring.rotation.x += ring.userData.speed * 0.002;
+      // ── Orbital Rings ──
+      const rings = [];
+      [
+        { radius: 1.8, tube: 0.015, color: 0xf97316, rotation: 0.3, speed: 0.4 },
+        { radius: 2.2, tube: 0.01, color: 0x3b82f6, rotation: -0.5, speed: -0.3 },
+        { radius: 2.6, tube: 0.008, color: 0x8b5cf6, rotation: 0.8, speed: 0.25 },
+      ].forEach(({ radius, tube, color, rotation, speed }) => {
+        const ringGeo = new THREE.TorusGeometry(radius, tube, 32, 100);
+        const ringMat = new THREE.MeshBasicMaterial({
+          color,
+          transparent: true,
+          opacity: 0.3,
+        });
+        const ring = new THREE.Mesh(ringGeo, ringMat);
+        ring.rotation.x = rotation;
+        ring.rotation.y = rotation * 0.5;
+        ring.userData = { speed, axis: new THREE.Vector3(Math.random(), Math.random(), Math.random()).normalize() };
+        rings.push(ring);
+        mainGroup.add(ring);
       });
 
-      // Animate floating shapes
-      particlesGroup.children.forEach(child => {
-        if (child.isMesh && child.userData.speed) {
-          child.position.y += Math.sin(elapsedTime * child.userData.speed + child.userData.phase) * 0.005;
-          child.rotation.x += child.userData.rotationSpeed;
-          child.rotation.y += child.userData.rotationSpeed * 0.7;
-        }
-      });
+      // ── Particle System ──
+      const particlesGroup = new THREE.Group();
+      const particleCount = 200;
+      const particlesGeo = new THREE.BufferGeometry();
+      const positions = new Float32Array(particleCount * 3);
+      const colors = new Float32Array(particleCount * 3);
 
-      // Rotate particle field
-      particles.rotation.y += 0.0003;
-      particles.rotation.x += 0.0002;
+      for (let i = 0; i < particleCount; i++) {
+        const theta = Math.random() * Math.PI * 2;
+        const phi = Math.acos(2 * Math.random() - 1);
+        const radius = 3 + Math.random() * 4;
+        
+        positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
+        positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
+        positions[i * 3 + 2] = radius * Math.cos(phi);
 
-      // Pulse torus knot wireframe
-      const pulse = 1 + Math.sin(elapsedTime * 0.5) * 0.02;
-      wireframe.scale.setScalar(pulse);
-
-      renderer.render(scene, camera);
-    };
-    animate();
-
-    return () => {
-      cancelAnimationFrame(frameRef.current);
-      window.removeEventListener('mousemove', onMouseMove);
-      window.removeEventListener('resize', onResize);
-      renderer.dispose();
-      if (el.contains(renderer.domElement)) {
-        el.removeChild(renderer.domElement);
+        const mix = Math.random();
+        colors[i * 3] = 0.98;
+        colors[i * 3 + 1] = 0.45 * (1 - mix) + 0.5 * mix;
+        colors[i * 3 + 2] = 0.09 * (1 - mix) + 0.96 * mix;
       }
-    };
-  }, []);
+
+      particlesGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      particlesGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+      const particlesMat = new THREE.PointsMaterial({
+        size: 0.02,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.6,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+      });
+
+      const particles = new THREE.Points(particlesGeo, particlesMat);
+      particlesGroup.add(particles);
+
+      // Floating geometric shapes
+      for (let i = 0; i < 15; i++) {
+        const size = 0.08 + Math.random() * 0.15;
+        const geo = new THREE.OctahedronGeometry(size, 0);
+        const mat = new THREE.MeshStandardMaterial({
+          color: new THREE.Color().setHSL(0.08, 0.8, 0.5 + Math.random() * 0.3),
+          metalness: 0.8,
+          roughness: 0.2,
+          transparent: true,
+          opacity: 0.4,
+        });
+        const mesh = new THREE.Mesh(geo, mat);
+        
+        const radius = 2 + Math.random() * 3;
+        const angle = Math.random() * Math.PI * 2;
+        const height = (Math.random() - 0.5) * 4;
+        
+        mesh.position.set(
+          Math.cos(angle) * radius,
+          height,
+          Math.sin(angle) * radius
+        );
+        mesh.userData = {
+          speed: 0.2 + Math.random() * 0.5,
+          amplitude: 0.5 + Math.random() * 1,
+          phase: Math.random() * Math.PI * 2,
+          rotationSpeed: (Math.random() - 0.5) * 0.02,
+        };
+        particlesGroup.add(mesh);
+      }
+
+      mainGroup.add(particlesGroup);
+      mainGroup.position.set(3, 0.5, -3);
+
+      // ── Soft Grid Plane ──
+      const gridHelper = new THREE.PolarGridHelper(5, 32, 24, 100, 0x3b82f6, 0x3b82f6);
+      gridHelper.position.y = -3;
+      scene.add(gridHelper);
+
+      // ── Animation Loop ──
+      let elapsedTime = 0;
+      
+      startAnimationLoop(() => {
+        elapsedTime += 0.016; // ~60fps
+
+        // Rotate main group
+        mainGroup.rotation.y += 0.002;
+        mainGroup.rotation.x += 0.001;
+
+        // Animate rings
+        rings.forEach(ring => {
+          ring.rotation.z += ring.userData.speed * 0.003;
+          ring.rotation.x += ring.userData.speed * 0.002;
+        });
+
+        // Animate floating shapes
+        particlesGroup.children.forEach(child => {
+          if (child.isMesh && child.userData.speed) {
+            child.position.y += Math.sin(elapsedTime * child.userData.speed + child.userData.phase) * 0.005;
+            child.rotation.x += child.userData.rotationSpeed;
+            child.rotation.y += child.userData.rotationSpeed * 0.7;
+          }
+        });
+
+        // Rotate particles
+        particles.rotation.y += 0.0003;
+        particles.rotation.x += 0.0002;
+
+        // Pulse wireframe
+        const pulse = 1 + Math.sin(elapsedTime * 0.5) * 0.02;
+        wireframe.scale.setScalar(pulse);
+      });
+    },
+  });
+
+  // Mouse interaction
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  useMouseInteraction(({ x, y }) => setMousePos({ x, y }));
+
+  // Resize handler
+  useEffect(() => {
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [handleResize]);
+
+  // Error state
+  if (error) {
+    return (
+      <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 via-transparent to-blue-500/5">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+      </div>
+    );
+  }
 
   return (
-    <div 
-      ref={mountRef} 
-      className="absolute inset-0"
-      style={{ zIndex: 0 }}
-    />
+    <div ref={mountRef} className="absolute inset-0">
+      {!isReady && (
+        <div className="absolute inset-0 flex items-center justify-center bg-stone-100 dark:bg-[#0c0b0a]">
+          <Loader2 size={24} className="animate-spin text-orange-500" />
+        </div>
+      )}
+    </div>
   );
 }
 
+// ─── Rocket Icon ──────────────────────────────────────────────
+function RocketIcon({ className }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/>
+      <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/>
+      <path d="M9 12H4s.55-3.03 2-5c1.62-2.2 5-3 5-3"/>
+      <path d="M12 15v5s3.03-.55 5-2c2.2-1.62 3-5 3-5"/>
+    </svg>
+  );
+}
+
+// ─── Main Hero Component ──────────────────────────────────────
 export default function Hero() {
   const { t } = useLanguage();
   const [imageLoaded, setImageLoaded] = useState(false);
   const [titleIndex, setTitleIndex] = useState(0);
 
-  /* rotate titles */
+  // Rotate titles
   useEffect(() => {
     const id = setInterval(() => setTitleIndex(p => (p + 1) % TITLES.length), 3800);
     return () => clearInterval(id);
   }, []);
 
   const achievements = [
-    { icon: Award, label: t('experience') || 'Experience', value: 3,  suffix: '+', color: '#f97316' },
-    { icon: Code2, label: t('projects')   || 'Projects',   value: 5,  suffix: '+', color: '#3b82f6' },
-    { icon: Heart, label: t('satisfaction')|| 'Satisfaction',value: 99,suffix: '%', color: '#ef4444' },
+    { icon: Award, label: t('experience', 'Experience'), value: 3,  suffix: '+', color: '#f97316' },
+    { icon: Code2, label: t('projects', 'Projects'),   value: 5,  suffix: '+', color: '#3b82f6' },
+    { icon: Heart, label: t('satisfaction', 'Satisfaction'), value: 99, suffix: '%', color: '#ef4444' },
     { icon: Star,  label: 'OSS Stars',                     value: 5,  suffix: '+', color: '#8b5cf6' },
   ];
 
@@ -315,19 +289,29 @@ export default function Hero() {
       className="relative min-h-screen flex items-center justify-center overflow-hidden
                  bg-stone-100 dark:bg-[#0c0b0a] pt-20 transition-colors duration-500"
     >
-      {/* ── 3D Background ─────────────────────────────────── */}
-      <Professional3DBackground />
+      {/* ── 3D Background ── */}
+      <LazyThreeJS 
+        componentId="hero-3d-bg"
+        fallback={
+          <div className="absolute inset-0">
+            <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl animate-pulse" />
+            <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+          </div>
+        }
+      >
+        <Professional3DBackground isDark={false} />
+      </LazyThreeJS>
 
-      {/* ── Gradient overlay for readability ────────────────── */}
-      <div className="absolute inset-0 bg-gradient-to-br from-stone-100/90 via-stone-100/70 to-transparent dark:from-[#0c0b0a]/90 dark:via-[#0c0b0a]/70 dark:to-transparent pointer-events-none" />
+      {/* ── Gradient overlay for readability ── */}
+      <div className="absolute inset-0 bg-gradient-to-br from-stone-100/80 via-stone-100/60 to-transparent dark:from-[#0c0b0a]/80 dark:via-[#0c0b0a]/60 dark:to-transparent pointer-events-none" />
 
-      {/* ── Ambient blobs ───────────────────────────────────── */}
+      {/* ── Ambient blobs ── */}
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -top-40 left-1/4 w-[480px] h-[480px] rounded-full bg-orange-500/[0.06] blur-3xl" />
         <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] rounded-full bg-blue-500/[0.05] blur-3xl" />
       </div>
 
-      {/* ── Subtle grid texture ─────────────────────────────── */}
+      {/* ── Subtle grid texture ── */}
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.025] dark:opacity-[0.04]"
         style={{
@@ -350,7 +334,7 @@ export default function Hero() {
             <div>
               <p className="flex items-center gap-2 text-[11px] font-semibold tracking-[0.2em] uppercase text-orange-500 mb-3">
                 <span className="block w-5 h-px bg-orange-500" />
-                {t("welcome") || "Hello, I'm"}
+                {t("welcome", "Hello, I'm")}
               </p>
               <h1 className="text-[clamp(52px,7vw,84px)] font-black leading-[0.9] tracking-tight text-stone-900 dark:text-stone-100">
                 Witness
@@ -377,8 +361,8 @@ export default function Hero() {
 
             {/* Bio */}
             <p className="text-sm leading-relaxed text-stone-500 dark:text-stone-500 max-w-md">
-              {t('witnessBio') ||
-                'Building fast, accessible, and beautifully crafted digital products from the heart of Kigali, Rwanda. Passionate about turning ideas into real, impactful experiences.'}
+              {t('witnessBio',
+                'Building fast, accessible, and beautifully crafted digital products from the heart of Kigali, Rwanda. Passionate about turning ideas into real, impactful experiences.')}
             </p>
 
             {/* Location */}
@@ -386,7 +370,7 @@ export default function Hero() {
               <MapPin size={12} className="text-orange-400" />
               Kigali, Rwanda
               <span className="mx-1 opacity-30">·</span>
-              <span className="text-green-500 font-semibold">Open to work</span>
+              <span className="text-green-500 font-semibold">{t('openToWork', 'Open to work')}</span>
             </div>
 
             {/* Achievement stats */}
@@ -415,7 +399,7 @@ export default function Hero() {
 
             {/* CTAs */}
             <div className="flex flex-wrap gap-3 items-center">
-              {/* Primary */}
+              {/* Primary CTA */}
               <motion.button
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
@@ -423,11 +407,11 @@ export default function Hero() {
                 className="group flex items-center gap-2 px-6 py-3.5 bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold rounded-2xl transition-all shadow-lg shadow-orange-500/25"
               >
                 <RocketIcon className="w-4 h-4" />
-                {t('viewProjects') || 'View Projects'}
+                {t('viewProjects', 'View Projects')}
                 <ArrowUpRight size={14} className="opacity-70 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
               </motion.button>
 
-              {/* Secondary */}
+              {/* Secondary CTA */}
               <motion.a
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
@@ -436,7 +420,7 @@ export default function Hero() {
                 className="flex items-center gap-2 px-6 py-3.5 bg-white/80 dark:bg-[#161513]/80 backdrop-blur-sm border border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-300 text-sm font-bold rounded-2xl hover:border-orange-400 transition-all"
               >
                 <Download size={14} />
-                Download CV
+                {t('downloadCV', 'Download CV')}
               </motion.a>
 
               {/* Socials */}
@@ -494,7 +478,7 @@ export default function Hero() {
                 <div className="absolute inset-0 bg-gradient-to-t from-stone-900/20 to-transparent pointer-events-none" />
               </div>
 
-              {/* Floating badges */}
+              {/* Floating badge — top right */}
               <motion.div
                 animate={{ y: [0, -10, 0] }}
                 transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
@@ -509,6 +493,7 @@ export default function Hero() {
                 </div>
               </motion.div>
 
+              {/* Floating badge — bottom left */}
               <motion.div
                 animate={{ y: [0, 10, 0] }}
                 transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
@@ -519,47 +504,38 @@ export default function Hero() {
                   <span className="relative rounded-full h-2 w-2 bg-green-500" />
                 </span>
                 <p className="text-[11px] font-bold text-stone-900 dark:text-stone-100 whitespace-nowrap">
-                  Available for hire
+                  {t('availableForHire', 'Available for hire')}
                 </p>
               </motion.div>
 
+              {/* Experience badge — bottom right */}
               <motion.div
                 animate={{ y: [0, -8, 0] }}
                 transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
                 className="absolute -bottom-2 right-6 flex flex-col items-center justify-center w-16 h-16 bg-orange-500 rounded-2xl shadow-lg shadow-orange-500/30 z-20"
               >
                 <span className="text-xl font-black text-white leading-none">3+</span>
-                <span className="text-[8px] font-bold text-orange-100 uppercase tracking-wide leading-tight text-center">Yrs Exp</span>
+                <span className="text-[8px] font-bold text-orange-100 uppercase tracking-wide leading-tight text-center">
+                  {t('yrsExp', 'Yrs Exp')}
+                </span>
               </motion.div>
             </div>
           </motion.div>
         </div>
       </div>
 
-      {/* ── Scroll indicator ────────────────────────────────── */}
+      {/* ── Scroll indicator ── */}
       <div
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 opacity-40 hover:opacity-70 transition-opacity cursor-pointer"
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 opacity-40 hover:opacity-70 transition-opacity cursor-pointer z-10"
         onClick={() => document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' })}
       >
         <span className="text-[9px] font-mono uppercase tracking-[0.25em] text-stone-400">
-          {t('exploreMore') || 'Explore'}
+          {t('exploreMore', 'Explore')}
         </span>
         <motion.div animate={{ y: [0, 6, 0] }} transition={{ repeat: Infinity, duration: 2 }}>
           <ChevronDown size={16} className="text-stone-400" />
         </motion.div>
       </div>
     </section>
-  );
-}
-
-/* ── Rocket SVG Icon ──────────────────────────────────────── */
-function RocketIcon({ className }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/>
-      <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/>
-      <path d="M9 12H4s.55-3.03 2-5c1.62-2.2 5-3 5-3"/>
-      <path d="M12 15v5s3.03-.55 5-2c2.2-1.62 3-5 3-5"/>
-    </svg>
   );
 }
