@@ -2,8 +2,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import * as THREE from 'three';
-import { useLanguage } from '../contexts/LanguageContext';
-import { useThreeJS } from '../hooks/useThreeJS';
+import { useLanguage } from '../../contexts/LanguageContext';
+import { useThreeJS } from '../../hooks/useThreeJS';
 import AnimatedCounter from '../shared/AnimatedCounter';
 import LazyThreeJS from '../shared/LazyThreeJS';
 import {
