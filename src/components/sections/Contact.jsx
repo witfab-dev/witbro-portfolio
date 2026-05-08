@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import * as THREE from 'three';
 import emailjs from '@emailjs/browser';
@@ -6,7 +6,7 @@ import {
   Mail, Phone, MapPin, Send, Github, Linkedin,
   Twitter, Instagram, Facebook, Check, Copy,
   AlertCircle, ArrowUpRight, Globe, Clock,
-  Shield, Zap, Star,
+  Shield, Zap, Star, Loader2,
 } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 
@@ -14,22 +14,117 @@ const SERVICE_ID  = 'service_r4cj7xg';
 const TEMPLATE_ID = 'template_mn5geej';
 const PUBLIC_KEY  = 'vNc8MXvN5Xl0NLVsy';
 
+// ─── Error Boundary ────────────────────────────────────────
+class ThreeJSErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.warn('Three.js component failed to initialize:', error);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="absolute inset-0 bg-[#0a0a0a]">
+          {/* Fallback decorative background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 via-transparent to-blue-500/5" />
+          <div className="absolute inset-0" style={{
+            backgroundImage: 'radial-gradient(circle at 50% 50%, rgba(249,115,22,0.1) 0%, transparent 50%)',
+          }} />
+          <div className="absolute inset-0" style={{
+            backgroundImage: 'linear-gradient(rgba(249,115,22,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(249,115,22,0.03) 1px, transparent 1px)',
+            backgroundSize: '60px 60px',
+          }} />
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
+// ─── Globe Background ──────────────────────────────────────
 function GlobeBackground() {
   const mountRef = useRef(null);
   const frameRef = useRef(null);
+  const rendererRef = useRef(null);
+  const [isVisible, setIsVisible] = useState(false);
+  const [webGLSupported, setWebGLSupported] = useState(true);
 
+  // Check WebGL support
   useEffect(() => {
+    try {
+      const canvas = document.createElement('canvas');
+      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      if (!gl) {
+        console.warn('WebGL not supported');
+        setWebGLSupported(false);
+        return;
+      }
+    } catch (e) {
+      console.warn('WebGL check failed:', e);
+      setWebGLSupported(false);
+    }
+  }, []);
+
+  // Intersection Observer for lazy loading
+  useEffect(() => {
+    if (!webGLSupported) return;
+    
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (mountRef.current) {
+      observer.observe(mountRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [webGLSupported]);
+
+  // Initialize Three.js only when visible and WebGL is supported
+  useEffect(() => {
+    if (!isVisible || !webGLSupported) return;
+
     const el = mountRef.current;
     if (!el) return;
-    const W = el.clientWidth, H = el.clientHeight;
+    
+    const W = el.clientWidth;
+    const H = el.clientHeight;
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setSize(W, H);
-    renderer.setClearColor(0x000000, 0);
-    el.appendChild(renderer.domElement);
+    let renderer = null;
+    
+    try {
+      renderer = new THREE.WebGLRenderer({ 
+        antialias: true, 
+        alpha: true,
+        powerPreference: "low-power",
+      });
+      
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setSize(W, H);
+      renderer.setClearColor(0x000000, 0);
+      el.appendChild(renderer.domElement);
+      rendererRef.current = renderer;
+    } catch (e) {
+      console.error('Failed to create WebGL renderer:', e);
+      return;
+    }
 
-    const scene  = new THREE.Scene();
+    const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(45, W / H, 0.1, 100);
     camera.position.set(0, 0, 4.5);
 
@@ -72,12 +167,12 @@ function GlobeBackground() {
     globeGroup.add(new THREE.Mesh(glowGeo, glowMat));
 
     const toSphere = (lat, lon, r = 1.53) => {
-      const phi   = (90 - lat)  * (Math.PI / 180);
+      const phi   = (90 - lat) * (Math.PI / 180);
       const theta = (lon + 180) * (Math.PI / 180);
       return new THREE.Vector3(
         -r * Math.sin(phi) * Math.cos(theta),
-         r * Math.cos(phi),
-         r * Math.sin(phi) * Math.sin(theta)
+        r * Math.cos(phi),
+        r * Math.sin(phi) * Math.sin(theta)
       );
     };
 
@@ -111,7 +206,7 @@ function GlobeBackground() {
     const dotGeo = new THREE.BufferGeometry();
     const dotPos = new Float32Array(continentClusters.length * 3);
     continentClusters.forEach((v, i) => {
-      dotPos[i * 3]     = v.x;
+      dotPos[i * 3] = v.x;
       dotPos[i * 3 + 1] = v.y;
       dotPos[i * 3 + 2] = v.z;
     });
@@ -135,8 +230,7 @@ function GlobeBackground() {
     ];
 
     markerPositions.forEach(({ lat, lon, color, r }) => {
-      const pos  = toSphere(lat, lon, 1.53);
-
+      const pos = toSphere(lat, lon, 1.53);
       const dot = new THREE.Mesh(
         new THREE.SphereGeometry(r, 8, 8),
         new THREE.MeshBasicMaterial({ color })
@@ -156,11 +250,11 @@ function GlobeBackground() {
 
     const kigali = toSphere(-1.94, 30.06, 1.54);
     const arcTargets = [
-      toSphere(48.85, 2.35,   1.54),
-      toSphere(40.71, -74.0,  1.54),
-      toSphere(35.68, 139.7,  1.54),
-      toSphere(1.35,  103.8,  1.54),
-      toSphere(25.2,  55.27,  1.54),
+      toSphere(48.85, 2.35, 1.54),
+      toSphere(40.71, -74.0, 1.54),
+      toSphere(35.68, 139.7, 1.54),
+      toSphere(1.35, 103.8, 1.54),
+      toSphere(25.2, 55.27, 1.54),
     ];
 
     arcTargets.forEach((target, ti) => {
@@ -182,9 +276,9 @@ function GlobeBackground() {
 
     const orbitRings = [];
     [
-      { r: 1.8,  tube: 0.006, color: 0xf97316, tilt:  0.5,  speed:  0.3 },
-      { r: 2.1,  tube: 0.004, color: 0x3b82f6, tilt: -0.8,  speed: -0.2 },
-      { r: 2.45, tube: 0.003, color: 0x8b5cf6, tilt:  1.2,  speed:  0.15 },
+      { r: 1.8, tube: 0.006, color: 0xf97316, tilt: 0.5, speed: 0.3 },
+      { r: 2.1, tube: 0.004, color: 0x3b82f6, tilt: -0.8, speed: -0.2 },
+      { r: 2.45, tube: 0.003, color: 0x8b5cf6, tilt: 1.2, speed: 0.15 },
     ].forEach(({ r, tube, color, tilt, speed }) => {
       const mesh = new THREE.Mesh(
         new THREE.TorusGeometry(r, tube, 6, 80),
@@ -197,12 +291,12 @@ function GlobeBackground() {
     });
 
     const pCount = 300;
-    const pPos   = new Float32Array(pCount * 3);
+    const pPos = new Float32Array(pCount * 3);
     for (let i = 0; i < pCount; i++) {
       const th = Math.random() * Math.PI * 2;
       const ph = Math.acos(2 * Math.random() - 1);
       const rr = 2.3 + Math.random() * 1.8;
-      pPos[i*3]   = rr * Math.sin(ph) * Math.cos(th);
+      pPos[i*3] = rr * Math.sin(ph) * Math.cos(th);
       pPos[i*3+1] = rr * Math.sin(ph) * Math.sin(th);
       pPos[i*3+2] = rr * Math.cos(ph);
     }
@@ -213,12 +307,12 @@ function GlobeBackground() {
     );
     globeGroup.add(particles);
 
-    // Position globe at center for full visibility
     globeGroup.position.set(0, 0, 0);
     scene.add(globeGroup);
 
     const onResize = () => {
-      const w = el.clientWidth, h = el.clientHeight;
+      const w = el.clientWidth;
+      const h = el.clientHeight;
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
@@ -252,42 +346,76 @@ function GlobeBackground() {
     return () => {
       cancelAnimationFrame(frameRef.current);
       window.removeEventListener('resize', onResize);
-      renderer.dispose();
-      if (el.contains(renderer.domElement)) el.removeChild(renderer.domElement);
+      
+      // Proper cleanup
+      scene.traverse((object) => {
+        if (object.geometry) object.geometry.dispose();
+        if (object.material) {
+          if (object.material.map) object.material.map.dispose();
+          object.material.dispose();
+        }
+      });
+      
+      if (renderer) {
+        renderer.dispose();
+        rendererRef.current = null;
+      }
+      
+      if (el && el.contains(renderer.domElement)) {
+        el.removeChild(renderer.domElement);
+      }
     };
-  }, []);
+  }, [isVisible, webGLSupported]);
 
-  return <div ref={mountRef} className="absolute inset-0" />;
+  if (!webGLSupported) {
+    return (
+      <div className="absolute inset-0 bg-[#0a0a0a]">
+        <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 via-transparent to-blue-500/5" />
+      </div>
+    );
+  }
+
+  return (
+    <div ref={mountRef} className="absolute inset-0">
+      {!isVisible && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <Loader2 size={24} className="animate-spin text-orange-500/50" />
+        </div>
+      )}
+    </div>
+  );
 }
 
+// ─── Contact Component ─────────────────────────────────────
 export default function Contact() {
   const { t } = useLanguage();
   const formRef = useRef();
 
-  const [formData,     setFormData]     = useState({ name: '', email: '', subject: '', message: '' });
+  const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null);
-  const [copiedField,  setCopiedField]  = useState(null);
-  const [focused,      setFocused]      = useState(null);
-  const [activeTab,    setActiveTab]    = useState('contact');
+  const [copiedField, setCopiedField] = useState(null);
+  const [focused, setFocused] = useState(null);
+  const [activeTab, setActiveTab] = useState('contact');
+  const [globeError, setGlobeError] = useState(false);
 
   const contactInfo = [
-    { id: 'email',    icon: Mail,   label: 'Email',    value: 'witnessfabrice@gmail.com', href: 'mailto:witnessfabrice@gmail.com' },
-    { id: 'phone',    icon: Phone,  label: 'Phone',    value: '+250 783 568 337',          href: 'tel:+250783568337' },
-    { id: 'location', icon: MapPin, label: 'Location', value: 'Kigali, Rwanda',            href: 'https://maps.google.com/?q=Kigali+Rwanda' },
+    { id: 'email', icon: Mail, label: 'Email', value: 'witnessfabrice@gmail.com', href: 'mailto:witnessfabrice@gmail.com' },
+    { id: 'phone', icon: Phone, label: 'Phone', value: '+250 783 568 337', href: 'tel:+250783568337' },
+    { id: 'location', icon: MapPin, label: 'Location', value: 'Kigali, Rwanda', href: 'https://maps.google.com/?q=Kigali+Rwanda' },
   ];
 
   const socialLinks = [
-    { icon: Github,    href: 'https://github.com/witfab-dev',          label: 'GitHub',    color: 'hover:bg-[#24292e]' },
-    { icon: Linkedin,  href: 'https://linkedin.com/in/witnessfabrice', label: 'LinkedIn',  color: 'hover:bg-[#0A66C2]' },
-    { icon: Twitter,   href: 'https://twitter.com/wit-fab',            label: 'Twitter',   color: 'hover:bg-[#1DA1F2]' },
-    { icon: Instagram, href: 'https://instagram.com/witbri1',          label: 'Instagram', color: 'hover:bg-[#E4405F]' },
-    { icon: Facebook,  href: 'https://facebook.com/witbrice',          label: 'Facebook',  color: 'hover:bg-[#1877F2]' },
+    { icon: Github, href: 'https://github.com/witfab-dev', label: 'GitHub', color: 'hover:bg-[#24292e]' },
+    { icon: Linkedin, href: 'https://linkedin.com/in/witnessfabrice', label: 'LinkedIn', color: 'hover:bg-[#0A66C2]' },
+    { icon: Twitter, href: 'https://twitter.com/wit-fab', label: 'Twitter', color: 'hover:bg-[#1DA1F2]' },
+    { icon: Instagram, href: 'https://instagram.com/witbri1', label: 'Instagram', color: 'hover:bg-[#E4405F]' },
+    { icon: Facebook, href: 'https://facebook.com/witbrice', label: 'Facebook', color: 'hover:bg-[#1877F2]' },
   ];
 
   const quickReplies = [
     'I have a project idea',
-    'Let\'s collaborate',
+    "Let's collaborate",
     'Need a consultation',
     'Job opportunity',
   ];
@@ -306,8 +434,8 @@ export default function Contact() {
 
   const handleChange = (e) => {
     const key = e.target.name === 'from_name' ? 'name'
-              : e.target.name === 'reply_to'  ? 'email'
-              : e.target.name === 'subject'   ? 'subject'
+              : e.target.name === 'reply_to' ? 'email'
+              : e.target.name === 'subject' ? 'subject'
               : 'message';
     setFormData(p => ({ ...p, [key]: e.target.value }));
   };
@@ -342,8 +470,10 @@ export default function Contact() {
       id="contact"
       className="relative min-h-screen py-24 px-4 sm:px-6 overflow-hidden bg-[#0a0a0a]"
     >
-      {/* Full visible globe background - NO overlay */}
-      <GlobeBackground />
+      {/* Full visible globe background with error boundary */}
+      <ThreeJSErrorBoundary>
+        <GlobeBackground />
+      </ThreeJSErrorBoundary>
 
       <div className="relative z-10 max-w-[1200px] mx-auto">
 
@@ -357,17 +487,17 @@ export default function Contact() {
         >
           <p className="inline-flex items-center gap-2 text-[11px] font-semibold tracking-[0.2em] uppercase text-orange-500 mb-4 px-4 py-2 rounded-full bg-orange-500/10 backdrop-blur-sm border border-orange-500/20">
             <Globe size={12} />
-            Get in touch
+            {t('contact.tagline', 'Get in touch')}
           </p>
           <h2 className="text-[clamp(36px,5vw,72px)] font-black leading-[0.93] tracking-tight text-white mb-4">
-            Let's build something
+            {t('contact.title1', "Let's build something")}
             <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-orange-300 italic">
-              great together.
+              {t('contact.title2', 'great together.')}
             </span>
           </h2>
           <p className="text-white/70 text-sm max-w-md mx-auto">
-            Have a project in mind? Drop me a message — I reply within 24 hours, from Kigali to anywhere on the globe.
+            {t('contact.subtitle', 'Have a project in mind? Drop me a message — I reply within 24 hours, from Kigali to anywhere on the globe.')}
           </p>
 
           {/* Stats */}
@@ -440,7 +570,7 @@ export default function Contact() {
               transition={{ delay: 0.3 }}
               className="p-5 bg-black/30 backdrop-blur-md border border-white/10 rounded-2xl"
             >
-              <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-white/50 mb-4">Follow me</p>
+              <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-white/50 mb-4">{t('contact.follow', 'Follow me')}</p>
               <div className="flex flex-wrap gap-2">
                 {socialLinks.map(({ icon: Icon, href, label, color }) => (
                   <motion.a
@@ -474,7 +604,7 @@ export default function Contact() {
                 <span className="relative rounded-full h-2.5 w-2.5 bg-green-500" />
               </span>
               <p className="text-xs text-white/70">
-                <span className="font-bold text-green-400">Available</span> for new projects & collaborations
+                <span className="font-bold text-green-400">{t('contact.available', 'Available')}</span> {t('contact.availableText', 'for new projects & collaborations')}
               </p>
             </motion.div>
           </div>
@@ -495,7 +625,7 @@ export default function Contact() {
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${
+                  className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all capitalize ${
                     activeTab === tab
                       ? 'bg-orange-500 text-white'
                       : 'text-white/50 hover:text-white hover:bg-white/5'
@@ -511,7 +641,7 @@ export default function Contact() {
               <div className="grid sm:grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[11px] font-bold uppercase tracking-widest text-white/50 ml-1">
-                    Your name
+                    {t('contact.name', 'Your name')}
                   </label>
                   <input
                     name="from_name" type="text" required
@@ -525,7 +655,7 @@ export default function Contact() {
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[11px] font-bold uppercase tracking-widest text-white/50 ml-1">
-                    Email address
+                    {t('contact.email', 'Email address')}
                   </label>
                   <input
                     name="reply_to" type="email" required
@@ -541,13 +671,13 @@ export default function Contact() {
 
               <div className="flex flex-col gap-1.5">
                 <label className="text-[11px] font-bold uppercase tracking-widest text-white/50 ml-1">
-                  Subject
+                  {t('contact.subject', 'Subject')}
                 </label>
                 <input
                   name="subject" type="text"
                   value={formData.subject} onChange={handleChange}
                   onFocus={() => setFocused('subject')} onBlur={() => setFocused(null)}
-                  placeholder="Project collaboration inquiry"
+                  placeholder={t('contact.subjectPlaceholder', 'Project collaboration inquiry')}
                   className={`${inputBase} ${focused === 'subject'
                     ? 'border-orange-400 shadow-[0_0_0_3px_rgba(249,115,22,0.15)]'
                     : 'border-white/10'}`}
@@ -556,19 +686,19 @@ export default function Contact() {
 
               <div className="flex flex-col gap-1.5">
                 <label className="text-[11px] font-bold uppercase tracking-widest text-white/50 ml-1">
-                  Message
+                  {t('contact.message', 'Message')}
                 </label>
                 <textarea
                   name="message" required rows={5}
                   value={formData.message} onChange={handleChange}
                   onFocus={() => setFocused('message')} onBlur={() => setFocused(null)}
-                  placeholder="Tell me about your project…"
+                  placeholder={t('contact.messagePlaceholder', 'Tell me about your project…')}
                   className={`${inputBase} resize-none ${focused === 'message'
                     ? 'border-orange-400 shadow-[0_0_0_3px_rgba(249,115,22,0.15)]'
                     : 'border-white/10'}`}
                 />
-                <div className="flex items-center justify-between">
-                  <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                  <div className="flex flex-wrap gap-2">
                     {quickReplies.map((reply, i) => (
                       <button
                         key={i}
@@ -581,7 +711,7 @@ export default function Contact() {
                     ))}
                   </div>
                   <p className="text-[10px] text-white/40">
-                    {formData.message.length} characters
+                    {formData.message.length} {t('contact.characters', 'characters')}
                   </p>
                 </div>
               </div>
@@ -597,23 +727,24 @@ export default function Contact() {
                   {isSubmitting ? (
                     <motion.span key="loading" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
                       className="flex items-center justify-center gap-2">
-                      <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Sending…
+                      <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      {t('contact.sending', 'Sending…')}
                     </motion.span>
                   ) : submitStatus === 'success' ? (
                     <motion.span key="ok" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
                       className="flex items-center justify-center gap-2">
-                      <Check size={16} /> Message sent successfully!
+                      <Check size={16} /> {t('contact.success', 'Message sent successfully!')}
                     </motion.span>
                   ) : submitStatus === 'error' ? (
                     <motion.span key="err" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
                       className="flex items-center justify-center gap-2">
-                      <AlertCircle size={16} /> Failed to send — try again
+                      <AlertCircle size={16} /> {t('contact.error', 'Failed to send — try again')}
                     </motion.span>
                   ) : (
                     <motion.span key="idle" initial={{ opacity: 0 }} animate={{ opacity: 1 }}
                       className="flex items-center justify-center gap-2">
                       <Send size={15} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                      Send Message
+                      {t('contact.send', 'Send Message')}
                       <ArrowUpRight size={14} className="opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
                     </motion.span>
                   )}
@@ -622,10 +753,10 @@ export default function Contact() {
 
               <div className="flex items-center justify-center gap-4 text-[10px] text-white/40">
                 <span className="flex items-center gap-1">
-                  <Shield size={10} /> Your info is secure
+                  <Shield size={10} /> {t('contact.secure', 'Your info is secure')}
                 </span>
                 <span className="flex items-center gap-1">
-                  <Clock size={10} /> Reply within 24 hours
+                  <Clock size={10} /> {t('contact.reply', 'Reply within 24 hours')}
                 </span>
               </div>
             </form>
