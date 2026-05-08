@@ -1,13 +1,13 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ThemeProvider } from './components/contexts/ThemeContext';
-import { LanguageProvider, useLanguage } from '.components//contexts/LanguageContext';
+import { ThemeProvider } from './contexts/ThemeContext';
+import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import VoiceAssistant from './components/ui/VoiceAssistant';
 import ThreeJSErrorBoundary from './components/shared/ThreeJSErrorBoundary';
-import { webGLManager } from './components/hooks/WebGLManager';
+import { webGLManager } from './hooks/WebGLManager';
 
 import { Loader2, Bot } from 'lucide-react';
 
