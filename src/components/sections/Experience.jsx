@@ -1,10 +1,14 @@
-import React, { useRef, useState, useMemo } from 'react';
+import React, { useRef, useState, useMemo, useEffect } from 'react';
 import { motion, useScroll, useSpring, AnimatePresence } from 'framer-motion';
+import * as THREE from 'three';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { useThreeJS } from '../hooks/useThreeJS';
+import LazyThreeJS from '../shared/LazyThreeJS';
 import {
   MapPin, Calendar, Briefcase, ChevronDown,
   Star, TrendingUp, Users, Clock, Zap, ArrowUpRight,
+  Loader2,
 } from 'lucide-react';
 
 // ─── Data ──────────────────────────────────────────────────────
@@ -27,8 +31,7 @@ const getExperiences = (t) => [
     ],
     accent: '#f97316',
     highlight: 'Led full frontend architecture migration',
-    peakHeight: 380,
-    mountainColor: 'from-orange-600 to-orange-800',
+    peakHeight: 3.8,
   },
   {
     company: 'Kirehe Adventist TVET School',
@@ -48,8 +51,7 @@ const getExperiences = (t) => [
     ],
     accent: '#3b82f6',
     highlight: 'AI voice-command integration',
-    peakHeight: 290,
-    mountainColor: 'from-blue-600 to-blue-800',
+    peakHeight: 2.9,
   },
   {
     company: 'Kirehe Adventist TVET School',
@@ -69,220 +71,302 @@ const getExperiences = (t) => [
     ],
     accent: '#8b5cf6',
     highlight: '20+ production sites across 6 countries',
-    peakHeight: 220,
-    mountainColor: 'from-purple-600 to-purple-800',
+    peakHeight: 2.2,
   },
 ];
 
-// ─── CSS Mountain Scene ────────────────────────────────────────
-function CSSMountainScene({ experiences, activeIdx, onPeakClick }) {
-  const [stars] = useState(() => 
-    Array.from({ length: 50 }, () => ({
-      left: Math.random() * 100,
-      top: Math.random() * 60,
-      size: 1 + Math.random() * 2,
-      delay: Math.random() * 3,
-      duration: 2 + Math.random() * 3,
-    }))
-  );
+// ─── 3D Mountain Scene ────────────────────────────────────────
+function MountainScene({ experiences, activeIdx, onPeakClick }) {
+  const { 
+    mountRef, 
+    isReady, 
+    error,
+    startAnimationLoop,
+    handleResize,
+    useMouseInteraction,
+    useRaycaster,
+  } = useThreeJS('experience-mountains', {
+    cameraPosition: [0, 2, 10],
+    fov: 50,
+    enableShadows: true,
+    onInit: ({ scene, camera }) => {
+      // Fog for depth
+      scene.fog = new THREE.FogExp2(0x0c0b0a, 0.035);
 
-  return (
-    <div className="relative w-full h-full bg-gradient-to-b from-[#0a0d14] via-[#0d1117] to-[#111827] overflow-hidden">
-      {/* Stars */}
-      {stars.map((star, i) => (
-        <motion.div
-          key={i}
-          className="absolute rounded-full bg-white"
-          style={{
-            left: `${star.left}%`,
-            top: `${star.top}%`,
-            width: star.size,
-            height: star.size,
-          }}
-          animate={{
-            opacity: [0.3, 1, 0.3],
-            scale: [1, 1.5, 1],
-          }}
-          transition={{
-            duration: star.duration,
-            delay: star.delay,
-            repeat: Infinity,
-            ease: 'easeInOut',
-          }}
-        />
-      ))}
+      // Lighting
+      scene.add(new THREE.AmbientLight(0xffffff, 0.25));
+      
+      const sun = new THREE.DirectionalLight(0xfff4e0, 3);
+      sun.position.set(6, 10, 5);
+      sun.castShadow = true;
+      scene.add(sun);
+      
+      const fillLight = new THREE.DirectionalLight(0x3b82f6, 0.8);
+      fillLight.position.set(-8, 2, -3);
+      scene.add(fillLight);
+      
+      const rimLight = new THREE.DirectionalLight(0xf97316, 0.6);
+      rimLight.position.set(0, -2, 6);
+      scene.add(rimLight);
 
-      {/* Moon */}
-      <div className="absolute top-8 right-12 w-12 h-12 rounded-full bg-gradient-to-br from-white to-gray-300 opacity-80 shadow-lg shadow-white/20" />
-      <div className="absolute top-6 right-10 w-4 h-4 rounded-full bg-[#0a0d14]" />
+      const COLORS = [0x8b5cf6, 0x3b82f6, 0xf97316];
+      const HEIGHTS = experiences.map(e => e.peakHeight);
+      const X_POS = [-3.2, 0, 3.2];
+      const group = new THREE.Group();
 
-      {/* Mountains Container */}
-      <div className="absolute bottom-0 left-0 right-0 flex items-end justify-center px-8 sm:px-16">
-        <div className="flex items-end gap-0 w-full max-w-2xl" style={{ justifyContent: 'space-between' }}>
-          {experiences.map((exp, i) => {
-            const isActive = activeIdx === i;
-            const height = isActive ? exp.peakHeight + 20 : exp.peakHeight;
-            
-            return (
-              <div
-                key={i}
-                className="relative flex flex-col items-center cursor-pointer"
-                style={{ width: `${100 / experiences.length}%` }}
-                onClick={() => onPeakClick(i)}
-              >
-                {/* Light beam from peak */}
-                {isActive && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: [0.3, 0.6, 0.3], height: [0, 80, 0] }}
-                    transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-                    className="absolute bottom-full w-0.5 origin-bottom"
-                    style={{
-                      background: `linear-gradient(to top, ${exp.accent}, transparent)`,
-                      left: '50%',
-                      transform: 'translateX(-50%)',
-                    }}
-                  />
-                )}
+      // Ground plane
+      const groundGeo = new THREE.PlaneGeometry(20, 12, 40, 20);
+      const gPos = groundGeo.attributes.position;
+      for (let i = 0; i < gPos.count; i++) {
+        const x = gPos.getX(i), z = gPos.getY(i);
+        const d = Math.sqrt(x * x + z * z) / 8;
+        gPos.setZ(i, Math.sin(x * 0.8) * Math.cos(z * 0.6) * 0.15 * d);
+      }
+      groundGeo.computeVertexNormals();
+      const ground = new THREE.Mesh(groundGeo, new THREE.MeshStandardMaterial({
+        color: 0x1a1512, metalness: 0.0, roughness: 0.95,
+      }));
+      ground.rotation.x = -Math.PI / 2;
+      ground.position.y = -1.5;
+      ground.receiveShadow = true;
+      group.add(ground);
 
-                {/* Mountain */}
-                <motion.div
-                  animate={{
-                    height: height,
-                    scale: isActive ? 1.05 : 1,
-                  }}
-                  transition={{ duration: 0.5, ease: 'easeInOut' }}
-                  className="relative w-full"
-                  style={{ height }}
-                >
-                  {/* Main mountain shape */}
-                  <div
-                    className={`absolute bottom-0 w-full bg-gradient-to-b ${exp.mountainColor} rounded-t-full`}
-                    style={{
-                      height: '100%',
-                      clipPath: `polygon(50% 0%, 100% 100%, 0% 100%)`,
-                    }}
-                  >
-                    {/* Snow cap */}
-                    <div
-                      className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-8 bg-gradient-to-b from-white to-white/80 rounded-t-full"
-                      style={{
-                        clipPath: 'polygon(40% 0%, 60% 0%, 80% 100%, 20% 100%)',
-                      }}
-                    />
-                  </div>
+      // Grid helper
+      const gridHelper = new THREE.GridHelper(18, 22, 0xf97316, 0x1f1b16);
+      gridHelper.material.opacity = 0.07;
+      gridHelper.material.transparent = true;
+      gridHelper.position.y = -1.48;
+      group.add(gridHelper);
 
-                  {/* Mountain texture lines */}
-                  <div className="absolute inset-0 opacity-10">
-                    {[...Array(4)].map((_, j) => (
-                      <div
-                        key={j}
-                        className="absolute bg-white/20"
-                        style={{
-                          left: `${15 + j * 20}%`,
-                          top: `${20 + j * 15}%`,
-                          width: '1px',
-                          height: `${30 + j * 10}%`,
-                          transform: `rotate(${-10 + j * 5}deg)`,
-                        }}
-                      />
-                    ))}
-                  </div>
+      // Mountains
+      const peaks = [];
+      const snowCapArr = [];
+      const glowSph = [];
+      const beams = [];
+      const rings = [];
 
-                  {/* Active glow */}
-                  {isActive && (
-                    <motion.div
-                      animate={{ opacity: [0.2, 0.5, 0.2] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                      className="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-20 rounded-full blur-xl"
-                      style={{ background: exp.accent }}
-                    />
-                  )}
-                </motion.div>
+      X_POS.forEach((x, i) => {
+        const h = HEIGHTS[i];
+        const color = COLORS[i];
 
-                {/* Orbital ring at peak */}
-                {isActive && (
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
-                    className="absolute border-2 rounded-full opacity-40"
-                    style={{
-                      width: 40,
-                      height: 40,
-                      borderColor: exp.accent,
-                      bottom: height - 20,
-                      left: '50%',
-                      transform: 'translateX(-50%)',
-                      clipPath: 'polygon(0 0, 100% 0, 100% 50%, 0 50%)',
-                    }}
-                  />
-                )}
+        // Main mountain cone
+        const coneGeo = new THREE.ConeGeometry(1.5 - i * 0.1, h, 7, 1);
+        const cPos = coneGeo.attributes.position;
+        for (let v = 0; v < cPos.count; v++) {
+          const vy = cPos.getY(v);
+          if (vy < h / 2 - 0.1) {
+            cPos.setX(v, cPos.getX(v) + (Math.random() - 0.5) * 0.18);
+            cPos.setZ(v, cPos.getZ(v) + (Math.random() - 0.5) * 0.18);
+          }
+        }
+        coneGeo.computeVertexNormals();
 
-                {/* Year badge */}
-                <motion.div
-                  animate={{
-                    y: isActive ? -5 : 0,
-                    scale: isActive ? 1.1 : 1,
-                  }}
-                  className="absolute top-[-30px] left-1/2 -translate-x-1/2 px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest transition-all duration-300"
-                  style={{
-                    background: isActive ? exp.accent : `${exp.accent}20`,
-                    color: isActive ? 'white' : exp.accent,
-                    border: `1px solid ${exp.accent}50`,
-                  }}
-                >
-                  {exp.period.split(' ')[0]}
-                </motion.div>
-              </div>
-            );
-          })}
+        const cone = new THREE.Mesh(coneGeo, new THREE.MeshStandardMaterial({
+          color, metalness: 0.15, roughness: 0.85,
+          emissive: color, emissiveIntensity: 0.05,
+        }));
+        cone.position.set(x, -1.5 + h / 2, 0);
+        cone.castShadow = true;
+        cone.receiveShadow = true;
+        cone.userData = { index: i };
+        group.add(cone);
+        peaks.push(cone);
+
+        // Wireframe overlay
+        const wireframe = new THREE.Mesh(coneGeo, new THREE.MeshBasicMaterial({
+          color, wireframe: true, transparent: true, opacity: 0.06,
+        }));
+        wireframe.position.copy(cone.position);
+        group.add(wireframe);
+
+        // Snow cap
+        const snow = new THREE.Mesh(
+          new THREE.ConeGeometry(0.32, 0.45, 7, 1),
+          new THREE.MeshStandardMaterial({
+            color: 0xffffff, emissive: 0xffffff,
+            emissiveIntensity: 0.08, roughness: 0.6,
+          })
+        );
+        snow.position.set(x, -1.5 + h - 0.1, 0);
+        group.add(snow);
+        snowCapArr.push(snow);
+
+        // Peak glow
+        const glow = new THREE.Mesh(
+          new THREE.SphereGeometry(0.22, 12, 12),
+          new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.2 })
+        );
+        glow.position.set(x, -1.5 + h + 0.18, 0);
+        group.add(glow);
+        glowSph.push(glow);
+
+        // Light beam
+        const beam = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.015, 0.04, 3, 6, 1, true),
+          new THREE.MeshBasicMaterial({
+            color, transparent: true, opacity: 0.18, side: THREE.DoubleSide,
+          })
+        );
+        beam.position.set(x, -1.5 + h + 1.6, 0);
+        group.add(beam);
+        beams.push(beam);
+
+        // Orbital ring
+        const ring = new THREE.Mesh(
+          new THREE.TorusGeometry(0.45, 0.012, 6, 40),
+          new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.5 })
+        );
+        ring.position.set(x, -1.5 + h + 0.18, 0);
+        ring.rotation.x = Math.PI / 2.5;
+        ring.userData.speed = 0.025 - i * 0.005;
+        group.add(ring);
+        rings.push(ring);
+      });
+
+      // Background distant mountains
+      [
+        { x: -6.5, h: 1.6, s: 2.2, z: -3 },
+        { x: -5, h: 2.1, s: 1.8, z: -4 },
+        { x: 5, h: 1.8, s: 2.0, z: -3 },
+        { x: 6.5, h: 1.4, s: 2.5, z: -4 },
+        { x: 1.8, h: 1.3, s: 1.5, z: -5 },
+        { x: -1.5, h: 1.1, s: 1.4, z: -5 },
+      ].forEach(({ x, h, s, z }) => {
+        const m = new THREE.Mesh(
+          new THREE.ConeGeometry(s, h, 6, 1),
+          new THREE.MeshStandardMaterial({ color: 0x1a1815, roughness: 1, metalness: 0 })
+        );
+        m.position.set(x, -1.5 + h / 2, z);
+        group.add(m);
+      });
+
+      // Stars
+      const sCnt = 250;
+      const sPts = new Float32Array(sCnt * 3);
+      for (let i = 0; i < sCnt; i++) {
+        sPts[i * 3] = (Math.random() - 0.5) * 24;
+        sPts[i * 3 + 1] = Math.random() * 8 + 1;
+        sPts[i * 3 + 2] = (Math.random() - 0.5) * 14 - 2;
+      }
+      const sGeo = new THREE.BufferGeometry();
+      sGeo.setAttribute('position', new THREE.BufferAttribute(sPts, 3));
+      const stars = new THREE.Points(sGeo, new THREE.PointsMaterial({
+        color: 0xffffff, size: 0.035, transparent: true, opacity: 0.55,
+      }));
+      group.add(stars);
+
+      // Floating particles
+      const pCnt = 60;
+      const pPts = new Float32Array(pCnt * 3);
+      X_POS.forEach((px, mi) => {
+        const base = mi * 20;
+        for (let i = 0; i < 20; i++) {
+          pPts[(base + i) * 3] = px + (Math.random() - 0.5) * 1.5;
+          pPts[(base + i) * 3 + 1] = -1.5 + HEIGHTS[mi] * 0.6 + Math.random() * HEIGHTS[mi] * 0.5;
+          pPts[(base + i) * 3 + 2] = (Math.random() - 0.5) * 1.5;
+        }
+      });
+      const pGeo = new THREE.BufferGeometry();
+      pGeo.setAttribute('position', new THREE.BufferAttribute(pPts, 3));
+      const particles = new THREE.Points(pGeo, new THREE.PointsMaterial({
+        color: 0xffffff, size: 0.02, transparent: true, opacity: 0.4,
+      }));
+      group.add(particles);
+
+      scene.add(group);
+
+      // Track active index
+      let currentActiveIdx = activeIdx;
+      const setActiveIdx = (idx) => { currentActiveIdx = idx; };
+
+      // Animation loop
+      let elapsedTime = 0;
+      startAnimationLoop(() => {
+        elapsedTime += 0.016;
+
+        // Animate peaks
+        peaks.forEach((p, i) => {
+          const isActive = i === currentActiveIdx;
+          p.material.emissiveIntensity += ((isActive ? 0.35 : 0.04) - p.material.emissiveIntensity) * 0.07;
+          
+          const targetS = isActive ? 1 + Math.sin(elapsedTime * 2) * 0.015 : 1.0;
+          p.scale.setScalar(p.scale.x + (targetS - p.scale.x) * 0.1);
+
+          if (glowSph[i]) {
+            glowSph[i].material.opacity += ((isActive ? 0.45 + Math.sin(elapsedTime * 2.5) * 0.15 : 0.12) - glowSph[i].material.opacity) * 0.08;
+            glowSph[i].scale.setScalar(isActive ? 1 + Math.sin(elapsedTime * 2) * 0.12 : 1);
+          }
+
+          if (beams[i]) {
+            beams[i].material.opacity = isActive ? 0.35 + Math.sin(elapsedTime * 3) * 0.1 : 0.08;
+          }
+
+          if (snowCapArr[i]) {
+            snowCapArr[i].material.emissiveIntensity = isActive ? 0.35 : 0.06;
+          }
+        });
+
+        // Rotate rings
+        rings.forEach(r => {
+          if (r.userData.speed) r.rotation.z += r.userData.speed;
+        });
+
+        stars.rotation.y += 0.0003;
+        particles.rotation.y += 0.001;
+      });
+
+      // Store references for click handling and active index updates
+      return { peaks, setActiveIdx, camera, scene };
+    },
+  });
+
+  // Update active index in the animation loop
+  useEffect(() => {
+    // This will be handled by the animation loop reference
+    const el = mountRef.current;
+    if (!el) return;
+    
+    // Use a custom event or ref to communicate activeIdx changes
+    window.__mountainActiveIdx = activeIdx;
+  }, [activeIdx]);
+
+  // Mouse interaction for camera tilt
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  useMouseInteraction(({ x, y }) => setMousePos({ x, y }));
+
+  // Click detection on peaks
+  useRaycaster([], (intersect) => {
+    if (intersect.object.userData && intersect.object.userData.index !== undefined) {
+      onPeakClick(intersect.object.userData.index);
+    }
+  });
+
+  // Resize handler
+  useEffect(() => {
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [handleResize]);
+
+  // Error state
+  if (error) {
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-[#080c14]">
+        <div className="text-center text-white/50">
+          <div className="text-4xl mb-2">⛰️</div>
+          <p className="text-sm font-bold">Mountain View</p>
+          <p className="text-[10px]">Click cards below to explore</p>
         </div>
       </div>
+    );
+  }
 
-      {/* Ground */}
-      <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-[#1a1a2e] to-transparent" />
-      
-      {/* Ground grid */}
-      <div className="absolute bottom-0 left-0 right-0 h-16 opacity-10"
-        style={{
-          backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)',
-          backgroundSize: '30px 30px',
-          perspective: '500px',
-          transform: 'rotateX(60deg)',
-          transformOrigin: 'bottom',
-        }}
-      />
-
-      {/* Floating particles */}
-      {[...Array(15)].map((_, i) => (
-        <motion.div
-          key={`particle-${i}`}
-          className="absolute w-1 h-1 rounded-full bg-white/30"
-          style={{
-            left: `${Math.random() * 100}%`,
-            bottom: `${20 + Math.random() * 60}%`,
-          }}
-          animate={{
-            y: [-20, 20, -20],
-            opacity: [0, 0.5, 0],
-          }}
-          transition={{
-            duration: 3 + Math.random() * 4,
-            delay: Math.random() * 2,
-            repeat: Infinity,
-            ease: 'easeInOut',
-          }}
-        />
-      ))}
-
-      {/* Click instruction */}
-      <div className="absolute top-4 left-4 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/50 backdrop-blur-sm border border-white/10">
-        <span className="relative flex h-1.5 w-1.5">
-          <span className="animate-ping absolute h-full w-full rounded-full bg-orange-400 opacity-70" />
-          <span className="relative rounded-full h-1.5 w-1.5 bg-orange-500" />
-        </span>
-        <span className="text-[9px] font-bold uppercase tracking-widest text-white/60">Click a peak to explore</span>
-      </div>
+  return (
+    <div ref={mountRef} className="w-full h-full cursor-pointer" style={{ touchAction: 'none' }}>
+      {!isReady && (
+        <div className="w-full h-full flex items-center justify-center bg-[#080c14]">
+          <Loader2 size={24} className="animate-spin text-orange-500" />
+        </div>
+      )}
     </div>
   );
 }
@@ -332,17 +416,14 @@ const ExpCard = ({ exp, index, isActive, onClick, t }) => (
     <div className="absolute inset-0 rounded-2xl pointer-events-none border border-stone-200 dark:border-stone-800/60 transition-opacity duration-300"
       style={{ opacity: isActive ? 0 : 1 }} />
 
-    {/* Top accent bar */}
     <div className="h-1 w-full" style={{ background: isActive ? exp.accent : `${exp.accent}35` }} />
 
-    {/* Active peak indicator line */}
     {isActive && (
       <div className="absolute top-1 left-1/2 -translate-x-1/2 w-px h-5 -translate-y-full"
         style={{ background: `linear-gradient(to top, ${exp.accent}, transparent)` }} />
     )}
 
     <div className="bg-white dark:bg-[#161513] p-5">
-      {/* Step number */}
       <div className="flex items-start justify-between mb-3">
         <div
           className="w-8 h-8 rounded-xl flex items-center justify-center text-[11px] font-black shrink-0"
@@ -387,7 +468,6 @@ const ExpCard = ({ exp, index, isActive, onClick, t }) => (
         </span>
       </div>
 
-      {/* Highlight */}
       <div className="flex items-center gap-1.5 mb-2.5">
         <Zap size={10} style={{ color: exp.accent }} />
         <span className="text-[10px] font-semibold text-stone-500 dark:text-stone-500 italic">{exp.highlight}</span>
@@ -395,7 +475,6 @@ const ExpCard = ({ exp, index, isActive, onClick, t }) => (
 
       <p className="text-xs leading-relaxed text-stone-500 dark:text-stone-400 mb-3">{exp.description}</p>
 
-      {/* Skills */}
       <div className="flex flex-wrap gap-1">
         {exp.skills.slice(0, 4).map(s => (
           <span key={s} className="px-2 py-0.5 rounded-md text-[9px] font-bold uppercase"
@@ -408,7 +487,6 @@ const ExpCard = ({ exp, index, isActive, onClick, t }) => (
         )}
       </div>
 
-      {/* Expand */}
       <AnimatePresence>
         {isActive && (
           <motion.div
@@ -419,7 +497,6 @@ const ExpCard = ({ exp, index, isActive, onClick, t }) => (
             className="overflow-hidden"
           >
             <div className="mt-4 pt-4 border-t space-y-4" style={{ borderColor: `${exp.accent}20` }}>
-              {/* Stats */}
               <div>
                 <p className="text-[9px] uppercase tracking-widest text-stone-400 dark:text-stone-600 mb-2">
                   {t('keyMetrics', 'Key metrics')}
@@ -430,7 +507,6 @@ const ExpCard = ({ exp, index, isActive, onClick, t }) => (
                   ))}
                 </div>
               </div>
-              {/* Skill bars */}
               <div>
                 <p className="text-[9px] uppercase tracking-widest text-stone-400 dark:text-stone-600 mb-2">
                   {t('proficiency', 'Proficiency')}
@@ -520,11 +596,10 @@ export default function Experience() {
               {t('work', 'Work')} <span className="text-orange-500 italic">{t('experience', 'Experience')}</span>
             </h2>
             <p className="mt-3 text-sm leading-relaxed max-w-xs text-stone-500 dark:text-stone-500">
-              {t('experienceDesc', 'Each peak represents a milestone — the higher the mountain, the greater the growth.')}
+              {t('experienceDesc', 'Each peak represents a milestone — click a mountain to explore.')}
             </p>
           </motion.div>
 
-          {/* Filters */}
           <motion.div 
             initial={{ opacity: 0, y: 16 }} 
             whileInView={{ opacity: 1, y: 0 }} 
@@ -574,20 +649,67 @@ export default function Experience() {
           ))}
         </motion.div>
 
-        {/* CSS Mountain Scene (No WebGL!) */}
+        {/* 3D Mountain Scene */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
-          className="relative rounded-3xl overflow-hidden border border-stone-200 dark:border-stone-800/50 mb-4"
+          className="relative rounded-3xl overflow-hidden border border-stone-800/50 bg-[#080c14] mb-4"
           style={{ height: 380 }}
         >
-          <CSSMountainScene 
-            experiences={experiences} 
-            activeIdx={activeIdx} 
-            onPeakClick={handlePeakClick} 
-          />
+          <LazyThreeJS
+            componentId="experience-mountains"
+            fallback={
+              <div className="w-full h-full flex items-center justify-center bg-[#080c14]">
+                <div className="text-center">
+                  <Loader2 size={24} className="animate-spin mx-auto mb-2 text-orange-500" />
+                  <p className="text-sm text-white/50">{t('loading', 'Loading mountains...')}</p>
+                </div>
+              </div>
+            }
+          >
+            <MountainScene 
+              experiences={experiences} 
+              activeIdx={activeIdx} 
+              onPeakClick={handlePeakClick} 
+            />
+          </LazyThreeJS>
+
+          {/* Vignette overlay */}
+          <div className="absolute inset-0 pointer-events-none"
+            style={{ background: 'radial-gradient(ellipse at center, transparent 45%, rgba(0,0,0,0.5) 100%)' }} />
+
+          {/* Peak labels */}
+          <div className="absolute inset-0 pointer-events-none flex items-end justify-center pb-5">
+            <div className="flex items-end gap-0" style={{ width: '72%', justifyContent: 'space-between' }}>
+              {experiences.map((exp, i) => (
+                <div key={i} className="flex flex-col items-center gap-1" style={{ width: '33%' }}>
+                  <div
+                    className="px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest transition-all duration-300"
+                    style={{
+                      background: activeIdx === i ? exp.accent : `${exp.accent}20`,
+                      color: activeIdx === i ? 'white' : exp.accent,
+                      border: `1px solid ${exp.accent}50`,
+                    }}
+                  >
+                    {exp.period.split(' ')[0]}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Click instruction */}
+          <div className="absolute top-4 left-4 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/50 backdrop-blur-sm border border-white/10">
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="animate-ping absolute h-full w-full rounded-full bg-orange-400 opacity-70" />
+              <span className="relative rounded-full h-1.5 w-1.5 bg-orange-500" />
+            </span>
+            <span className="text-[9px] font-bold uppercase tracking-widest text-white/60">
+              {t('clickPeak', 'Click a peak to explore')}
+            </span>
+          </div>
         </motion.div>
 
         {/* Experience Cards */}
