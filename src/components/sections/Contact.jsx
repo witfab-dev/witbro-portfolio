@@ -1,384 +1,276 @@
-import React, { useState, useRef, useEffect, Suspense } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import * as THREE from 'three';
 import emailjs from '@emailjs/browser';
+import { useLanguage } from '../contexts/LanguageContext';
+import { useThreeJS } from '../hooks/useThreeJS';
+import LazyThreeJS from '../shared/LazyThreeJS';
 import {
   Mail, Phone, MapPin, Send, Github, Linkedin,
   Twitter, Instagram, Facebook, Check, Copy,
   AlertCircle, ArrowUpRight, Globe, Clock,
   Shield, Zap, Star, Loader2,
 } from 'lucide-react';
-import { useLanguage } from '../../contexts/LanguageContext';
 
 const SERVICE_ID  = 'service_r4cj7xg';
 const TEMPLATE_ID = 'template_mn5geej';
 const PUBLIC_KEY  = 'vNc8MXvN5Xl0NLVsy';
 
-// ─── Error Boundary ────────────────────────────────────────
-class ThreeJSErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { hasError: false, error: null };
-  }
-
-  static getDerivedStateFromError(error) {
-    return { hasError: true, error };
-  }
-
-  componentDidCatch(error, errorInfo) {
-    console.warn('Three.js component failed to initialize:', error);
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return (
-        <div className="absolute inset-0 bg-[#0a0a0a]">
-          {/* Fallback decorative background */}
-          <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 via-transparent to-blue-500/5" />
-          <div className="absolute inset-0" style={{
-            backgroundImage: 'radial-gradient(circle at 50% 50%, rgba(249,115,22,0.1) 0%, transparent 50%)',
-          }} />
-          <div className="absolute inset-0" style={{
-            backgroundImage: 'linear-gradient(rgba(249,115,22,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(249,115,22,0.03) 1px, transparent 1px)',
-            backgroundSize: '60px 60px',
-          }} />
-        </div>
-      );
-    }
-
-    return this.props.children;
-  }
-}
-
 // ─── Globe Background ──────────────────────────────────────
 function GlobeBackground() {
-  const mountRef = useRef(null);
-  const frameRef = useRef(null);
-  const rendererRef = useRef(null);
-  const [isVisible, setIsVisible] = useState(false);
-  const [webGLSupported, setWebGLSupported] = useState(true);
-
-  // Check WebGL support
-  useEffect(() => {
-    try {
-      const canvas = document.createElement('canvas');
-      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-      if (!gl) {
-        console.warn('WebGL not supported');
-        setWebGLSupported(false);
-        return;
-      }
-    } catch (e) {
-      console.warn('WebGL check failed:', e);
-      setWebGLSupported(false);
-    }
-  }, []);
-
-  // Intersection Observer for lazy loading
-  useEffect(() => {
-    if (!webGLSupported) return;
-    
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    if (mountRef.current) {
-      observer.observe(mountRef.current);
-    }
-
-    return () => observer.disconnect();
-  }, [webGLSupported]);
-
-  // Initialize Three.js only when visible and WebGL is supported
-  useEffect(() => {
-    if (!isVisible || !webGLSupported) return;
-
-    const el = mountRef.current;
-    if (!el) return;
-    
-    const W = el.clientWidth;
-    const H = el.clientHeight;
-
-    let renderer = null;
-    
-    try {
-      renderer = new THREE.WebGLRenderer({ 
-        antialias: true, 
-        alpha: true,
-        powerPreference: "low-power",
-      });
+  const { 
+    mountRef, 
+    isReady, 
+    error,
+    startAnimationLoop,
+    handleResize,
+  } = useThreeJS('contact-globe', {
+    cameraPosition: [0, 0, 4.5],
+    fov: 45,
+    enableShadows: false,
+    onInit: ({ scene, camera }) => {
+      // Lighting
+      scene.add(new THREE.AmbientLight(0xffffff, 0.15));
       
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      renderer.setSize(W, H);
-      renderer.setClearColor(0x000000, 0);
-      el.appendChild(renderer.domElement);
-      rendererRef.current = renderer;
-    } catch (e) {
-      console.error('Failed to create WebGL renderer:', e);
-      return;
-    }
+      const dOrange = new THREE.DirectionalLight(0xf97316, 1.2);
+      dOrange.position.set(5, 3, 5);
+      scene.add(dOrange);
+      
+      const dBlue = new THREE.DirectionalLight(0x3b82f6, 0.8);
+      dBlue.position.set(-5, -3, 3);
+      scene.add(dBlue);
 
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(45, W / H, 0.1, 100);
-    camera.position.set(0, 0, 4.5);
+      // Globe group
+      const globeGroup = new THREE.Group();
 
-    scene.add(new THREE.AmbientLight(0xffffff, 0.15));
-    const dOrange = new THREE.DirectionalLight(0xf97316, 1.2);
-    dOrange.position.set(5, 3, 5);
-    scene.add(dOrange);
-    const dBlue = new THREE.DirectionalLight(0x3b82f6, 0.8);
-    dBlue.position.set(-5, -3, 3);
-    scene.add(dBlue);
-
-    const globeGroup = new THREE.Group();
-
-    const innerGeo = new THREE.SphereGeometry(1.5, 64, 64);
-    const innerMat = new THREE.MeshStandardMaterial({
-      color: 0x0c0b0a,
-      metalness: 0.3,
-      roughness: 0.8,
-      transparent: true,
-      opacity: 0.6,
-    });
-    globeGroup.add(new THREE.Mesh(innerGeo, innerMat));
-
-    const gridGeo = new THREE.SphereGeometry(1.52, 36, 18);
-    const gridMat = new THREE.MeshBasicMaterial({
-      color: 0xf97316,
-      wireframe: true,
-      transparent: true,
-      opacity: 0.06,
-    });
-    globeGroup.add(new THREE.Mesh(gridGeo, gridMat));
-
-    const glowGeo = new THREE.SphereGeometry(1.6, 32, 32);
-    const glowMat = new THREE.MeshBasicMaterial({
-      color: 0xf97316,
-      transparent: true,
-      opacity: 0.03,
-      side: THREE.BackSide,
-    });
-    globeGroup.add(new THREE.Mesh(glowGeo, glowMat));
-
-    const toSphere = (lat, lon, r = 1.53) => {
-      const phi   = (90 - lat) * (Math.PI / 180);
-      const theta = (lon + 180) * (Math.PI / 180);
-      return new THREE.Vector3(
-        -r * Math.sin(phi) * Math.cos(theta),
-        r * Math.cos(phi),
-        r * Math.sin(phi) * Math.sin(theta)
-      );
-    };
-
-    const continentClusters = [
-      ...Array.from({ length: 120 }, () => toSphere(
-        (Math.random() - 0.5) * 65 - 5,
-        (Math.random() - 0.5) * 50 + 20
-      )),
-      ...Array.from({ length: 80 }, () => toSphere(
-        Math.random() * 25 + 35,
-        (Math.random() - 0.5) * 40 + 15
-      )),
-      ...Array.from({ length: 180 }, () => toSphere(
-        (Math.random() - 0.5) * 60 + 35,
-        (Math.random() - 0.5) * 100 + 90
-      )),
-      ...Array.from({ length: 120 }, () => toSphere(
-        Math.random() * 45 + 15,
-        (Math.random() - 0.5) * 60 - 100
-      )),
-      ...Array.from({ length: 80 }, () => toSphere(
-        (Math.random() - 0.5) * 55 - 15,
-        (Math.random() - 0.5) * 40 - 60
-      )),
-      ...Array.from({ length: 50 }, () => toSphere(
-        (Math.random() - 0.5) * 30 - 25,
-        (Math.random() - 0.5) * 30 + 135
-      )),
-    ];
-
-    const dotGeo = new THREE.BufferGeometry();
-    const dotPos = new Float32Array(continentClusters.length * 3);
-    continentClusters.forEach((v, i) => {
-      dotPos[i * 3] = v.x;
-      dotPos[i * 3 + 1] = v.y;
-      dotPos[i * 3 + 2] = v.z;
-    });
-    dotGeo.setAttribute('position', new THREE.BufferAttribute(dotPos, 3));
-    const dotMat = new THREE.PointsMaterial({
-      color: 0xf97316, size: 0.018,
-      transparent: true, opacity: 0.55,
-    });
-    globeGroup.add(new THREE.Points(dotGeo, dotMat));
-
-    const markerPositions = [
-      { lat: -1.94,  lon: 30.06, color: 0xf97316, r: 0.04 },
-      { lat: 48.85,  lon: 2.35,  color: 0x3b82f6, r: 0.025 },
-      { lat: 51.5,   lon: -0.12, color: 0x3b82f6, r: 0.025 },
-      { lat: 40.71,  lon: -74.0, color: 0x3b82f6, r: 0.025 },
-      { lat: 37.77,  lon: -122.4,color: 0x8b5cf6, r: 0.022 },
-      { lat: 35.68,  lon: 139.7, color: 0x8b5cf6, r: 0.022 },
-      { lat: -33.87, lon: 151.2, color: 0x10b981, r: 0.022 },
-      { lat: 1.35,   lon: 103.8, color: 0x10b981, r: 0.022 },
-      { lat: 25.2,   lon: 55.27, color: 0x8b5cf6, r: 0.022 },
-    ];
-
-    markerPositions.forEach(({ lat, lon, color, r }) => {
-      const pos = toSphere(lat, lon, 1.53);
-      const dot = new THREE.Mesh(
-        new THREE.SphereGeometry(r, 8, 8),
-        new THREE.MeshBasicMaterial({ color })
-      );
-      dot.position.copy(pos);
-      globeGroup.add(dot);
-
-      const ring = new THREE.Mesh(
-        new THREE.RingGeometry(r * 1.5, r * 2.2, 16),
-        new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.5, side: THREE.DoubleSide })
-      );
-      ring.position.copy(pos);
-      ring.lookAt(pos.clone().multiplyScalar(2));
-      ring.userData.pulse = Math.random() * Math.PI * 2;
-      globeGroup.add(ring);
-    });
-
-    const kigali = toSphere(-1.94, 30.06, 1.54);
-    const arcTargets = [
-      toSphere(48.85, 2.35, 1.54),
-      toSphere(40.71, -74.0, 1.54),
-      toSphere(35.68, 139.7, 1.54),
-      toSphere(1.35, 103.8, 1.54),
-      toSphere(25.2, 55.27, 1.54),
-    ];
-
-    arcTargets.forEach((target, ti) => {
-      const points = [];
-      const segments = 50;
-      for (let i = 0; i <= segments; i++) {
-        const t = i / segments;
-        const interp = new THREE.Vector3().lerpVectors(kigali, target, t).normalize().multiplyScalar(1.58 + Math.sin(t * Math.PI) * 0.2);
-        points.push(interp);
-      }
-      const arcGeo = new THREE.BufferGeometry().setFromPoints(points);
-      const arcMat = new THREE.LineBasicMaterial({
-        color: ti === 0 ? 0xf97316 : 0x3b82f6,
+      // Inner sphere
+      const innerGeo = new THREE.SphereGeometry(1.5, 64, 64);
+      const innerMat = new THREE.MeshStandardMaterial({
+        color: 0x0c0b0a,
+        metalness: 0.3,
+        roughness: 0.8,
         transparent: true,
-        opacity: 0.25,
+        opacity: 0.6,
       });
-      globeGroup.add(new THREE.Line(arcGeo, arcMat));
-    });
+      globeGroup.add(new THREE.Mesh(innerGeo, innerMat));
 
-    const orbitRings = [];
-    [
-      { r: 1.8, tube: 0.006, color: 0xf97316, tilt: 0.5, speed: 0.3 },
-      { r: 2.1, tube: 0.004, color: 0x3b82f6, tilt: -0.8, speed: -0.2 },
-      { r: 2.45, tube: 0.003, color: 0x8b5cf6, tilt: 1.2, speed: 0.15 },
-    ].forEach(({ r, tube, color, tilt, speed }) => {
-      const mesh = new THREE.Mesh(
-        new THREE.TorusGeometry(r, tube, 6, 80),
-        new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.4 })
-      );
-      mesh.rotation.x = tilt;
-      mesh.userData.speed = speed;
-      globeGroup.add(mesh);
-      orbitRings.push(mesh);
-    });
+      // Wireframe grid
+      const gridGeo = new THREE.SphereGeometry(1.52, 36, 18);
+      const gridMat = new THREE.MeshBasicMaterial({
+        color: 0xf97316,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.06,
+      });
+      globeGroup.add(new THREE.Mesh(gridGeo, gridMat));
 
-    const pCount = 300;
-    const pPos = new Float32Array(pCount * 3);
-    for (let i = 0; i < pCount; i++) {
-      const th = Math.random() * Math.PI * 2;
-      const ph = Math.acos(2 * Math.random() - 1);
-      const rr = 2.3 + Math.random() * 1.8;
-      pPos[i*3] = rr * Math.sin(ph) * Math.cos(th);
-      pPos[i*3+1] = rr * Math.sin(ph) * Math.sin(th);
-      pPos[i*3+2] = rr * Math.cos(ph);
-    }
-    const pGeo = new THREE.BufferGeometry();
-    pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
-    const particles = new THREE.Points(pGeo,
-      new THREE.PointsMaterial({ color: 0xf97316, size: 0.014, transparent: true, opacity: 0.3 })
-    );
-    globeGroup.add(particles);
+      // Outer glow
+      const glowGeo = new THREE.SphereGeometry(1.6, 32, 32);
+      const glowMat = new THREE.MeshBasicMaterial({
+        color: 0xf97316,
+        transparent: true,
+        opacity: 0.03,
+        side: THREE.BackSide,
+      });
+      globeGroup.add(new THREE.Mesh(glowGeo, glowMat));
 
-    globeGroup.position.set(0, 0, 0);
-    scene.add(globeGroup);
+      // Helper function to convert lat/lon to sphere surface
+      const toSphere = (lat, lon, r = 1.53) => {
+        const phi   = (90 - lat) * (Math.PI / 180);
+        const theta = (lon + 180) * (Math.PI / 180);
+        return new THREE.Vector3(
+          -r * Math.sin(phi) * Math.cos(theta),
+          r * Math.cos(phi),
+          r * Math.sin(phi) * Math.sin(theta)
+        );
+      };
 
-    const onResize = () => {
-      const w = el.clientWidth;
-      const h = el.clientHeight;
-      camera.aspect = w / h;
-      camera.updateProjectionMatrix();
-      renderer.setSize(w, h);
-    };
-    window.addEventListener('resize', onResize);
+      // Continent clusters (points)
+      const continentClusters = [
+        ...Array.from({ length: 120 }, () => toSphere((Math.random() - 0.5) * 65 - 5, (Math.random() - 0.5) * 50 + 20)),
+        ...Array.from({ length: 80 }, () => toSphere(Math.random() * 25 + 35, (Math.random() - 0.5) * 40 + 15)),
+        ...Array.from({ length: 180 }, () => toSphere((Math.random() - 0.5) * 60 + 35, (Math.random() - 0.5) * 100 + 90)),
+        ...Array.from({ length: 120 }, () => toSphere(Math.random() * 45 + 15, (Math.random() - 0.5) * 60 - 100)),
+        ...Array.from({ length: 80 }, () => toSphere((Math.random() - 0.5) * 55 - 15, (Math.random() - 0.5) * 40 - 60)),
+        ...Array.from({ length: 50 }, () => toSphere((Math.random() - 0.5) * 30 - 25, (Math.random() - 0.5) * 30 + 135)),
+      ];
 
-    let t = 0;
-    const animate = () => {
-      frameRef.current = requestAnimationFrame(animate);
-      t += 0.008;
+      const dotGeo = new THREE.BufferGeometry();
+      const dotPos = new Float32Array(continentClusters.length * 3);
+      continentClusters.forEach((v, i) => {
+        dotPos[i * 3] = v.x;
+        dotPos[i * 3 + 1] = v.y;
+        dotPos[i * 3 + 2] = v.z;
+      });
+      dotGeo.setAttribute('position', new THREE.BufferAttribute(dotPos, 3));
+      const dotMat = new THREE.PointsMaterial({
+        color: 0xf97316,
+        size: 0.018,
+        transparent: true,
+        opacity: 0.55,
+      });
+      globeGroup.add(new THREE.Points(dotGeo, dotMat));
 
-      globeGroup.rotation.y += 0.0018;
-      globeGroup.rotation.x = Math.sin(t * 0.15) * 0.08;
+      // City markers
+      const markerPositions = [
+        { lat: -1.94,  lon: 30.06, color: 0xf97316, r: 0.04 },
+        { lat: 48.85,  lon: 2.35,  color: 0x3b82f6, r: 0.025 },
+        { lat: 51.5,   lon: -0.12, color: 0x3b82f6, r: 0.025 },
+        { lat: 40.71,  lon: -74.0, color: 0x3b82f6, r: 0.025 },
+        { lat: 37.77,  lon: -122.4,color: 0x8b5cf6, r: 0.022 },
+        { lat: 35.68,  lon: 139.7, color: 0x8b5cf6, r: 0.022 },
+        { lat: -33.87, lon: 151.2, color: 0x10b981, r: 0.022 },
+        { lat: 1.35,   lon: 103.8, color: 0x10b981, r: 0.022 },
+        { lat: 25.2,   lon: 55.27, color: 0x8b5cf6, r: 0.022 },
+      ];
 
-      globeGroup.children.forEach(child => {
-        if (child.userData.pulse !== undefined) {
-          child.userData.pulse += 0.04;
-          const s = 1 + 0.4 * Math.abs(Math.sin(child.userData.pulse));
-          child.scale.setScalar(s);
-          child.material.opacity = 0.5 * (1 - Math.abs(Math.sin(child.userData.pulse)) * 0.7);
+      markerPositions.forEach(({ lat, lon, color, r }) => {
+        const pos = toSphere(lat, lon, 1.53);
+        
+        const dot = new THREE.Mesh(
+          new THREE.SphereGeometry(r, 8, 8),
+          new THREE.MeshBasicMaterial({ color })
+        );
+        dot.position.copy(pos);
+        globeGroup.add(dot);
+
+        const ring = new THREE.Mesh(
+          new THREE.RingGeometry(r * 1.5, r * 2.2, 16),
+          new THREE.MeshBasicMaterial({ 
+            color, 
+            transparent: true, 
+            opacity: 0.5, 
+            side: THREE.DoubleSide 
+          })
+        );
+        ring.position.copy(pos);
+        ring.lookAt(pos.clone().multiplyScalar(2));
+        ring.userData.pulse = Math.random() * Math.PI * 2;
+        globeGroup.add(ring);
+      });
+
+      // Arc connections from Kigali
+      const kigali = toSphere(-1.94, 30.06, 1.54);
+      const arcTargets = [
+        toSphere(48.85, 2.35, 1.54),
+        toSphere(40.71, -74.0, 1.54),
+        toSphere(35.68, 139.7, 1.54),
+        toSphere(1.35, 103.8, 1.54),
+        toSphere(25.2, 55.27, 1.54),
+      ];
+
+      arcTargets.forEach((target, ti) => {
+        const points = [];
+        const segments = 50;
+        for (let i = 0; i <= segments; i++) {
+          const t = i / segments;
+          const interp = new THREE.Vector3()
+            .lerpVectors(kigali, target, t)
+            .normalize()
+            .multiplyScalar(1.58 + Math.sin(t * Math.PI) * 0.2);
+          points.push(interp);
         }
+        const arcGeo = new THREE.BufferGeometry().setFromPoints(points);
+        const arcMat = new THREE.LineBasicMaterial({
+          color: ti === 0 ? 0xf97316 : 0x3b82f6,
+          transparent: true,
+          opacity: 0.25,
+        });
+        globeGroup.add(new THREE.Line(arcGeo, arcMat));
       });
 
-      orbitRings.forEach(r => { r.rotation.z += r.userData.speed * 0.012; });
-      particles.rotation.y += 0.0008;
-
-      renderer.render(scene, camera);
-    };
-    animate();
-
-    return () => {
-      cancelAnimationFrame(frameRef.current);
-      window.removeEventListener('resize', onResize);
-      
-      // Proper cleanup
-      scene.traverse((object) => {
-        if (object.geometry) object.geometry.dispose();
-        if (object.material) {
-          if (object.material.map) object.material.map.dispose();
-          object.material.dispose();
-        }
+      // Orbital rings
+      const orbitRings = [];
+      [
+        { r: 1.8, tube: 0.006, color: 0xf97316, tilt: 0.5, speed: 0.3 },
+        { r: 2.1, tube: 0.004, color: 0x3b82f6, tilt: -0.8, speed: -0.2 },
+        { r: 2.45, tube: 0.003, color: 0x8b5cf6, tilt: 1.2, speed: 0.15 },
+      ].forEach(({ r, tube, color, tilt, speed }) => {
+        const mesh = new THREE.Mesh(
+          new THREE.TorusGeometry(r, tube, 6, 80),
+          new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.4 })
+        );
+        mesh.rotation.x = tilt;
+        mesh.userData.speed = speed;
+        globeGroup.add(mesh);
+        orbitRings.push(mesh);
       });
-      
-      if (renderer) {
-        renderer.dispose();
-        rendererRef.current = null;
-      }
-      
-      if (el && el.contains(renderer.domElement)) {
-        el.removeChild(renderer.domElement);
-      }
-    };
-  }, [isVisible, webGLSupported]);
 
-  if (!webGLSupported) {
+      // Particle cloud
+      const pCount = 300;
+      const pPos = new Float32Array(pCount * 3);
+      for (let i = 0; i < pCount; i++) {
+        const th = Math.random() * Math.PI * 2;
+        const ph = Math.acos(2 * Math.random() - 1);
+        const rr = 2.3 + Math.random() * 1.8;
+        pPos[i * 3] = rr * Math.sin(ph) * Math.cos(th);
+        pPos[i * 3 + 1] = rr * Math.sin(ph) * Math.sin(th);
+        pPos[i * 3 + 2] = rr * Math.cos(ph);
+      }
+      const pGeo = new THREE.BufferGeometry();
+      pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+      const particles = new THREE.Points(pGeo, new THREE.PointsMaterial({
+        color: 0xf97316,
+        size: 0.014,
+        transparent: true,
+        opacity: 0.3,
+      }));
+      globeGroup.add(particles);
+
+      globeGroup.position.set(0, 0, 0);
+      scene.add(globeGroup);
+
+      // Animation loop
+      let elapsedTime = 0;
+      startAnimationLoop(() => {
+        elapsedTime += 0.016;
+
+        globeGroup.rotation.y += 0.0018;
+        globeGroup.rotation.x = Math.sin(elapsedTime * 0.15) * 0.08;
+
+        // Pulse markers
+        globeGroup.children.forEach(child => {
+          if (child.userData.pulse !== undefined) {
+            child.userData.pulse += 0.04;
+            const s = 1 + 0.4 * Math.abs(Math.sin(child.userData.pulse));
+            child.scale.setScalar(s);
+            child.material.opacity = 0.5 * (1 - Math.abs(Math.sin(child.userData.pulse)) * 0.7);
+          }
+        });
+
+        // Rotate orbit rings
+        orbitRings.forEach(r => {
+          r.rotation.z += r.userData.speed * 0.012;
+        });
+
+        // Drift particles
+        particles.rotation.y += 0.0008;
+      });
+    },
+  });
+
+  // Handle resize
+  useEffect(() => {
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [handleResize]);
+
+  // Error state
+  if (error) {
     return (
       <div className="absolute inset-0 bg-[#0a0a0a]">
         <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 via-transparent to-blue-500/5" />
+        <div className="absolute inset-0" style={{
+          backgroundImage: 'radial-gradient(circle at 50% 50%, rgba(249,115,22,0.1) 0%, transparent 50%)',
+        }} />
       </div>
     );
   }
 
   return (
     <div ref={mountRef} className="absolute inset-0">
-      {!isVisible && (
-        <div className="absolute inset-0 flex items-center justify-center">
+      {!isReady && (
+        <div className="absolute inset-0 flex items-center justify-center bg-[#0a0a0a]">
           <Loader2 size={24} className="animate-spin text-orange-500/50" />
         </div>
       )}
@@ -397,7 +289,6 @@ export default function Contact() {
   const [copiedField, setCopiedField] = useState(null);
   const [focused, setFocused] = useState(null);
   const [activeTab, setActiveTab] = useState('contact');
-  const [globeError, setGlobeError] = useState(false);
 
   const contactInfo = [
     { id: 'email', icon: Mail, label: 'Email', value: 'witnessfabrice@gmail.com', href: 'mailto:witnessfabrice@gmail.com' },
@@ -470,10 +361,20 @@ export default function Contact() {
       id="contact"
       className="relative min-h-screen py-24 px-4 sm:px-6 overflow-hidden bg-[#0a0a0a]"
     >
-      {/* Full visible globe background with error boundary */}
-      <ThreeJSErrorBoundary>
+      {/* Full visible globe background with lazy loading */}
+      <LazyThreeJS
+        componentId="contact-globe"
+        fallback={
+          <div className="absolute inset-0 bg-[#0a0a0a]">
+            <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 via-transparent to-blue-500/5" />
+            <div className="absolute inset-0" style={{
+              backgroundImage: 'radial-gradient(circle at 50% 50%, rgba(249,115,22,0.1) 0%, transparent 50%)',
+            }} />
+          </div>
+        }
+      >
         <GlobeBackground />
-      </ThreeJSErrorBoundary>
+      </LazyThreeJS>
 
       <div className="relative z-10 max-w-[1200px] mx-auto">
 
@@ -526,8 +427,6 @@ export default function Contact() {
 
           {/* ── LEFT: Contact Info & Quick Links ────────────── */}
           <div className="space-y-6">
-
-            {/* Contact cards */}
             {contactInfo.map((info, i) => (
               <motion.a
                 key={info.id}
@@ -570,7 +469,9 @@ export default function Contact() {
               transition={{ delay: 0.3 }}
               className="p-5 bg-black/30 backdrop-blur-md border border-white/10 rounded-2xl"
             >
-              <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-white/50 mb-4">{t('contact.follow', 'Follow me')}</p>
+              <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-white/50 mb-4">
+                {t('contact.follow', 'Follow me')}
+              </p>
               <div className="flex flex-wrap gap-2">
                 {socialLinks.map(({ icon: Icon, href, label, color }) => (
                   <motion.a
@@ -604,7 +505,8 @@ export default function Contact() {
                 <span className="relative rounded-full h-2.5 w-2.5 bg-green-500" />
               </span>
               <p className="text-xs text-white/70">
-                <span className="font-bold text-green-400">{t('contact.available', 'Available')}</span> {t('contact.availableText', 'for new projects & collaborations')}
+                <span className="font-bold text-green-400">{t('contact.available', 'Available')}</span>{' '}
+                {t('contact.availableText', 'for new projects & collaborations')}
               </p>
             </motion.div>
           </div>
@@ -637,7 +539,6 @@ export default function Contact() {
             </div>
 
             <form ref={formRef} onSubmit={handleSubmit} className="flex flex-col gap-5">
-
               <div className="grid sm:grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[11px] font-bold uppercase tracking-widest text-white/50 ml-1">
