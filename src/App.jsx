@@ -6,9 +6,12 @@ import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import VoiceAssistant from './components/ui/VoiceAssistant';
+import ThreeJSErrorBoundary from './components/shared/ThreeJSErrorBoundary';
+import { webGLManager } from './components/hooks/WebGLManager';
 
 import { Loader2, Bot } from 'lucide-react';
 
+// Lazy loaded sections
 const Hero        = lazy(() => import('./components/sections/Hero'));
 const About       = lazy(() => import('./components/sections/About'));
 const Projects    = lazy(() => import('./components/sections/Projects'));
@@ -29,11 +32,10 @@ const WELCOME_TEXT = "Hello, I'm Witness Fabrice. Welcome to my Digital Workspac
 // ─── Loading Screen ───────────────────────────────────────────
 const LoadingScreen = ({ onFinished }) => {
   const [progress,     setProgress]     = useState(0);
-  const [phase,        setPhase]        = useState('manifesto'); // 'manifesto' | 'welcome'
+  const [phase,        setPhase]        = useState('manifesto');
   const [welcomeText,  setWelcomeText]  = useState('');
   const [done,         setDone]         = useState(false);
 
-  /* Phase 1 — progress bar */
   useEffect(() => {
     const id = setInterval(() => {
       setProgress(p => {
@@ -48,7 +50,6 @@ const LoadingScreen = ({ onFinished }) => {
     return () => clearInterval(id);
   }, []);
 
-  /* Phase 2 — typewriter welcome */
   useEffect(() => {
     if (phase !== 'welcome') return;
     if (welcomeText.length < WELCOME_TEXT.length) {
@@ -58,7 +59,6 @@ const LoadingScreen = ({ onFinished }) => {
       );
       return () => clearTimeout(id);
     }
-    // fully typed — wait then finish
     const id = setTimeout(() => { setDone(true); setTimeout(onFinished, 600); }, 1600);
     return () => clearTimeout(id);
   }, [phase, welcomeText, onFinished]);
@@ -69,11 +69,9 @@ const LoadingScreen = ({ onFinished }) => {
       transition={{ duration: 0.7 }}
       className="fixed inset-0 z-[999] bg-[#0c0b0a] flex items-center justify-center overflow-hidden"
     >
-      {/* Ambient blobs */}
       <div className="pointer-events-none absolute -top-40 left-1/4 w-[500px] h-[500px] rounded-full bg-orange-500/[0.07] blur-3xl" />
       <div className="pointer-events-none absolute bottom-0 right-1/4 w-[400px] h-[400px] rounded-full bg-blue-500/[0.05] blur-3xl" />
 
-      {/* Subtle grid */}
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.03]"
         style={{
@@ -83,8 +81,6 @@ const LoadingScreen = ({ onFinished }) => {
       />
 
       <AnimatePresence mode="wait">
-
-        {/* ── Stage 1: Manifesto ── */}
         {phase === 'manifesto' && (
           <motion.div
             key="manifesto"
@@ -95,8 +91,6 @@ const LoadingScreen = ({ onFinished }) => {
             className="relative z-10 w-full max-w-lg px-4"
           >
             <div className="bg-[#161513] border border-stone-800/70 rounded-3xl overflow-hidden shadow-2xl">
-
-              {/* Header row */}
               <div className="flex items-center gap-5 p-6 border-b border-stone-800/60">
                 <div className="w-16 h-16 shrink-0 rounded-2xl overflow-hidden border border-stone-700">
                   <img src={PROFILE_IMG} alt="Witness" className="w-full h-full object-cover" />
@@ -105,8 +99,6 @@ const LoadingScreen = ({ onFinished }) => {
                   <h2 className="font-black text-xl text-stone-100 tracking-tight">WITNESS Fabrice</h2>
                 </div>
               </div>
-
-              {/* Manifesto */}
               <div className="p-6">
                 <div className="flex items-center gap-2 mb-3">
                   <span className="block w-3 h-px bg-orange-500" />
@@ -117,8 +109,6 @@ const LoadingScreen = ({ onFinished }) => {
                 </blockquote>
                 <p className="mt-3 text-[10px] font-mono text-stone-600 text-right">— Witness Fabrice</p>
               </div>
-
-              {/* Loading dots */}
               <div className="flex items-center gap-1.5 px-6 pb-5">
                 {[0, 0.15, 0.3].map((d, i) => (
                   <motion.span
@@ -133,7 +123,6 @@ const LoadingScreen = ({ onFinished }) => {
           </motion.div>
         )}
 
-        {/* ── Stage 2: Welcome typewriter ── */}
         {phase === 'welcome' && (
           <motion.div
             key="welcome"
@@ -143,7 +132,6 @@ const LoadingScreen = ({ onFinished }) => {
             transition={{ duration: 0.5 }}
             className="relative z-20 text-center px-6 max-w-3xl mx-auto"
           >
-            {/* Small avatar */}
             <motion.div
               initial={{ scale: 0, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -168,7 +156,7 @@ const LoadingScreen = ({ onFinished }) => {
                 animate={{ opacity: 1, y: 0 }}
                 className="mt-4 text-[11px] font-mono tracking-widest uppercase text-stone-600"
               >
-                
+                ✓ Ready
               </motion.p>
             )}
           </motion.div>
@@ -186,7 +174,7 @@ const SectionLoader = () => {
       <div className="flex flex-col items-center gap-3">
         <div className="w-10 h-10 rounded-full border-2 border-stone-200 dark:border-stone-800 border-t-orange-500 animate-spin" />
         <span className="text-[10px] font-mono tracking-[0.2em] uppercase text-stone-400 dark:text-stone-600">
-          {t('loadingCoreModule') || 'Loading…'}
+          {t('loadingCoreModule', 'Loading…')}
         </span>
       </div>
     </div>
@@ -195,8 +183,25 @@ const SectionLoader = () => {
 
 // ─── App ──────────────────────────────────────────────────────
 function App() {
-  const [loading,          setLoading]          = useState(true);
+  const [loading, setLoading] = useState(true);
   const [showVoiceAssistant, setShowVoiceAssistant] = useState(false);
+  const [webGLError, setWebGLError] = useState(false);
+
+  // Initialize WebGL Manager
+  useEffect(() => {
+    // Check WebGL support globally
+    const canvas = document.createElement('canvas');
+    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    if (!gl) {
+      console.warn('WebGL not supported - 3D features will use fallbacks');
+      setWebGLError(true);
+    }
+
+    // Cleanup on unmount
+    return () => {
+      webGLManager.disposeAll();
+    };
+  }, []);
 
   useEffect(() => {
     if (!loading) {
@@ -239,13 +244,33 @@ function App() {
 
               <main className="relative z-10">
                 <Suspense fallback={<SectionLoader />}>
-                  <Hero />
-                  <About />
-                  <Projects />
-                  <SkillsGalaxy />
-                  <Experience />
-                  <NewsFeed />
-                  <Contact />
+                  <ThreeJSErrorBoundary>
+                    <Hero />
+                  </ThreeJSErrorBoundary>
+                  
+                  <ThreeJSErrorBoundary>
+                    <About />
+                  </ThreeJSErrorBoundary>
+                  
+                  <ThreeJSErrorBoundary>
+                    <Projects />
+                  </ThreeJSErrorBoundary>
+                  
+                  <ThreeJSErrorBoundary>
+                    <SkillsGalaxy webGLEnabled={!webGLError} />
+                  </ThreeJSErrorBoundary>
+                  
+                  <ThreeJSErrorBoundary>
+                    <Experience webGLEnabled={!webGLError} />
+                  </ThreeJSErrorBoundary>
+                  
+                  <ThreeJSErrorBoundary>
+                    <NewsFeed />
+                  </ThreeJSErrorBoundary>
+                  
+                  <ThreeJSErrorBoundary>
+                    <Contact webGLEnabled={!webGLError} />
+                  </ThreeJSErrorBoundary>
                 </Suspense>
               </main>
 
@@ -270,7 +295,6 @@ function App() {
                              bg-orange-500 hover:bg-orange-600 text-white rounded-2xl shadow-xl
                              shadow-orange-500/30 border border-orange-400/30 transition-colors"
                 >
-                  {/* Online dot */}
                   <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-green-400 rounded-full border-2 border-stone-100 dark:border-[#0c0b0a]" />
                   <Bot size={22} />
                 </motion.button>
