@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useLanguage } from '../contexts/LanguageContext';
-import { useTheme } from '../contexts/ThemeContext';
-import { useThreeJS } from '../hooks/useThreeJS';
+import { useLanguage } from '../../contexts/LanguageContext';
+import { useTheme } from '../../contexts/ThemeContext';
+import { useThreeJS } from '../../hooks/useThreeJS';
 import LazyThreeJS from '../shared/LazyThreeJS';
 import {
   Code2, Database, Braces, Terminal, Cpu, Layers,
