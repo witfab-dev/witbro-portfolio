@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-<<<<<<< HEAD
-import * as THREE from 'three';
-=======
 import { useLanguage } from '../../contexts/LanguageContext';
->>>>>>> 8f2bd04 (language support)
+import { useTheme } from '../../contexts/ThemeContext';
+import { useThreeJS } from '../../hooks/useThreeJS';
+import LazyThreeJS from '../shared/LazyThreeJS';
 import {
   Code2, Database, Braces, Terminal, Cpu, Layers,
   Zap, Palette, Box, Globe, Activity, Smartphone,
   Layout, Shield, X, ChevronRight, LayoutGrid, Orbit,
+  Loader2, List,
 } from 'lucide-react';
 
 // ─── Data ─────────────────────────────────────────────────────
@@ -76,363 +76,331 @@ const ICON_MAP = {
 
 // ─── 3D Orbital Animation System ──────────────────────────────
 function ThreeJSOrbitalSystem({ skills, categoryColor, isDark, onSkillClick }) {
-  const mountRef = useRef(null);
-  const frameRef = useRef(null);
-  const tooltipRef = useRef(null);
+  const { 
+    mountRef, 
+    isReady, 
+    error,
+    startAnimationLoop,
+    handleResize,
+    useMouseInteraction 
+  } = useThreeJS(`skills-orbit-${categoryColor}`, {
+    cameraPosition: [0, 2, 10],
+    fov: 45,
+    enableShadows: false,
+    onInit: ({ scene, camera, renderer }) => {
+      // Main group
+      const mainGroup = new THREE.Group();
+      scene.add(mainGroup);
 
-  useEffect(() => {
-    const el = mountRef.current;
-    if (!el) return;
-    const W = el.clientWidth;
-    const H = el.clientHeight;
+      // Lighting
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+      scene.add(ambientLight);
 
-    // Renderer
-    const renderer = new THREE.WebGLRenderer({ 
-      antialias: true, 
-      alpha: true 
-    });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setSize(W, H);
-    renderer.setClearColor(0x000000, 0);
-    el.appendChild(renderer.domElement);
+      const pointLight = new THREE.PointLight(categoryColor, 1, 30);
+      pointLight.position.set(0, 0, 0);
+      scene.add(pointLight);
 
-    // Scene & Camera
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(45, W / H, 0.1, 100);
-    camera.position.set(0, 2, 10);
-    camera.lookAt(0, 0, 0);
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+      directionalLight.position.set(5, 5, 5);
+      scene.add(directionalLight);
 
-    // Raycaster for click detection
-    const raycaster = new THREE.Raycaster();
-    const mouse = new THREE.Vector2();
-
-    // Lighting
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
-    scene.add(ambientLight);
-
-    const pointLight = new THREE.PointLight(categoryColor, 1, 30);
-    pointLight.position.set(0, 0, 0);
-    scene.add(pointLight);
-
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
-    directionalLight.position.set(5, 5, 5);
-    scene.add(directionalLight);
-
-    // Main group
-    const mainGroup = new THREE.Group();
-    scene.add(mainGroup);
-
-    // Central glowing core
-    const coreGeo = new THREE.SphereGeometry(0.35, 32, 32);
-    const coreMat = new THREE.MeshPhongMaterial({
-      color: categoryColor,
-      emissive: categoryColor,
-      emissiveIntensity: 0.6,
-      transparent: true,
-      opacity: 0.9,
-    });
-    const core = new THREE.Mesh(coreGeo, coreMat);
-    mainGroup.add(core);
-
-    // Core glow
-    const glowGeo = new THREE.SphereGeometry(0.55, 32, 32);
-    const glowMat = new THREE.MeshBasicMaterial({
-      color: categoryColor,
-      transparent: true,
-      opacity: 0.2,
-      side: THREE.BackSide,
-    });
-    const glow = new THREE.Mesh(glowGeo, glowMat);
-    mainGroup.add(glow);
-
-    // Core particles
-    const coreParticlesGeo = new THREE.BufferGeometry();
-    const coreParticlesCount = 60;
-    const corePositions = new Float32Array(coreParticlesCount * 3);
-    for (let i = 0; i < coreParticlesCount; i++) {
-      const angle = Math.random() * Math.PI * 2;
-      const radius = 0.4 + Math.random() * 0.35;
-      corePositions[i * 3] = Math.cos(angle) * radius;
-      corePositions[i * 3 + 1] = Math.sin(angle) * radius;
-      corePositions[i * 3 + 2] = (Math.random() - 0.5) * 0.5;
-    }
-    coreParticlesGeo.setAttribute('position', new THREE.BufferAttribute(corePositions, 3));
-    const coreParticlesMat = new THREE.PointsMaterial({
-      color: categoryColor,
-      size: 0.02,
-      transparent: true,
-      opacity: 0.6,
-      blending: THREE.AdditiveBlending,
-    });
-    const coreParticles = new THREE.Points(coreParticlesGeo, coreParticlesMat);
-    mainGroup.add(coreParticles);
-
-    // Orbital rings
-    const rings = [];
-    skills.forEach((skill, index) => {
-      const radius = 1.5 + index * 0.9;
-      const ringGeo = new THREE.TorusGeometry(radius, 0.01, 16, 100);
-      const ringMat = new THREE.MeshBasicMaterial({
-        color: skill.color,
+      // Central core
+      const coreGeo = new THREE.SphereGeometry(0.35, 32, 32);
+      const coreMat = new THREE.MeshPhongMaterial({
+        color: categoryColor,
+        emissive: categoryColor,
+        emissiveIntensity: 0.6,
         transparent: true,
-        opacity: 0.25,
+        opacity: 0.9,
       });
-      const ring = new THREE.Mesh(ringGeo, ringMat);
-      ring.rotation.x = Math.PI / 2 + (Math.random() - 0.5) * 0.3;
-      ring.rotation.y = Math.random() * 0.5;
-      ring.userData = {
-        baseRotationSpeed: 0.2 + Math.random() * 0.3,
-      };
-      rings.push(ring);
-      mainGroup.add(ring);
-    });
+      const core = new THREE.Mesh(coreGeo, coreMat);
+      mainGroup.add(core);
 
-    // Create canvas for text labels
-    const createSkillLabel = (skill) => {
-      const canvas = document.createElement('canvas');
-      canvas.width = 256;
-      canvas.height = 64;
-      const ctx = canvas.getContext('2d');
-      
-      // Background glow
-      const gradient = ctx.createRadialGradient(128, 32, 0, 128, 32, 120);
-      gradient.addColorStop(0, `${skill.color}40`);
-      gradient.addColorStop(1, 'transparent');
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, 256, 64);
-      
-      // Text
-      ctx.font = 'bold 20px Inter, system-ui, sans-serif';
-      ctx.fillStyle = skill.color;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(skill.name, 128, 32);
-      
-      // Level indicator
-      ctx.font = 'bold 14px Inter, system-ui, sans-serif';
-      ctx.fillStyle = `${skill.color}99`;
-      ctx.fillText(`${skill.level}%`, 128, 50);
-      
-      const texture = new THREE.CanvasTexture(canvas);
-      texture.minFilter = THREE.LinearFilter;
-      
-      const spriteMaterial = new THREE.SpriteMaterial({
-        map: texture,
-        transparent: true,
-        blending: THREE.NormalBlending,
-      });
-      const sprite = new THREE.Sprite(spriteMaterial);
-      sprite.scale.set(1.8, 0.45, 1);
-      return sprite;
-    };
-
-    // Skill planets
-    const planets = [];
-    skills.forEach((skill, index) => {
-      const planetGroup = new THREE.Group();
-      
-      // Planet sphere
-      const radius = 0.1 + (skill.level / 100) * 0.12;
-      const planetGeo = new THREE.SphereGeometry(radius, 16, 16);
-      const planetMat = new THREE.MeshStandardMaterial({
-        color: skill.color,
-        metalness: 0.6,
-        roughness: 0.2,
-        emissive: skill.color,
-        emissiveIntensity: 0.3,
-      });
-      const planet = new THREE.Mesh(planetGeo, planetMat);
-      planet.name = skill.name; // For raycasting
-      planetGroup.add(planet);
-
-      // Glow effect
-      const planetGlowGeo = new THREE.SphereGeometry(radius * 1.8, 16, 16);
-      const planetGlowMat = new THREE.MeshBasicMaterial({
-        color: skill.color,
+      // Core glow
+      const glowGeo = new THREE.SphereGeometry(0.55, 32, 32);
+      const glowMat = new THREE.MeshBasicMaterial({
+        color: categoryColor,
         transparent: true,
         opacity: 0.2,
         side: THREE.BackSide,
       });
-      const planetGlow = new THREE.Mesh(planetGlowGeo, planetGlowMat);
-      planetGroup.add(planetGlow);
+      const glow = new THREE.Mesh(glowGeo, glowMat);
+      mainGroup.add(glow);
 
-      // Label sprite
-      const label = createSkillLabel(skill);
-      label.position.y = radius + 0.3;
-      planetGroup.add(label);
+      // Core particles
+      const coreParticlesGeo = new THREE.BufferGeometry();
+      const coreParticlesCount = 60;
+      const corePositions = new Float32Array(coreParticlesCount * 3);
+      for (let i = 0; i < coreParticlesCount; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const radius = 0.4 + Math.random() * 0.35;
+        corePositions[i * 3] = Math.cos(angle) * radius;
+        corePositions[i * 3 + 1] = Math.sin(angle) * radius;
+        corePositions[i * 3 + 2] = (Math.random() - 0.5) * 0.5;
+      }
+      coreParticlesGeo.setAttribute('position', new THREE.BufferAttribute(corePositions, 3));
+      const coreParticlesMat = new THREE.PointsMaterial({
+        color: categoryColor,
+        size: 0.02,
+        transparent: true,
+        opacity: 0.6,
+        blending: THREE.AdditiveBlending,
+      });
+      const coreParticles = new THREE.Points(coreParticlesGeo, coreParticlesMat);
+      mainGroup.add(coreParticles);
 
-      // Position in orbit
-      const orbitRadius = 1.5 + index * 0.9;
-      const angle = (index / skills.length) * Math.PI * 2;
-      planetGroup.position.set(
-        Math.cos(angle) * orbitRadius,
-        0,
-        Math.sin(angle) * orbitRadius
-      );
+      // Orbital rings
+      const rings = [];
+      skills.forEach((skill, index) => {
+        const radius = 1.5 + index * 0.9;
+        const ringGeo = new THREE.TorusGeometry(radius, 0.01, 16, 100);
+        const ringMat = new THREE.MeshBasicMaterial({
+          color: skill.color,
+          transparent: true,
+          opacity: 0.25,
+        });
+        const ring = new THREE.Mesh(ringGeo, ringMat);
+        ring.rotation.x = Math.PI / 2 + (Math.random() - 0.5) * 0.3;
+        ring.rotation.y = Math.random() * 0.5;
+        ring.userData = { baseRotationSpeed: 0.2 + Math.random() * 0.3 };
+        rings.push(ring);
+        mainGroup.add(ring);
+      });
 
-      planetGroup.userData = {
-        orbitRadius,
-        angle,
-        speed: 0.3 + Math.random() * 0.5,
-        skill,
-        planet,
-        planetGlow,
-        label,
+      // Create text labels using canvas
+      const createSkillLabel = (skill) => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 256;
+        canvas.height = 64;
+        const ctx = canvas.getContext('2d');
+        
+        const gradient = ctx.createRadialGradient(128, 32, 0, 128, 32, 120);
+        gradient.addColorStop(0, `${skill.color}40`);
+        gradient.addColorStop(1, 'transparent');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 256, 64);
+        
+        ctx.font = 'bold 20px Inter, system-ui, sans-serif';
+        ctx.fillStyle = skill.color;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(skill.name, 128, 32);
+        
+        ctx.font = 'bold 14px Inter, system-ui, sans-serif';
+        ctx.fillStyle = `${skill.color}99`;
+        ctx.fillText(`${skill.level}%`, 128, 50);
+        
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.minFilter = THREE.LinearFilter;
+        
+        const sprite = new THREE.Sprite(new THREE.SpriteMaterial({
+          map: texture,
+          transparent: true,
+          blending: THREE.NormalBlending,
+        }));
+        sprite.scale.set(1.8, 0.45, 1);
+        return sprite;
       };
 
-      planets.push(planetGroup);
-      mainGroup.add(planetGroup);
-    });
-
-    // Background stars
-    const starsGeo = new THREE.BufferGeometry();
-    const starsCount = 500;
-    const starsPositions = new Float32Array(starsCount * 3);
-    for (let i = 0; i < starsCount; i++) {
-      starsPositions[i * 3] = (Math.random() - 0.5) * 20;
-      starsPositions[i * 3 + 1] = (Math.random() - 0.5) * 20;
-      starsPositions[i * 3 + 2] = (Math.random() - 0.5) * 20;
-    }
-    starsGeo.setAttribute('position', new THREE.BufferAttribute(starsPositions, 3));
-    const starsMat = new THREE.PointsMaterial({
-      color: 0xffffff,
-      size: 0.03,
-      transparent: true,
-      opacity: 0.5,
-      blending: THREE.AdditiveBlending,
-    });
-    const stars = new THREE.Points(starsGeo, starsMat);
-    mainGroup.add(stars);
-
-    // Mouse interaction
-    let mouseX = 0;
-    let mouseY = 0;
-    let targetRotationX = 0;
-    let targetRotationY = 0;
-
-    const onMouseMove = (event) => {
-      const rect = el.getBoundingClientRect();
-      mouseX = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-      mouseY = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-      
-      // Update mouse for raycasting
-      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-      mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-    };
-
-    const onClick = (event) => {
-      raycaster.setFromCamera(mouse, camera);
-      
-      const planetMeshes = planets.map(p => p.children[0]); // Get planet meshes
-      const intersects = raycaster.intersectObjects(planetMeshes);
-      
-      if (intersects.length > 0) {
-        const clickedPlanet = intersects[0].object;
-        const planetGroup = planets.find(p => p.children[0] === clickedPlanet);
-        if (planetGroup && onSkillClick) {
-          onSkillClick(planetGroup.userData.skill);
-        }
-      }
-    };
-
-    el.addEventListener('mousemove', onMouseMove);
-    el.addEventListener('click', onClick);
-
-    // Resize handler
-    const onResize = () => {
-      const w = el.clientWidth;
-      const h = el.clientHeight;
-      camera.aspect = w / h;
-      camera.updateProjectionMatrix();
-      renderer.setSize(w, h);
-    };
-    window.addEventListener('resize', onResize);
-
-    // Animation
-    const clock = new THREE.Clock();
-
-    const animate = () => {
-      frameRef.current = requestAnimationFrame(animate);
-      
-      const elapsedTime = clock.getElapsedTime();
-
-      // Smooth mouse follow
-      targetRotationX += (mouseY * 0.5 - targetRotationX) * 0.05;
-      targetRotationY += (mouseX * 0.5 - targetRotationY) * 0.05;
-
-      mainGroup.rotation.x = targetRotationX * 0.3;
-      mainGroup.rotation.y += 0.003;
-      mainGroup.rotation.y += targetRotationY * 0.002;
-
-      // Animate core
-      core.rotation.y += 0.01;
-      core.rotation.x += 0.005;
-      const corePulse = 1 + Math.sin(elapsedTime * 2) * 0.1;
-      core.scale.setScalar(corePulse);
-      glow.scale.setScalar(corePulse * 1.2);
-      coreParticles.rotation.y += 0.02;
-      coreParticles.rotation.x += 0.01;
-      pointLight.intensity = 0.8 + Math.sin(elapsedTime * 3) * 0.3;
-
-      // Animate rings
-      rings.forEach(ring => {
-        ring.rotation.z += 0.002 * ring.userData.baseRotationSpeed;
-        ring.rotation.x += 0.001 * ring.userData.baseRotationSpeed;
-      });
-
-      // Animate planets
-      planets.forEach(planetGroup => {
-        const data = planetGroup.userData;
-        data.angle += data.speed * 0.008;
-        planetGroup.position.x = Math.cos(data.angle) * data.orbitRadius;
-        planetGroup.position.z = Math.sin(data.angle) * data.orbitRadius;
+      // Skill planets
+      const planets = [];
+      skills.forEach((skill, index) => {
+        const planetGroup = new THREE.Group();
         
-        // Planet rotation
-        data.planet.rotation.y += 0.02;
-        data.planet.rotation.x += 0.01;
+        const radius = 0.1 + (skill.level / 100) * 0.12;
+        const planetGeo = new THREE.SphereGeometry(radius, 16, 16);
+        const planetMat = new THREE.MeshStandardMaterial({
+          color: skill.color,
+          metalness: 0.6,
+          roughness: 0.2,
+          emissive: skill.color,
+          emissiveIntensity: 0.3,
+        });
+        const planet = new THREE.Mesh(planetGeo, planetMat);
+        planet.name = skill.name;
+        planetGroup.add(planet);
 
-        // Pulse glow
-        const frontAngle = mainGroup.rotation.y;
-        const distanceFromFront = Math.abs(Math.sin(data.angle - frontAngle));
-        data.planetGlow.material.opacity = 0.15 + distanceFromFront * 0.15;
+        const planetGlowGeo = new THREE.SphereGeometry(radius * 1.8, 16, 16);
+        const planetGlowMat = new THREE.MeshBasicMaterial({
+          color: skill.color,
+          transparent: true,
+          opacity: 0.2,
+          side: THREE.BackSide,
+        });
+        const planetGlow = new THREE.Mesh(planetGlowGeo, planetGlowMat);
+        planetGroup.add(planetGlow);
 
-        // Make labels always face camera
-        if (data.label) {
-          data.label.lookAt(camera.position);
-        }
+        const label = createSkillLabel(skill);
+        label.position.y = radius + 0.3;
+        planetGroup.add(label);
+
+        const orbitRadius = 1.5 + index * 0.9;
+        const angle = (index / skills.length) * Math.PI * 2;
+        planetGroup.position.set(
+          Math.cos(angle) * orbitRadius,
+          0,
+          Math.sin(angle) * orbitRadius
+        );
+
+        planetGroup.userData = {
+          orbitRadius,
+          angle,
+          speed: 0.3 + Math.random() * 0.5,
+          skill,
+          planet,
+          planetGlow,
+          label,
+        };
+
+        planets.push(planetGroup);
+        mainGroup.add(planetGroup);
       });
 
-      // Rotate stars
-      stars.rotation.y += 0.0005;
-      stars.rotation.x += 0.0003;
-
-      renderer.render(scene, camera);
-    };
-    animate();
-
-    return () => {
-      cancelAnimationFrame(frameRef.current);
-      el.removeEventListener('mousemove', onMouseMove);
-      el.removeEventListener('click', onClick);
-      window.removeEventListener('resize', onResize);
-      renderer.dispose();
-      if (el.contains(renderer.domElement)) {
-        el.removeChild(renderer.domElement);
+      // Background stars
+      const starsGeo = new THREE.BufferGeometry();
+      const starsCount = 500;
+      const starsPositions = new Float32Array(starsCount * 3);
+      for (let i = 0; i < starsCount; i++) {
+        starsPositions[i * 3] = (Math.random() - 0.5) * 20;
+        starsPositions[i * 3 + 1] = (Math.random() - 0.5) * 20;
+        starsPositions[i * 3 + 2] = (Math.random() - 0.5) * 20;
       }
-    };
-  }, [skills, categoryColor, isDark, onSkillClick]);
+      starsGeo.setAttribute('position', new THREE.BufferAttribute(starsPositions, 3));
+      const stars = new THREE.Points(starsGeo, new THREE.PointsMaterial({
+        color: 0xffffff,
+        size: 0.03,
+        transparent: true,
+        opacity: 0.5,
+        blending: THREE.AdditiveBlending,
+      }));
+      mainGroup.add(stars);
+
+      // Raycaster setup
+      const raycaster = new THREE.Raycaster();
+      const mouse = new THREE.Vector2();
+
+      const onMouseMove = (event) => {
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+      };
+
+      window.addEventListener('mousemove', onMouseMove);
+
+      // Animation loop
+      let elapsedTime = 0;
+      startAnimationLoop(() => {
+        elapsedTime += 0.016;
+
+        mainGroup.rotation.y += 0.003;
+
+        // Animate core
+        core.rotation.y += 0.01;
+        core.rotation.x += 0.005;
+        const corePulse = 1 + Math.sin(elapsedTime * 2) * 0.1;
+        core.scale.setScalar(corePulse);
+        glow.scale.setScalar(corePulse * 1.2);
+        coreParticles.rotation.y += 0.02;
+        pointLight.intensity = 0.8 + Math.sin(elapsedTime * 3) * 0.3;
+
+        // Animate rings
+        rings.forEach(ring => {
+          ring.rotation.z += 0.002 * ring.userData.baseRotationSpeed;
+        });
+
+        // Animate planets
+        planets.forEach(planetGroup => {
+          const data = planetGroup.userData;
+          data.angle += data.speed * 0.008;
+          planetGroup.position.x = Math.cos(data.angle) * data.orbitRadius;
+          planetGroup.position.z = Math.sin(data.angle) * data.orbitRadius;
+          
+          data.planet.rotation.y += 0.02;
+          data.planet.rotation.x += 0.01;
+
+          const distanceFromFront = Math.abs(Math.sin(data.angle - mainGroup.rotation.y));
+          data.planetGlow.material.opacity = 0.15 + distanceFromFront * 0.15;
+
+          if (data.label) {
+            data.label.lookAt(camera.position);
+          }
+        });
+
+        stars.rotation.y += 0.0005;
+      });
+
+      // Cleanup function
+      return () => {
+        window.removeEventListener('mousemove', onMouseMove);
+      };
+    },
+  });
+
+  // Click handler using raycaster
+  const handleClick = (event) => {
+    if (!mountRef.current || !scene || !camera) return;
+    
+    const rect = mountRef.current.getBoundingClientRect();
+    const mouse = new THREE.Vector2();
+    mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+    const raycaster = new THREE.Raycaster();
+    raycaster.setFromCamera(mouse, camera);
+    
+    // Get all planet meshes
+    const planetMeshes = [];
+    scene.traverse(child => {
+      if (child.name && child.geometry && child.geometry.type === 'SphereGeometry') {
+        planetMeshes.push(child);
+      }
+    });
+    
+    const intersects = raycaster.intersectObjects(planetMeshes);
+    if (intersects.length > 0 && onSkillClick) {
+      const clickedName = intersects[0].object.name;
+      const skill = skills.find(s => s.name === clickedName);
+      if (skill) onSkillClick(skill);
+    }
+  };
+
+  // Resize handler
+  useEffect(() => {
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [handleResize]);
+
+  // Error state
+  if (error) {
+    return (
+      <div className="absolute inset-0 flex items-center justify-center" 
+           style={{ background: isDark ? '#0c0b0a' : '#f5f3ee' }}>
+        <div className="text-center">
+          <Orbit size={40} className="mx-auto mb-3 opacity-30" />
+          <p className="text-sm font-bold opacity-50">3D View Unavailable</p>
+          <p className="text-[10px] opacity-30 mt-1">Switch to grid view for better performance</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div 
       ref={mountRef} 
       className="absolute inset-0 cursor-pointer"
+      onClick={handleClick}
       style={{ minHeight: '500px' }}
-    />
+    >
+      {!isReady && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <Loader2 size={24} className="animate-spin text-orange-500" />
+        </div>
+      )}
+    </div>
   );
 }
 
 // ─── Skill card (grid view) ────────────────────────────────────
-const SkillCard = ({ skill, onClick, delay }) => {
+const SkillCard = ({ skill, onClick, delay, t }) => {
   const Icon = skill.icon;
   return (
     <motion.button
@@ -456,8 +424,10 @@ const SkillCard = ({ skill, onClick, delay }) => {
       <div>
         <p className="font-black text-sm text-stone-900 dark:text-stone-100 tracking-tight group-hover:text-orange-500 transition-colors">
           {skill.name}
-        </p>{t('years')}
-        <p className="text-[10px] text-stone-400 dark:text-stone-600 mt-0.5">{skill.years}+ yrs</p>
+        </p>
+        <p className="text-[10px] text-stone-400 dark:text-stone-600 mt-0.5">
+          {skill.years}+ {t('years', 'yrs')}
+        </p>
       </div>
 
       <div className="w-full h-1 bg-stone-100 dark:bg-stone-800 rounded-full overflow-hidden">
@@ -481,7 +451,7 @@ const SkillCard = ({ skill, onClick, delay }) => {
 };
 
 // ─── Skill detail modal ────────────────────────────────────────
-const SkillModal = ({ skill, onClose }) => {
+const SkillModal = ({ skill, onClose, t }) => {
   const Icon = skill.icon;
   return (
     <motion.div
@@ -513,8 +483,10 @@ const SkillModal = ({ skill, onClose }) => {
                 <Icon size={28} style={{ color: skill.color }} />
               </div>
               <div>
-                <h3 className="text-xl font-black text-stone-900 dark:text-stone-100 tracking-tight">{skill.years} {t('yearsExperience')}
-                <p className="text-[10px] text-stone-400 mt-0.5 uppercase tracking-widest">{skill.years}+ years experience</p>
+                <h3 className="text-xl font-black text-stone-900 dark:text-stone-100 tracking-tight">{skill.name}</h3>
+                <p className="text-[10px] text-stone-400 mt-0.5 uppercase tracking-widest">
+                  {skill.years}+ {t('yearsExperience', 'years experience')}
+                </p>
               </div>
             </div>
             <button
@@ -526,19 +498,14 @@ const SkillModal = ({ skill, onClose }) => {
             </button>
           </div>
 
-<<<<<<< HEAD
           <p className="text-sm leading-relaxed text-stone-500 dark:text-stone-400 mb-6">
-            Deep expertise in {skill.name}, building high-performance, production-ready solutions
-=======
-          {/* description */}
-          <p{t('deepExpertise')} {skill.name}, {t('buildingSolutions')}nce, production-ready solutions
->>>>>>> 8f2bd04 (language support)
+            {t('deepExpertise', 'Deep expertise in')} {skill.name}, {t('buildingSolutions', 'building high-performance, production-ready solutions')}
             with modern architectural patterns and best practices.
           </p>
 
           <div className="mb-6">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-[10px] uppercase tracking-widest text-stone-400">Mastery</span>
+              <span className="text-[10px] uppercase tracking-widest text-stone-400">{t('mastery', 'Mastery')}</span>
               <span className="text-sm font-black text-stone-900 dark:text-stone-100">{skill.level}%</span>
             </div>
             <div className="h-2 rounded-full bg-stone-100 dark:bg-stone-800 overflow-hidden">
@@ -555,9 +522,9 @@ const SkillModal = ({ skill, onClose }) => {
           <div className="grid grid-cols-2 gap-3 mb-6">
             {[
               { labelKey: 'mastery',    value: `${skill.level}%` },
-              { labelKey: 'experience', value: `${skill.years}+ ${t('years')}` },
+              { labelKey: 'experience', value: `${skill.years}+ ${t('years', 'yrs')}` },
             ].map(({ labelKey, value }) => (
-              <div key={t(labelKey)} className="px-4 py-3 rounded-2xl bg-stone-50 dark:bg-stone-800/40
+              <div key={labelKey} className="px-4 py-3 rounded-2xl bg-stone-50 dark:bg-stone-800/40
                                           border border-stone-100 dark:border-stone-800">
                 <p className="text-[9px] uppercase tracking-widest text-stone-400 mb-1">{t(labelKey)}</p>
                 <p className="text-xl font-black text-stone-900 dark:text-stone-100">{value}</p>
@@ -571,7 +538,7 @@ const SkillModal = ({ skill, onClose }) => {
                        text-xs font-black uppercase tracking-widest text-white transition-all active:scale-95"
             style={{ background: `linear-gradient(135deg, ${skill.color}dd, ${skill.color}aa)` }}
           >
-            {t('close')}
+            {t('close', 'Close')}
             <ChevronRight size={13} className="group-hover:translate-x-1 transition-transform" />
           </button>
         </div>
@@ -580,18 +547,16 @@ const SkillModal = ({ skill, onClose }) => {
   );
 };
 
-<<<<<<< HEAD
 // ─── Main Component ────────────────────────────────────────────
 export default function SkillsGalaxy() {
-=======
-// ─── Main ──────────────────────────────────────────────────────
-export d{ t } = useLanguage();
-  const efault function SkillsGalaxy() {
->>>>>>> 8f2bd04 (language support)
+  const { t } = useLanguage();
+  const { theme } = useTheme();
+  const dark = theme === 'dark';
+  
   const [activeCategory, setActiveCategory] = useState(skillsPayload.categories[0].name);
   const [hoveredSkill,   setHoveredSkill]   = useState(null);
   const [activeSkill,    setActiveSkill]    = useState(null);
-  const [viewMode,       setViewMode]       = useState('3d'); // Default to 3D view
+  const [viewMode,       setViewMode]       = useState('grid'); // Default to grid to avoid WebGL issues
 
   const activeCategoryData = useMemo(
     () => skillsPayload.categories.find(c => c.name === activeCategory),
@@ -605,10 +570,6 @@ export d{ t } = useLanguage();
       icon: ICON_MAP[skill.name] || Code2,
     }));
   }, [activeCategoryData]);
-
-  const dark = typeof document !== 'undefined'
-    ? document.documentElement.classList.contains('dark')
-    : false;
 
   const bg      = 'bg-stone-100 dark:bg-[#0c0b0a]';
   const surface = 'bg-white dark:bg-[#161513]';
@@ -640,34 +601,24 @@ export d{ t } = useLanguage();
             viewport={{ once: true }}
             transition={{ duration: 0.55 }}
           >
-            <p{t('technicalSkills')}
+            <p className="flex items-center gap-2 text-[11px] font-semibold tracking-[0.2em] uppercase text-orange-500 mb-3">
+              <span className="block w-5 h-px bg-orange-500" />
+              {t('technicalSkills', 'Technical skills')}
             </p>
             <h2 className={`text-[clamp(38px,5.5vw,64px)] font-black leading-[0.93] tracking-tight ${ink}`}>
-              {t('myTechStack')}
+              {t('myTechStack', 'My')} <span className="text-orange-500 italic">{t('techStack', 'Tech')}</span> {t('stack', 'Stack')}
             </h2>
             <p className={`mt-3 text-sm leading-relaxed max-w-xs ${subtle}`}>
-<<<<<<< HEAD
-              Click on any planet to explore skill details in the interactive 3D orbit.
-=======
-              {t('skillsSubtitle')}
-            <p className={`mt-3 text-sm leading-relaxed max-w-xs ${subtle}`}>
-              Tools and technologies I use to build fast, scalable, and beautiful products.
->>>>>>> 8f2bd04 (language support)
+              {t('skillsSubtitle', 'Tools and technologies I use to build fast, scalable, and beautiful products.')}
             </p>
           </motion.div>
 
           {/* View toggle */}
-<<<<<<< HEAD
           <div className={`flex items-center gap-1 p-1 rounded-xl border ${surface} ${border}`}>
             {[
-              { mode: 'grid',  Icon: LayoutGrid, label: 'Grid'  },
-              { mode: '3d',    Icon: Orbit,      label: '3D Orbit' },
-            ].map(({ mode, Icon: Ic, label }) => (
-=======
-          <div className={`flex items-center gap-1 p-1Key: 'grid'  },
-              { mode: 'orbit', Icon: Orbit,      labelKey: 'orbit' },
+              { mode: 'grid',  Icon: LayoutGrid, labelKey: 'grid' },
+              { mode: '3d',    Icon: Orbit,      labelKey: '3dOrbit' },
             ].map(({ mode, Icon: Ic, labelKey }) => (
->>>>>>> 8f2bd04 (language support)
               <button
                 key={mode}
                 onClick={() => setViewMode(mode)}
@@ -677,9 +628,7 @@ export d{ t } = useLanguage();
                     : `${muted} hover:${ink}`
                   }`}
               >
-                <Ic size={13} /> {t(labelKey)
-              >
-                <Ic size={13} /> {label}
+                <Ic size={13} /> {t(labelKey, mode === 'grid' ? 'Grid' : '3D Orbit')}
               </button>
             ))}
           </div>
@@ -728,6 +677,7 @@ export d{ t } = useLanguage();
                   skill={skill}
                   delay={i * 0.04}
                   onClick={() => setActiveSkill(skill)}
+                  t={t}
                 />
               ))}
             </motion.div>
@@ -746,12 +696,24 @@ export d{ t } = useLanguage();
               <div className="relative w-full rounded-3xl overflow-hidden border border-stone-200 dark:border-stone-800/60"
                    style={{ height: '550px', background: dark ? 'radial-gradient(circle at center, #1a1917 0%, #0c0b0a 100%)' : 'radial-gradient(circle at center, #fafaf9 0%, #f5f3ee 100%)' }}>
                 
-                <ThreeJSOrbitalSystem 
-                  skills={visibleSkills} 
-                  categoryColor={activeCategoryData?.color || '#f97316'} 
-                  isDark={dark}
-                  onSkillClick={handleSkillClick}
-                />
+                <LazyThreeJS
+                  componentId={`skills-orbit-${activeCategory}`}
+                  fallback={
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="text-center">
+                        <Loader2 size={24} className="animate-spin mx-auto mb-2 text-orange-500" />
+                        <p className="text-sm opacity-50">{t('loading3D', 'Loading 3D view...')}</p>
+                      </div>
+                    </div>
+                  }
+                >
+                  <ThreeJSOrbitalSystem 
+                    skills={visibleSkills} 
+                    categoryColor={activeCategoryData?.color || '#f97316'} 
+                    isDark={dark}
+                    onSkillClick={handleSkillClick}
+                  />
+                </LazyThreeJS>
 
                 {/* Overlay UI */}
                 <div className="absolute inset-0 pointer-events-none">
@@ -765,7 +727,7 @@ export d{ t } = useLanguage();
                   </div>
                   <div className="absolute bottom-4 left-4">
                     <div className="text-[10px] text-white/50 uppercase tracking-widest">
-                      🖱️ Drag to rotate • Click planets to explore
+                      🖱️ Click planets to explore
                     </div>
                   </div>
                 </div>
@@ -809,7 +771,9 @@ export d{ t } = useLanguage();
           className={`mt-14 p-5 rounded-2xl border ${surface} ${border} flex flex-wrap items-center justify-between gap-4`}
         >
           <div>
-            <p className={`text-[10px] font-bold uppercase tracking-[0.2em] ${muted} mb-1`}>Total skills</p>
+            <p className={`text-[10px] font-bold uppercase tracking-[0.2em] ${muted} mb-1`}>
+              {t('totalSkills', 'Total skills')}
+            </p>
             <p className={`text-2xl font-black ${ink}`}>
               {skillsPayload.categories.reduce((a, c) => a + c.skills.length, 0)}
               <span className="text-orange-500">+</span>
@@ -832,7 +796,7 @@ export d{ t } = useLanguage();
 
       {/* Modal */}
       <AnimatePresence>
-        {activeSkill && <SkillModal skill={activeSkill} onClose={() => setActiveSkill(null)} />}
+        {activeSkill && <SkillModal skill={activeSkill} onClose={() => setActiveSkill(null)} t={t} />}
       </AnimatePresence>
     </section>
   );
