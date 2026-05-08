@@ -1,6 +1,7 @@
-import React, { useRef, useState, useMemo, useEffect } from 'react';
+import React, { useRef, useState, useMemo } from 'react';
 import { motion, useScroll, useSpring, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import {
   MapPin, Calendar, Briefcase, ChevronDown,
   Star, TrendingUp, Users, Clock, Zap, ArrowUpRight,
@@ -15,13 +16,14 @@ const getExperiences = (t) => [
     location: 'Kigali, Rwanda',
     type: t('fullTime', 'Full-time'),
     current: true,
+    descriptionKey: 'architectureMicroservices',
     description: 'Architecting scalable microservices and leading the frontend migration to Next.js. Improved system performance by 40% through strategic caching and query optimization.',
     skills: ['React', 'Go', 'AWS', 'Docker', 'PostgreSQL', 'Redis'],
     skillLevels: [92, 78, 75, 80, 85, 72],
     achievements: [
-      { icon: TrendingUp, label: 'Performance', value: '+40%' },
-      { icon: Clock, label: 'Uptime', value: '99.9%' },
-      { icon: Users, label: 'Team', value: '8 devs' },
+      { icon: TrendingUp, labelKey: 'performance', label: 'Performance', value: '+40%' },
+      { icon: Clock,      labelKey: 'uptime',      label: 'Uptime',      value: '99.9%' },
+      { icon: Users,      labelKey: 'teamSize',    label: 'Team',         value: '8 devs' },
     ],
     accent: '#f97316',
     highlight: 'Led full frontend architecture migration',
@@ -35,13 +37,14 @@ const getExperiences = (t) => [
     location: 'Kigali, Rwanda',
     type: t('fullTime', 'Full-time'),
     current: false,
+    descriptionKey: 'interactiveDashboards',
     description: 'Built interactive data-visualization dashboards processing 100k+ daily records. Pioneered AI voice-command integration, cutting navigation time by 35%.',
     skills: ['TypeScript', 'D3.js', 'Tailwind CSS', 'GraphQL', 'Framer Motion'],
     skillLevels: [88, 75, 92, 80, 85],
     achievements: [
-      { icon: TrendingUp, label: 'Records/day', value: '100k+' },
-      { icon: Clock, label: 'Time saved', value: '35%' },
-      { icon: Users, label: 'Dashboards', value: '12' },
+      { icon: TrendingUp, labelKey: 'recordsProcessed', label: 'Records/day', value: '100k+' },
+      { icon: Clock,      labelKey: 'timeSaved',       label: 'Time saved',  value: '35%' },
+      { icon: Users,      labelKey: 'dashboardsBuilt',  label: 'Dashboards',  value: '12' },
     ],
     accent: '#3b82f6',
     highlight: 'AI voice-command integration',
@@ -55,13 +58,14 @@ const getExperiences = (t) => [
     location: 'Kigali, Rwanda',
     type: t('internship', 'Internship'),
     current: false,
+    descriptionKey: 'juniorDeveloper',
     description: 'Built responsive landing pages and managed CMS integrations for international clients across 6 countries. Delivered 20+ production sites on time and under budget.',
     skills: ['HTML', 'CSS', 'JavaScript', 'React', 'Node.js', 'MySQL'],
     skillLevels: [85, 78, 82, 80, 75, 70],
     achievements: [
-      { icon: TrendingUp, label: 'Sites', value: '20+' },
-      { icon: Users, label: 'Countries', value: '6' },
-      { icon: Star, label: 'Rating', value: '4.9★' },
+      { icon: TrendingUp, labelKey: 'sitesDelivered', label: 'Sites',     value: '20+' },
+      { icon: Users,      labelKey: 'countries',      label: 'Countries', value: '6' },
+      { icon: Star,       labelKey: 'rating',         label: 'Rating',    value: '4.9★' },
     ],
     accent: '#8b5cf6',
     highlight: '20+ production sites across 6 countries',
@@ -277,15 +281,40 @@ function CSSMountainScene({ experiences, activeIdx, onPeakClick }) {
           <span className="animate-ping absolute h-full w-full rounded-full bg-orange-400 opacity-70" />
           <span className="relative rounded-full h-1.5 w-1.5 bg-orange-500" />
         </span>
-        <span className="text-[9px] font-bold uppercase tracking-widest text-white/60">
-          Click a peak to explore
-        </span>
+        <span className="text-[9px] font-bold uppercase tracking-widest text-white/60">Click a peak to explore</span>
       </div>
     </div>
   );
 }
 
-// ─── Experience Card ───────────────────────────────────────────
+// ─── Stat tile ─────────────────────────────────────────────────
+const StatTile = ({ icon: Icon, label, value, accent }) => (
+  <div className="flex flex-col items-center justify-center p-3 rounded-xl text-center"
+    style={{ background: `${accent}0d`, border: `1px solid ${accent}22` }}>
+    <Icon size={12} style={{ color: accent }} className="mb-1 opacity-80" />
+    <span className="text-lg font-black leading-none" style={{ color: accent }}>{value}</span>
+    <span className="text-[8px] text-stone-400 uppercase tracking-widest mt-1 leading-tight">{label}</span>
+  </div>
+);
+
+// ─── Skill bar ─────────────────────────────────────────────────
+const SkillBar = ({ label, level, accent, delay }) => (
+  <div className="flex items-center gap-2">
+    <span className="text-[10px] font-medium text-stone-500 dark:text-stone-500 w-20 shrink-0 truncate">{label}</span>
+    <div className="flex-1 h-1.5 rounded-full bg-stone-100 dark:bg-stone-800 overflow-hidden">
+      <motion.div
+        initial={{ width: 0 }}
+        animate={{ width: `${level}%` }}
+        transition={{ duration: 0.9, delay, ease: [0.22, 1, 0.36, 1] }}
+        className="h-full rounded-full"
+        style={{ background: `linear-gradient(90deg, ${accent}88, ${accent})` }}
+      />
+    </div>
+    <span className="text-[10px] font-bold w-7 text-right shrink-0" style={{ color: accent }}>{level}%</span>
+  </div>
+);
+
+// ─── Experience card ───────────────────────────────────────────
 const ExpCard = ({ exp, index, isActive, onClick, t }) => (
   <motion.div
     initial={{ opacity: 0, y: 24 }}
@@ -294,19 +323,26 @@ const ExpCard = ({ exp, index, isActive, onClick, t }) => (
     transition={{ duration: 0.5, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
     onClick={onClick}
     whileHover={{ y: -4 }}
-    className={`group relative rounded-2xl cursor-pointer overflow-hidden transition-all duration-300 flex-1 ${
-      isActive ? 'shadow-lg' : ''
-    }`}
+    className="group relative rounded-2xl cursor-pointer overflow-hidden transition-all duration-300 flex-1"
     style={{
-      border: `1px solid ${isActive ? exp.accent + '55' : 'transparent'}`,
+      border: `1px solid ${isActive ? exp.accent + '55' : ''}`,
       boxShadow: isActive ? `0 0 0 1px ${exp.accent}25, 0 16px 40px ${exp.accent}15` : undefined,
     }}
   >
-    <div className="absolute inset-0 rounded-2xl pointer-events-none border border-stone-200 dark:border-stone-800/60" />
+    <div className="absolute inset-0 rounded-2xl pointer-events-none border border-stone-200 dark:border-stone-800/60 transition-opacity duration-300"
+      style={{ opacity: isActive ? 0 : 1 }} />
 
+    {/* Top accent bar */}
     <div className="h-1 w-full" style={{ background: isActive ? exp.accent : `${exp.accent}35` }} />
 
+    {/* Active peak indicator line */}
+    {isActive && (
+      <div className="absolute top-1 left-1/2 -translate-x-1/2 w-px h-5 -translate-y-full"
+        style={{ background: `linear-gradient(to top, ${exp.accent}, transparent)` }} />
+    )}
+
     <div className="bg-white dark:bg-[#161513] p-5">
+      {/* Step number */}
       <div className="flex items-start justify-between mb-3">
         <div
           className="w-8 h-8 rounded-xl flex items-center justify-center text-[11px] font-black shrink-0"
@@ -351,6 +387,7 @@ const ExpCard = ({ exp, index, isActive, onClick, t }) => (
         </span>
       </div>
 
+      {/* Highlight */}
       <div className="flex items-center gap-1.5 mb-2.5">
         <Zap size={10} style={{ color: exp.accent }} />
         <span className="text-[10px] font-semibold text-stone-500 dark:text-stone-500 italic">{exp.highlight}</span>
@@ -358,6 +395,7 @@ const ExpCard = ({ exp, index, isActive, onClick, t }) => (
 
       <p className="text-xs leading-relaxed text-stone-500 dark:text-stone-400 mb-3">{exp.description}</p>
 
+      {/* Skills */}
       <div className="flex flex-wrap gap-1">
         {exp.skills.slice(0, 4).map(s => (
           <span key={s} className="px-2 py-0.5 rounded-md text-[9px] font-bold uppercase"
@@ -365,8 +403,12 @@ const ExpCard = ({ exp, index, isActive, onClick, t }) => (
             {s}
           </span>
         ))}
+        {exp.skills.length > 4 && (
+          <span className="px-2 py-0.5 rounded-md text-[9px] font-bold text-stone-400">+{exp.skills.length - 4}</span>
+        )}
       </div>
 
+      {/* Expand */}
       <AnimatePresence>
         {isActive && (
           <motion.div
@@ -377,42 +419,25 @@ const ExpCard = ({ exp, index, isActive, onClick, t }) => (
             className="overflow-hidden"
           >
             <div className="mt-4 pt-4 border-t space-y-4" style={{ borderColor: `${exp.accent}20` }}>
+              {/* Stats */}
               <div>
                 <p className="text-[9px] uppercase tracking-widest text-stone-400 dark:text-stone-600 mb-2">
                   {t('keyMetrics', 'Key metrics')}
                 </p>
                 <div className="grid grid-cols-3 gap-2">
                   {exp.achievements.map((a, i) => (
-                    <div key={i} className="flex flex-col items-center p-3 rounded-xl text-center"
-                      style={{ background: `${exp.accent}0d`, border: `1px solid ${exp.accent}22` }}>
-                      <a.icon size={12} style={{ color: exp.accent }} className="mb-1 opacity-80" />
-                      <span className="text-lg font-black leading-none" style={{ color: exp.accent }}>{a.value}</span>
-                      <span className="text-[8px] text-stone-400 uppercase tracking-widest mt-1 leading-tight">{a.label}</span>
-                    </div>
+                    <StatTile key={i} {...a} accent={exp.accent} />
                   ))}
                 </div>
               </div>
+              {/* Skill bars */}
               <div>
                 <p className="text-[9px] uppercase tracking-widest text-stone-400 dark:text-stone-600 mb-2">
                   {t('proficiency', 'Proficiency')}
                 </p>
                 <div className="flex flex-col gap-2">
                   {exp.skills.map((s, i) => (
-                    <div key={s} className="flex items-center gap-2">
-                      <span className="text-[10px] font-medium text-stone-500 w-20 shrink-0 truncate">{s}</span>
-                      <div className="flex-1 h-1.5 rounded-full bg-stone-100 dark:bg-stone-800 overflow-hidden">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${exp.skillLevels[i]}%` }}
-                          transition={{ duration: 0.9, delay: 0.1 * i, ease: [0.22, 1, 0.36, 1] }}
-                          className="h-full rounded-full"
-                          style={{ background: `linear-gradient(90deg, ${exp.accent}88, ${exp.accent})` }}
-                        />
-                      </div>
-                      <span className="text-[10px] font-bold w-7 text-right shrink-0" style={{ color: exp.accent }}>
-                        {exp.skillLevels[i]}%
-                      </span>
-                    </div>
+                    <SkillBar key={s} label={s} level={exp.skillLevels[i]} accent={exp.accent} delay={0.05 + i * 0.06} />
                   ))}
                 </div>
               </div>
@@ -433,9 +458,18 @@ const ExpCard = ({ exp, index, isActive, onClick, t }) => (
 // ─── Main Component ────────────────────────────────────────────
 export default function Experience() {
   const { t } = useLanguage();
+  const { theme } = useTheme();
+  const dark = theme === 'dark';
+  
   const experiences = getExperiences(t);
   const [activeIdx, setActiveIdx] = useState(0);
   const [filter, setFilter] = useState('all');
+
+  const FILTERS = [
+    { key: 'all', label: t('all', 'All') },
+    { key: 'fullTime', label: t('fullTime', 'Full-time') },
+    { key: 'internship', label: t('internship', 'Internship') },
+  ];
 
   const handlePeakClick = React.useCallback((i) => {
     setActiveIdx(prev => prev === i ? -1 : i);
@@ -444,8 +478,8 @@ export default function Experience() {
   const filtered = useMemo(
     () => filter === 'all' 
       ? experiences 
-      : experiences.filter(e => e.type.toLowerCase().includes(filter)),
-    [filter, experiences]
+      : experiences.filter(e => e.type === t(filter, filter)),
+    [filter, t, experiences]
   );
 
   const startYear = 2023;
@@ -453,16 +487,10 @@ export default function Experience() {
   const totalSkills = [...new Set(experiences.flatMap(e => e.skills))].length;
 
   const STATS = [
-    { label: t('yearsActive', 'Years active'), value: `${yearsActive}+`, color: '#f97316' },
-    { label: t('rolesHeld', 'Roles held'), value: experiences.length, color: '#3b82f6' },
-    { label: t('skillsMastered', 'Skills mastered'), value: totalSkills, color: '#8b5cf6' },
-    { label: t('sitesDelivered', 'Sites delivered'), value: '20+', color: '#10b981' },
-  ];
-
-  const FILTERS = [
-    { key: 'all', label: t('all', 'All') },
-    { key: 'fullTime', label: t('fullTime', 'Full-time') },
-    { key: 'internship', label: t('internship', 'Internship') },
+    { label: t('yearsActive', 'Years active'),    value: `${yearsActive}+`,  color: '#f97316' },
+    { label: t('rolesHeld', 'Roles held'),         value: experiences.length, color: '#3b82f6' },
+    { label: t('skillsMastered', 'Skills mastered'), value: totalSkills,     color: '#8b5cf6' },
+    { label: t('sitesDelivered', 'Sites delivered'), value: '20+',           color: '#10b981' },
   ];
 
   return (
@@ -489,13 +517,14 @@ export default function Experience() {
               {t('careerPath', 'Career path')}
             </p>
             <h2 className="text-[clamp(38px,5.5vw,64px)] font-black leading-[0.93] tracking-tight text-stone-900 dark:text-stone-100">
-              {t('workExperience', 'Work')} <span className="text-orange-500 italic">{t('experience', 'Experience')}</span>
+              {t('work', 'Work')} <span className="text-orange-500 italic">{t('experience', 'Experience')}</span>
             </h2>
             <p className="mt-3 text-sm leading-relaxed max-w-xs text-stone-500 dark:text-stone-500">
-              {t('experienceDescription', 'Each peak represents a milestone — the higher the mountain, the greater the growth.')}
+              {t('experienceDesc', 'Each peak represents a milestone — the higher the mountain, the greater the growth.')}
             </p>
           </motion.div>
 
+          {/* Filters */}
           <motion.div 
             initial={{ opacity: 0, y: 16 }} 
             whileInView={{ opacity: 1, y: 0 }} 
@@ -601,7 +630,10 @@ export default function Experience() {
               {t('nextPeak', 'The next peak is yet to be climbed — open to new challenges')}
             </p>
           </div>
-          <a href="#contact" className="ml-auto flex items-center gap-1.5 px-4 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-[11px] font-bold uppercase tracking-widest transition-all shadow-md shadow-orange-500/20 shrink-0">
+          <a 
+            href="#contact" 
+            className="ml-auto flex items-center gap-1.5 px-4 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-[11px] font-bold uppercase tracking-widest transition-all shadow-md shadow-orange-500/20 shrink-0"
+          >
             {t('hireMe', 'Hire me')} <ArrowUpRight size={12} />
           </a>
         </motion.div>
