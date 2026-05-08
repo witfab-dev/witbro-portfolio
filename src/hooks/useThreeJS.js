@@ -1,7 +1,7 @@
 // hooks/useThreeJS.js
 import { useEffect, useRef, useState, useCallback } from 'react';
 import * as THREE from 'three';
-import { webGLManager } from '../utils/WebGLManager';
+import { webGLManager } from './WebGLManager';
 
 /**
  * Custom hook for managing Three.js scenes with WebGL context limits
