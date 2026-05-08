@@ -1,9 +1,9 @@
 import React, { useRef, useState, useMemo, useEffect } from 'react';
 import { motion, useScroll, useSpring, AnimatePresence } from 'framer-motion';
 import * as THREE from 'three';
-import { useLanguage } from '../contexts/LanguageContext';
-import { useTheme } from '../contexts/ThemeContext';
-import { useThreeJS } from '../hooks/useThreeJS';
+import { useLanguage } from '../../contexts/LanguageContext';
+import { useTheme } from '../../contexts/ThemeContext';
+import { useThreeJS } from '../../hooks/useThreeJS';
 import LazyThreeJS from '../shared/LazyThreeJS';
 import {
   MapPin, Calendar, Briefcase, ChevronDown,
