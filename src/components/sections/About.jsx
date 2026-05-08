@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import * as THREE from 'three';
-import { useLanguage } from '../../contexts/LanguageContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import {
   Layers, Globe, Zap, ShieldCheck, Terminal,
   ArrowUpRight, Sparkles, Coffee, Code2,
