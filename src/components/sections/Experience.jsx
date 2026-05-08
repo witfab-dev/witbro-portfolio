@@ -1,7 +1,7 @@
 import React, { useRef, useState, useMemo } from 'react';
 import { motion, useScroll, useSpring, AnimatePresence } from 'framer-motion';
-import { useLanguage } from '../../contexts/LanguageContext';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useLanguage } from '../contexts/LanguageContext';
+import { useTheme } from '../contexts/ThemeContext';
 import {
   MapPin, Calendar, Briefcase, ChevronDown,
   Star, TrendingUp, Users, Clock, Zap, ArrowUpRight,
