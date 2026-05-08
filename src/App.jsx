@@ -1,7 +1,7 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ThemeProvider } from './contexts/ThemeContext';
-import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
+import { ThemeProvider } from './components/contexts/ThemeContext';
+import { LanguageProvider, useLanguage } from '.components//contexts/LanguageContext';
 
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
