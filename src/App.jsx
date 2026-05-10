@@ -7,7 +7,7 @@ import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import VoiceAssistant from './components/ui/VoiceAssistant';
 import ThreeJSErrorBoundary from './components/shared/ThreeJSErrorBoundary';
-import { webGLManager } from './hooks/WebGLManager'; // ✅ Correct path - hooks folder
+import { webGLManager } from './hooks/WebGLManager';
 
 import { Loader2, Bot } from 'lucide-react';
 
@@ -185,18 +185,10 @@ const SectionLoader = () => {
 function App() {
   const [loading, setLoading] = useState(true);
   const [showVoiceAssistant, setShowVoiceAssistant] = useState(false);
-  const [webGLError, setWebGLError] = useState(false);
+  // ❌ REMOVED: const [webGLError, setWebGLError] = useState(false);
 
   // Initialize WebGL Manager
   useEffect(() => {
-    // Check WebGL support globally
-    const canvas = document.createElement('canvas');
-    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-    if (!gl) {
-      console.warn('WebGL not supported - 3D features will use fallbacks');
-      setWebGLError(true);
-    }
-
     // Cleanup on unmount
     return () => {
       webGLManager.disposeAll();
@@ -256,12 +248,13 @@ function App() {
                     <Projects />
                   </ThreeJSErrorBoundary>
                   
+                  {/* ✅ Removed webGLEnabled prop - always show */}
                   <ThreeJSErrorBoundary>
-                    <SkillsGalaxy webGLEnabled={!webGLError} />
+                    <SkillsGalaxy />
                   </ThreeJSErrorBoundary>
                   
                   <ThreeJSErrorBoundary>
-                    <Experience webGLEnabled={!webGLError} />
+                    <Experience />
                   </ThreeJSErrorBoundary>
                   
                   <ThreeJSErrorBoundary>
@@ -269,7 +262,7 @@ function App() {
                   </ThreeJSErrorBoundary>
                   
                   <ThreeJSErrorBoundary>
-                    <Contact webGLEnabled={!webGLError} />
+                    <Contact />
                   </ThreeJSErrorBoundary>
                 </Suspense>
               </main>
