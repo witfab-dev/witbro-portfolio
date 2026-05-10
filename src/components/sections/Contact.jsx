@@ -62,72 +62,55 @@ function GlobeFallback() {
   );
 }
 
-// ─── Three.js Globe ────────────────────────────────────────────
 function GlobeBackground() {
   const { mountRef, isReady, error, startAnimationLoop, handleResize } = useThreeJS(
     'contact-globe',
     {
-      cameraPosition: [0, 0, 5.5],
-      fov: 40,
+      cameraPosition: [0, 0, 8],
+      fov: 35,
       enableShadows: false,
       onInit: ({ scene }) => {
-        // Enhanced Lighting
-        scene.add(new THREE.AmbientLight(0xffffff, 0.2));
+        // Subtle Lighting
+        scene.add(new THREE.AmbientLight(0xffffff, 0.15));
         
-        const dOrange = new THREE.DirectionalLight(0xf97316, 1.5);
+        const dOrange = new THREE.DirectionalLight(0xf97316, 0.8);
         dOrange.position.set(5, 3, 5); 
         scene.add(dOrange);
         
-        const dBlue = new THREE.DirectionalLight(0x3b82f6, 1.0);
+        const dBlue = new THREE.DirectionalLight(0x3b82f6, 0.5);
         dBlue.position.set(-5, -3, 3); 
         scene.add(dBlue);
-        
-        // Rim light for atmosphere
-        const rimLight = new THREE.DirectionalLight(0x8b5cf6, 0.6);
-        rimLight.position.set(0, -5, -3);
-        scene.add(rimLight);
 
         const globeGroup = new THREE.Group();
 
-        // Inner sphere - more subtle and atmospheric
+        // Inner sphere - smaller and more subtle
         globeGroup.add(new THREE.Mesh(
-          new THREE.SphereGeometry(1.8, 64, 64),
+          new THREE.SphereGeometry(0.8, 48, 48),
           new THREE.MeshStandardMaterial({ 
             color: 0x0c0b0a, 
             metalness: 0.2, 
-            roughness: 0.7, 
+            roughness: 0.8, 
             transparent: true, 
-            opacity: 0.5 
+            opacity: 0.4 
           })
         ));
 
         // Grid wireframe
         globeGroup.add(new THREE.Mesh(
-          new THREE.SphereGeometry(1.82, 48, 24),
+          new THREE.SphereGeometry(0.82, 32, 16),
           new THREE.MeshBasicMaterial({ 
             color: 0xf97316, 
             wireframe: true, 
             transparent: true, 
-            opacity: 0.08 
+            opacity: 0.05 
           })
         ));
 
-        // Outer glow layer 1
+        // Outer glow
         globeGroup.add(new THREE.Mesh(
-          new THREE.SphereGeometry(1.95, 48, 48),
+          new THREE.SphereGeometry(0.9, 32, 32),
           new THREE.MeshBasicMaterial({ 
             color: 0xf97316, 
-            transparent: true, 
-            opacity: 0.04, 
-            side: THREE.BackSide 
-          })
-        ));
-
-        // Outer glow layer 2
-        globeGroup.add(new THREE.Mesh(
-          new THREE.SphereGeometry(2.1, 32, 32),
-          new THREE.MeshBasicMaterial({ 
-            color: 0x3b82f6, 
             transparent: true, 
             opacity: 0.03, 
             side: THREE.BackSide 
@@ -135,7 +118,7 @@ function GlobeBackground() {
         ));
 
         // lat/lon → sphere helper
-        const toSphere = (lat, lon, r = 1.85) => {
+        const toSphere = (lat, lon, r = 0.84) => {
           const phi   = (90 - lat) * (Math.PI / 180);
           const theta = (lon + 180) * (Math.PI / 180);
           return new THREE.Vector3(
@@ -145,36 +128,24 @@ function GlobeBackground() {
           );
         };
 
-        // Continent dot clusters - enhanced density
+        // Continent dot clusters
         const continentData = [
-          { count: 150, latRange: [-37.5, 27.5], lonRange: [-5, 45]    },
-          { count: 100, latRange: [35, 60],      lonRange: [-5, 35]    },
-          { count: 220, latRange: [5, 65],       lonRange: [40, 140]   },
-          { count: 150, latRange: [15, 60],      lonRange: [-130, -70] },
-          { count: 100, latRange: [-42.5, 12.5], lonRange: [-80, -40]  },
-          { count: 60,  latRange: [-40, -10],    lonRange: [110, 150]  },
+          { count: 80,  latRange: [-37.5, 27.5], lonRange: [-5, 45]    },
+          { count: 60,  latRange: [35, 60],      lonRange: [-5, 35]    },
+          { count: 120, latRange: [5, 65],       lonRange: [40, 140]   },
+          { count: 80,  latRange: [15, 60],      lonRange: [-130, -70] },
+          { count: 50,  latRange: [-42.5, 12.5], lonRange: [-80, -40]  },
+          { count: 30,  latRange: [-40, -10],    lonRange: [110, 150]  },
         ];
         
-        // Ocean dots for atmosphere
-        const oceanDots = Array.from({ length: 200 }, () => {
-          return toSphere(
-            (Math.random() - 0.5) * 160,
-            Math.random() * 360,
-            1.83
-          );
-        });
-
-        const allDots = [
-          ...continentData.flatMap(({ count, latRange, lonRange }) =>
-            Array.from({ length: count }, () =>
-              toSphere(
-                latRange[0] + Math.random() * (latRange[1] - latRange[0]),
-                lonRange[0] + Math.random() * (lonRange[1] - lonRange[0])
-              )
+        const allDots = continentData.flatMap(({ count, latRange, lonRange }) =>
+          Array.from({ length: count }, () =>
+            toSphere(
+              latRange[0] + Math.random() * (latRange[1] - latRange[0]),
+              lonRange[0] + Math.random() * (lonRange[1] - lonRange[0])
             )
-          ),
-          ...oceanDots
-        ];
+          )
+        );
         
         const dotPos = new Float32Array(allDots.length * 3);
         allDots.forEach((v, i) => { 
@@ -186,50 +157,41 @@ function GlobeBackground() {
         const dotGeo = new THREE.BufferGeometry();
         dotGeo.setAttribute('position', new THREE.BufferAttribute(dotPos, 3));
         
-        // Create two dot layers for depth
         globeGroup.add(new THREE.Points(
           dotGeo,
           new THREE.PointsMaterial({ 
             color: 0xf97316, 
-            size: 0.022, 
+            size: 0.012, 
             transparent: true, 
-            opacity: 0.6,
-            blending: THREE.AdditiveBlending
+            opacity: 0.4 
           })
         ));
 
-        // City markers + pulsing rings
+        // City markers - few key cities only
         const pulsingRings = [];
         [
-          { lat: -1.94, lon: 30.06,  color: 0xf97316, r: 0.05  },
-          { lat: 48.85, lon: 2.35,   color: 0x3b82f6, r: 0.03 },
-          { lat: 51.5,  lon: -0.12,  color: 0x3b82f6, r: 0.03 },
-          { lat: 40.71, lon: -74.0,  color: 0x3b82f6, r: 0.03 },
-          { lat: 37.77, lon: -122.4, color: 0x8b5cf6, r: 0.028 },
-          { lat: 35.68, lon: 139.7,  color: 0x8b5cf6, r: 0.028 },
-          { lat: -33.87,lon: 151.2,  color: 0x10b981, r: 0.028 },
-          { lat: 1.35,  lon: 103.8,  color: 0x10b981, r: 0.028 },
-          { lat: 25.2,  lon: 55.27,  color: 0x8b5cf6, r: 0.028 },
-          { lat: -26.2, lon: 28.04,  color: 0x10b981, r: 0.028 },
-          { lat: 6.52,  lon: 3.38,   color: 0xf97316, r: 0.028 },
-          { lat: 52.52, lon: 13.40,  color: 0x3b82f6, r: 0.028 },
+          { lat: -1.94, lon: 30.06,  color: 0xf97316, r: 0.025 },
+          { lat: 48.85, lon: 2.35,   color: 0x3b82f6, r: 0.015 },
+          { lat: 40.71, lon: -74.0,  color: 0x3b82f6, r: 0.015 },
+          { lat: 35.68, lon: 139.7,  color: 0x8b5cf6, r: 0.015 },
+          { lat: -33.87,lon: 151.2,  color: 0x10b981, r: 0.015 },
+          { lat: 1.35,  lon: 103.8,  color: 0x10b981, r: 0.015 },
         ].forEach(({ lat, lon, color, r }) => {
-          const pos = toSphere(lat, lon, 1.85);
+          const pos = toSphere(lat, lon, 0.84);
           const dot = new THREE.Mesh(
-            new THREE.SphereGeometry(r, 8, 8), 
-            new THREE.MeshBasicMaterial({ color, blending: THREE.AdditiveBlending })
+            new THREE.SphereGeometry(r, 6, 6), 
+            new THREE.MeshBasicMaterial({ color })
           );
           dot.position.copy(pos);
           globeGroup.add(dot);
           
           const ring = new THREE.Mesh(
-            new THREE.RingGeometry(r * 1.5, r * 2.2, 16),
+            new THREE.RingGeometry(r * 1.5, r * 2.2, 12),
             new THREE.MeshBasicMaterial({ 
               color, 
               transparent: true, 
-              opacity: 0.5, 
-              side: THREE.DoubleSide,
-              blending: THREE.AdditiveBlending 
+              opacity: 0.4, 
+              side: THREE.DoubleSide 
             })
           );
           ring.position.copy(pos);
@@ -239,123 +201,90 @@ function GlobeBackground() {
           pulsingRings.push(ring);
         });
 
-        // Arcs from Kigali
-        const kigali = toSphere(-1.94, 30.06, 1.87);
+        // Few connection arcs from Kigali
+        const kigali = toSphere(-1.94, 30.06, 0.86);
         [
-          toSphere(48.85, 2.35, 1.87),
-          toSphere(40.71, -74.0, 1.87),
-          toSphere(35.68, 139.7, 1.87),
-          toSphere(1.35, 103.8, 1.87),
-          toSphere(25.2, 55.27, 1.87),
-          toSphere(-26.2, 28.04, 1.87),
-          toSphere(6.52, 3.38, 1.87),
+          toSphere(48.85, 2.35, 0.86),
+          toSphere(40.71, -74.0, 0.86),
+          toSphere(35.68, 139.7, 0.86),
         ].forEach((target, ti) => {
-          const pts = Array.from({ length: 60 }, (_, i) => {
-            const t = i / 59;
+          const pts = Array.from({ length: 40 }, (_, i) => {
+            const t = i / 39;
             return new THREE.Vector3()
               .lerpVectors(kigali, target, t)
               .normalize()
-              .multiplyScalar(1.92 + Math.sin(t * Math.PI) * 0.25);
+              .multiplyScalar(0.9 + Math.sin(t * Math.PI) * 0.15);
           });
           globeGroup.add(new THREE.Line(
             new THREE.BufferGeometry().setFromPoints(pts),
             new THREE.LineBasicMaterial({ 
               color: ti === 0 ? 0xf97316 : 0x3b82f6, 
               transparent: true, 
-              opacity: 0.25,
-              blending: THREE.AdditiveBlending 
+              opacity: 0.15 
             })
           ));
         });
 
-        // Orbital rings
-        const orbitRings = [];
-        [
-          { r: 2.2,  tube: 0.008, color: 0xf97316, tilt: 0.5,  speed: 0.3  },
-          { r: 2.5,  tube: 0.006, color: 0x3b82f6, tilt: -0.8, speed: -0.2 },
-          { r: 2.85, tube: 0.004, color: 0x8b5cf6, tilt: 1.2,  speed: 0.15 },
-        ].forEach(({ r, tube, color, tilt, speed }) => {
-          const m = new THREE.Mesh(
-            new THREE.TorusGeometry(r, tube, 8, 100),
-            new THREE.MeshBasicMaterial({ 
-              color, 
-              transparent: true, 
-              opacity: 0.45,
-              blending: THREE.AdditiveBlending 
-            })
-          );
-          m.rotation.x = tilt;
-          m.userData.speed = speed;
-          globeGroup.add(m);
-          orbitRings.push(m);
-        });
+        // Single orbital ring
+        const orbitRing = new THREE.Mesh(
+          new THREE.TorusGeometry(1.1, 0.003, 6, 80),
+          new THREE.MeshBasicMaterial({ 
+            color: 0xf97316, 
+            transparent: true, 
+            opacity: 0.2 
+          })
+        );
+        orbitRing.rotation.x = 0.5;
+        orbitRing.userData.speed = 0.2;
+        globeGroup.add(orbitRing);
 
-        // Particle cloud - enhanced
-        const pCount = 500;
+        // Fewer particles
+        const pCount = 200;
         const pPos = new Float32Array(pCount * 3);
-        const pColors = new Float32Array(pCount * 3);
         
         for (let i = 0; i < pCount; i++) {
           const th = Math.random() * Math.PI * 2;
           const ph = Math.acos(2 * Math.random() - 1);
-          const rr = 2.5 + Math.random() * 2.5;
+          const rr = 1.2 + Math.random() * 1.0;
           pPos[i*3] = rr * Math.sin(ph) * Math.cos(th);
           pPos[i*3+1] = rr * Math.sin(ph) * Math.sin(th);
           pPos[i*3+2] = rr * Math.cos(ph);
-          
-          // Color gradient from orange to blue based on distance
-          const colorMix = Math.random();
-          const color = new THREE.Color().lerpColors(
-            new THREE.Color(0xf97316),
-            new THREE.Color(0x3b82f6),
-            colorMix
-          );
-          pColors[i*3] = color.r;
-          pColors[i*3+1] = color.g;
-          pColors[i*3+2] = color.b;
         }
         
         const pGeo = new THREE.BufferGeometry();
         pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
-        pGeo.setAttribute('color', new THREE.BufferAttribute(pColors, 3));
         
         const particles = new THREE.Points(
           pGeo,
           new THREE.PointsMaterial({ 
-            size: 0.018, 
+            color: 0xf97316, 
+            size: 0.01, 
             transparent: true, 
-            opacity: 0.35,
-            vertexColors: true,
-            blending: THREE.AdditiveBlending
+            opacity: 0.25 
           })
         );
         globeGroup.add(particles);
 
-        // Position globe in center
-        globeGroup.position.set(0, 0, 0);
+        // Position small globe in center background
+        globeGroup.position.set(0, 0, -1);
+        globeGroup.scale.set(0.7, 0.7, 0.7); // Make it even smaller
         scene.add(globeGroup);
 
-        // ✅ CORRECT: pass tick fn to startAnimationLoop — do NOT return from onInit
         let elapsed = 0;
         startAnimationLoop(() => {
           elapsed += 0.016;
-          globeGroup.rotation.y += 0.0015;
-          globeGroup.rotation.x = Math.sin(elapsed * 0.12) * 0.06;
+          globeGroup.rotation.y += 0.001;
+          globeGroup.rotation.x = Math.sin(elapsed * 0.1) * 0.04;
 
           pulsingRings.forEach(r => {
-            r.userData.pulse += 0.04;
-            const s = 1 + 0.5 * Math.abs(Math.sin(r.userData.pulse));
+            r.userData.pulse += 0.03;
+            const s = 1 + 0.3 * Math.abs(Math.sin(r.userData.pulse));
             r.scale.setScalar(s);
-            r.material.opacity = 0.6 * (1 - Math.abs(Math.sin(r.userData.pulse)) * 0.7);
+            r.material.opacity = 0.4 * (1 - Math.abs(Math.sin(r.userData.pulse)) * 0.5);
           });
 
-          orbitRings.forEach(r => { 
-            r.rotation.z += r.userData.speed * 0.01; 
-            r.rotation.x += r.userData.speed * 0.005;
-          });
-          
-          particles.rotation.y += 0.0006;
-          particles.rotation.x += 0.0003;
+          orbitRing.rotation.z += orbitRing.userData.speed * 0.008;
+          particles.rotation.y += 0.0004;
         });
       },
     }
@@ -372,7 +301,7 @@ function GlobeBackground() {
     <div ref={mountRef} className="absolute inset-0">
       {!isReady && (
         <div className="absolute inset-0 flex items-center justify-center bg-[#0a0a0a]">
-          <Loader2 size={24} className="animate-spin text-orange-500/50" />
+          <Loader2 size={20} className="animate-spin text-orange-500/30" />
         </div>
       )}
     </div>
@@ -391,6 +320,7 @@ function GlobeRenderer() {
     </ThreeJSErrorBoundary>
   );
 }
+
 
 // ─── Main Contact ──────────────────────────────────────────────
 export default function Contact() {
