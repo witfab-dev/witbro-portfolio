@@ -3,7 +3,7 @@ import { motion, useScroll, useSpring, AnimatePresence } from 'framer-motion';
 import * as THREE from 'three';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useTheme } from '../../contexts/ThemeContext';
-import { useThreeJS } from '../../hooks/useThreeJS';
+import {useThreeJS} from '../../hooks/useThreeJS';  // ✅ Fixed import
 import LazyThreeJS from '../shared/LazyThreeJS';
 import {
   MapPin, Calendar, Briefcase, ChevronDown,
@@ -20,7 +20,6 @@ const getExperiences = (t) => [
     location: 'Kigali, Rwanda',
     type: t('fullTime', 'Full-time'),
     current: true,
-    descriptionKey: 'architectureMicroservices',
     description: 'Architecting scalable microservices and leading the frontend migration to Next.js. Improved system performance by 40% through strategic caching and query optimization.',
     skills: ['React', 'Go', 'AWS', 'Docker', 'PostgreSQL', 'Redis'],
     skillLevels: [92, 78, 75, 80, 85, 72],
@@ -40,7 +39,6 @@ const getExperiences = (t) => [
     location: 'Kigali, Rwanda',
     type: t('fullTime', 'Full-time'),
     current: false,
-    descriptionKey: 'interactiveDashboards',
     description: 'Built interactive data-visualization dashboards processing 100k+ daily records. Pioneered AI voice-command integration, cutting navigation time by 35%.',
     skills: ['TypeScript', 'D3.js', 'Tailwind CSS', 'GraphQL', 'Framer Motion'],
     skillLevels: [88, 75, 92, 80, 85],
@@ -60,7 +58,6 @@ const getExperiences = (t) => [
     location: 'Kigali, Rwanda',
     type: t('internship', 'Internship'),
     current: false,
-    descriptionKey: 'juniorDeveloper',
     description: 'Built responsive landing pages and managed CMS integrations for international clients across 6 countries. Delivered 20+ production sites on time and under budget.',
     skills: ['HTML', 'CSS', 'JavaScript', 'React', 'Node.js', 'MySQL'],
     skillLevels: [85, 78, 82, 80, 75, 70],
@@ -84,12 +81,11 @@ function MountainScene({ experiences, activeIdx, onPeakClick }) {
     startAnimationLoop,
     handleResize,
     useMouseInteraction,
-    useRaycaster,
   } = useThreeJS('experience-mountains', {
     cameraPosition: [0, 2, 10],
     fov: 50,
     enableShadows: true,
-    onInit: ({ scene, camera }) => {
+    onInit: ({ scene, camera, renderer }) => {
       // Fog for depth
       scene.fog = new THREE.FogExp2(0x0c0b0a, 0.035);
 
@@ -149,7 +145,6 @@ function MountainScene({ experiences, activeIdx, onPeakClick }) {
         const h = HEIGHTS[i];
         const color = COLORS[i];
 
-        // Main mountain cone
         const coneGeo = new THREE.ConeGeometry(1.5 - i * 0.1, h, 7, 1);
         const cPos = coneGeo.attributes.position;
         for (let v = 0; v < cPos.count; v++) {
@@ -275,18 +270,33 @@ function MountainScene({ experiences, activeIdx, onPeakClick }) {
 
       scene.add(group);
 
-      // Track active index
-      let currentActiveIdx = activeIdx;
-      const setActiveIdx = (idx) => { currentActiveIdx = idx; };
+      // Click detection via raycaster
+      const raycaster = new THREE.Raycaster();
+      const mouse = new THREE.Vector2();
+      
+      const onClick = (event) => {
+        const rect = renderer.domElement.getBoundingClientRect();
+        mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+        
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObjects(peaks);
+        
+        if (intersects.length > 0) {
+          const idx = intersects[0].object.userData.index;
+          if (idx !== undefined) onPeakClick(idx);
+        }
+      };
+      
+      renderer.domElement.addEventListener('click', onClick);
 
       // Animation loop
       let elapsedTime = 0;
       startAnimationLoop(() => {
         elapsedTime += 0.016;
 
-        // Animate peaks
         peaks.forEach((p, i) => {
-          const isActive = i === currentActiveIdx;
+          const isActive = i === activeIdx;
           p.material.emissiveIntensity += ((isActive ? 0.35 : 0.04) - p.material.emissiveIntensity) * 0.07;
           
           const targetS = isActive ? 1 + Math.sin(elapsedTime * 2) * 0.015 : 1.0;
@@ -297,49 +307,24 @@ function MountainScene({ experiences, activeIdx, onPeakClick }) {
             glowSph[i].scale.setScalar(isActive ? 1 + Math.sin(elapsedTime * 2) * 0.12 : 1);
           }
 
-          if (beams[i]) {
-            beams[i].material.opacity = isActive ? 0.35 + Math.sin(elapsedTime * 3) * 0.1 : 0.08;
-          }
-
-          if (snowCapArr[i]) {
-            snowCapArr[i].material.emissiveIntensity = isActive ? 0.35 : 0.06;
-          }
+          if (beams[i]) beams[i].material.opacity = isActive ? 0.35 + Math.sin(elapsedTime * 3) * 0.1 : 0.08;
+          if (snowCapArr[i]) snowCapArr[i].material.emissiveIntensity = isActive ? 0.35 : 0.06;
         });
 
-        // Rotate rings
-        rings.forEach(r => {
-          if (r.userData.speed) r.rotation.z += r.userData.speed;
-        });
-
+        rings.forEach(r => { if (r.userData.speed) r.rotation.z += r.userData.speed; });
         stars.rotation.y += 0.0003;
         particles.rotation.y += 0.001;
       });
 
-      // Store references for click handling and active index updates
-      return { peaks, setActiveIdx, camera, scene };
+      return () => {
+        renderer.domElement.removeEventListener('click', onClick);
+      };
     },
   });
-
-  // Update active index in the animation loop
-  useEffect(() => {
-    // This will be handled by the animation loop reference
-    const el = mountRef.current;
-    if (!el) return;
-    
-    // Use a custom event or ref to communicate activeIdx changes
-    window.__mountainActiveIdx = activeIdx;
-  }, [activeIdx]);
 
   // Mouse interaction for camera tilt
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   useMouseInteraction(({ x, y }) => setMousePos({ x, y }));
-
-  // Click detection on peaks
-  useRaycaster([], (intersect) => {
-    if (intersect.object.userData && intersect.object.userData.index !== undefined) {
-      onPeakClick(intersect.object.userData.index);
-    }
-  });
 
   // Resize handler
   useEffect(() => {
