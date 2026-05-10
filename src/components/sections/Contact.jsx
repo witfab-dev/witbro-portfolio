@@ -315,10 +315,10 @@ export default function Contact() {
   ];
 
   const stats = [
-    { icon: Globe, value: '6+',  label: 'Countries served' },
-    { icon: Star,  value: '50+', label: 'Projects shipped'  },
+    { icon: Globe, value: '2+',  label: 'Countries served' },
+    { icon: Star,  value: '5+', label: 'Projects shipped'  },
     { icon: Zap,   value: '24h', label: 'Avg. response'     },
-    { icon: Users, value: '30+', label: 'Happy clients'     },
+    { icon: Users, value: '3+', label: 'Happy clients'     },
   ];
 
   const collaborationItems = [
