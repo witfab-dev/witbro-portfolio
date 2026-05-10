@@ -228,7 +228,7 @@ const Projects = () => {
                 <br className="sm:hidden" /> {t('projects', 'Projects')}
               </h2>
               <p className="mt-4 text-sm leading-relaxed opacity-60 max-w-md">
-                {t('projectsDescription', 'A curated collection of digital experiences — from mobile apps to high-performance web platforms.')}
+                {t('A curated collection of digital experiences — from mobile apps to high-performance web platforms.')}
               </p>
             </div>
 
