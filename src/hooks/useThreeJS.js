@@ -3,24 +3,7 @@ import { useRef, useEffect, useCallback, useState } from 'react';
 import * as THREE from 'three';
 import { webGLManager } from './WebGLManager';
 
-/**
- * useThreeJS
- * Manages the full Three.js lifecycle with WebGLManager integration.
- *
- * IMPORTANT — useMouseInteraction:
- *   Call it at the TOP LEVEL of a component (React hook rules).
- *   It registers a callback that fires on every mousemove over the canvas.
- *   It returns an unsubscribe function — call it in a cleanup if needed,
- *   though the hook also auto-cleans up on unmount.
- *
- * @param {string} id      - Unique stable identifier, e.g. 'hero-3d-bg'
- * @param {object} options
- *   cameraPosition  [x,y,z]    default [0,0,5]
- *   fov             number      default 60
- *   enableShadows   boolean     default false
- *   onInit          function    ({ scene, camera, renderer }) → void
- */
-export function useThreeJS(id = 'threejs', options = {}) {
+export default function useThreeJS(id = 'threejs', options = {}) {
   const {
     cameraPosition = [0, 0, 5],
     fov            = 60,
