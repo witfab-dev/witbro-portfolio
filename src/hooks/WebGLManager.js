@@ -7,7 +7,7 @@
 class WebGLManager {
   constructor() {
     this.activeContexts = 0;
-    this.maxContexts = 2; // Conservative limit for mobile devices
+    this.maxContexts = 8; // ✅ Allow all 5 scenes + buffer
     this.queue = [];
     this.instances = new Map();
     this.contextLimit = this.detectContextLimit();
@@ -17,15 +17,18 @@ class WebGLManager {
    * Detect optimal context limit based on device
    */
   detectContextLimit() {
+    // Check if running in browser
+    if (typeof navigator === 'undefined') return 8;
+    
     // Mobile devices typically have lower limits
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     const isLowMemory = navigator.deviceMemory && navigator.deviceMemory < 4;
     
     if (isMobile || isLowMemory) {
-      return 1; // Only allow 1 context on mobile
+      return 5; // Allow all 5 on mobile too (modern phones handle it)
     }
     
-    return 2; // Allow 2 on desktop
+    return 8; // Allow 8 on desktop (plenty for 5 scenes)
   }
 
   /**
@@ -36,17 +39,18 @@ class WebGLManager {
   async requestContext(id) {
     // If already registered, return existing
     if (this.instances.has(id)) {
+      console.log(`[WebGLManager] "${id}" already registered, reusing`);
       return this.instances.get(id);
     }
 
     // Wait if too many contexts are active
     while (this.activeContexts >= this.maxContexts) {
-      console.log(`[WebGLManager] "${id}" waiting for context slot...`);
+      console.warn(`[WebGLManager] "${id}" waiting for context slot (${this.activeContexts}/${this.maxContexts})...`);
       await new Promise(resolve => this.queue.push(resolve));
     }
 
     this.activeContexts++;
-    console.log(`[WebGLManager] Context granted to "${id}" (${this.activeContexts}/${this.maxContexts})`);
+    console.log(`[WebGLManager] ✅ Context granted to "${id}" (${this.activeContexts}/${this.maxContexts})`);
     return null; // Signal to create new context
   }
 
@@ -57,6 +61,7 @@ class WebGLManager {
    */
   registerContext(id, renderer) {
     this.instances.set(id, renderer);
+    console.log(`[WebGLManager] 📝 Registered "${id}". Total instances: ${this.instances.size}`);
   }
 
   /**
@@ -79,7 +84,7 @@ class WebGLManager {
       this.instances.delete(id);
       this.activeContexts = Math.max(0, this.activeContexts - 1);
       
-      console.log(`[WebGLManager] Context released from "${id}" (${this.activeContexts}/${this.maxContexts})`);
+      console.log(`[WebGLManager] 🔴 Context released from "${id}" (${this.activeContexts}/${this.maxContexts})`);
       
       // Process next in queue
       this.processQueue();
@@ -135,7 +140,8 @@ class WebGLManager {
    * Update maximum contexts (useful for responsive behavior)
    */
   setMaxContexts(max) {
-    this.maxContexts = Math.max(1, Math.min(max, 4)); // Clamp between 1-4
+    this.maxContexts = Math.max(1, Math.min(max, 16)); // Clamp between 1-16
+    console.log(`[WebGLManager] Max contexts updated to ${this.maxContexts}`);
     this.processQueue();
   }
 }
