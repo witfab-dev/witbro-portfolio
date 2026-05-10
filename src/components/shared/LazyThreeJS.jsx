@@ -10,7 +10,63 @@ export default function LazyThreeJS({ componentId, options, children, fallback }
  *
  * A production-grade lazy wrapper for any Three.js / WebGL scene.
  *
- * Features:
+ * Features:// components/shared/LazyThreeJS.jsx
+import React, { useState, useEffect, useRef } from 'react';
+
+/**
+ * LazyThreeJS
+ * Defers rendering of heavy Three.js children until the container
+ * enters the viewport (IntersectionObserver). Shows `fallback`
+ * until then, which avoids wasted GPU work on off-screen sections.
+ *
+ * Props:
+ *   children       – the Three.js component to render when visible
+ *   fallback       – JSX shown before the component enters viewport
+ *   componentId    – string identifier (for debugging)
+ *   rootMargin     – IntersectionObserver rootMargin (default "200px")
+ *   threshold      – IntersectionObserver threshold  (default 0)
+ */
+export default function LazyThreeJS({
+  children,
+  fallback  = null,
+  componentId = 'lazy-three',
+  rootMargin  = '200px',
+  threshold   = 0,
+}) {
+  const containerRef = useRef(null);
+  const [shouldRender, setShouldRender] = useState(false);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    // If IntersectionObserver not available (rare), render immediately
+    if (typeof IntersectionObserver === 'undefined') {
+      setShouldRender(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setShouldRender(true);
+          observer.disconnect(); // only need to trigger once
+        }
+      },
+      { rootMargin, threshold }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [rootMargin, threshold]);
+
+  return (
+    <div ref={containerRef} className="absolute inset-0">
+      {shouldRender ? children : fallback}
+    </div>
+  );
+}
+  /**
  *  ✓ IntersectionObserver — only mounts the 3-D scene when near the viewport
  *  ✓ WebGL capability check — renders `fallback` immediately on unsupported devices
  *  ✓ React Error Boundary — catches runtime Three.js errors without crashing the page
