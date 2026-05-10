@@ -3,7 +3,7 @@ import { useRef, useEffect, useCallback, useState } from 'react';
 import * as THREE from 'three';
 import { webGLManager } from './WebGLManager';
 
-export default function useThreeJS(id = 'threejs', options = {}) {
+export function useThreeJS(id = 'threejs', options = {}) {
   const {
     cameraPosition = [0, 0, 5],
     fov            = 60,
