@@ -1,5 +1,6 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import emailjs from '@emailjs/browser'; // ✅ Import EmailJS
 import { ThemeProvider } from './contexts/ThemeContext';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 
@@ -10,6 +11,9 @@ import ThreeJSErrorBoundary from './components/shared/ThreeJSErrorBoundary';
 import { webGLManager } from './hooks/WebGLManager';
 
 import { Loader2, Bot } from 'lucide-react';
+
+// ✅ Initialize EmailJS ONCE at app level
+emailjs.init('vNc8MXvN5Xl0NLVsy');
 
 // Lazy loaded sections
 const Hero        = lazy(() => import('./components/sections/Hero'));
@@ -185,11 +189,8 @@ const SectionLoader = () => {
 function App() {
   const [loading, setLoading] = useState(true);
   const [showVoiceAssistant, setShowVoiceAssistant] = useState(false);
-  // ❌ REMOVED: const [webGLError, setWebGLError] = useState(false);
 
-  // Initialize WebGL Manager
   useEffect(() => {
-    // Cleanup on unmount
     return () => {
       webGLManager.disposeAll();
     };
@@ -221,7 +222,6 @@ function App() {
               transition={{ duration: 0.8 }}
               className="relative min-h-screen bg-stone-100 dark:bg-[#0c0b0a] transition-colors duration-500"
             >
-              {/* Global ambient blobs */}
               <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
                 <div className="absolute top-0 left-[15%] w-[55vw] h-[55vw] max-w-[700px] max-h-[700px] rounded-full bg-orange-500/[0.04] blur-3xl" />
                 <div className="absolute bottom-0 right-[5%] w-[45vw] h-[45vw] max-w-[600px] max-h-[600px] rounded-full bg-blue-500/[0.04] blur-3xl" />
@@ -236,57 +236,33 @@ function App() {
 
               <main className="relative z-10">
                 <Suspense fallback={<SectionLoader />}>
-                  <ThreeJSErrorBoundary>
-                    <Hero />
-                  </ThreeJSErrorBoundary>
-                  
-                  <ThreeJSErrorBoundary>
-                    <About />
-                  </ThreeJSErrorBoundary>
-                  
-                  <ThreeJSErrorBoundary>
-                    <Projects />
-                  </ThreeJSErrorBoundary>
-                  
-                  {/* ✅ Removed webGLEnabled prop - always show */}
-                  <ThreeJSErrorBoundary>
-                    <SkillsGalaxy />
-                  </ThreeJSErrorBoundary>
-                  
-                  <ThreeJSErrorBoundary>
-                    <Experience />
-                  </ThreeJSErrorBoundary>
-                  
-                  <ThreeJSErrorBoundary>
-                    <NewsFeed />
-                  </ThreeJSErrorBoundary>
-                  
-                  <ThreeJSErrorBoundary>
-                    <Contact />
-                  </ThreeJSErrorBoundary>
+                  <ThreeJSErrorBoundary><Hero /></ThreeJSErrorBoundary>
+                  <ThreeJSErrorBoundary><About /></ThreeJSErrorBoundary>
+                  <ThreeJSErrorBoundary><Projects /></ThreeJSErrorBoundary>
+                  <ThreeJSErrorBoundary><SkillsGalaxy /></ThreeJSErrorBoundary>
+                  <ThreeJSErrorBoundary><Experience /></ThreeJSErrorBoundary>
+                  <ThreeJSErrorBoundary><NewsFeed /></ThreeJSErrorBoundary>
+                  <ThreeJSErrorBoundary><Contact /></ThreeJSErrorBoundary>
                 </Suspense>
               </main>
 
               <Footer />
 
-              {/* ── Floating AI assistant button ── */}
               {!showVoiceAssistant && (
                 <motion.button
                   layoutId="assistant-btn"
                   initial={{ scale: 0, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1, y: [0, -8, 0] }}
                   transition={{
-                    scale:   { type: 'spring', stiffness: 260, damping: 20 },
+                    scale: { type: 'spring', stiffness: 260, damping: 20 },
                     opacity: { duration: 0.3 },
-                    y:       { duration: 4, repeat: Infinity, ease: 'easeInOut', delay: 0.5 },
+                    y: { duration: 4, repeat: Infinity, ease: 'easeInOut', delay: 0.5 },
                   }}
                   whileHover={{ scale: 1.1, boxShadow: '0 0 28px rgba(249,115,22,0.4)' }}
                   whileTap={{ scale: 0.92 }}
                   onClick={() => setShowVoiceAssistant(true)}
                   aria-label="Open AI Assistant"
-                  className="fixed bottom-8 right-8 z-50 w-14 h-14 flex items-center justify-center
-                             bg-orange-500 hover:bg-orange-600 text-white rounded-2xl shadow-xl
-                             shadow-orange-500/30 border border-orange-400/30 transition-colors"
+                  className="fixed bottom-8 right-8 z-50 w-14 h-14 flex items-center justify-center bg-orange-500 hover:bg-orange-600 text-white rounded-2xl shadow-xl shadow-orange-500/30 border border-orange-400/30 transition-colors"
                 >
                   <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-green-400 rounded-full border-2 border-stone-100 dark:border-[#0c0b0a]" />
                   <Bot size={22} />
