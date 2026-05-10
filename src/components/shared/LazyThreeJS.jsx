@@ -5,27 +5,7 @@ import { useThreeJS } from '../../hooks/useThreeJS';
 export default function LazyThreeJS({ componentId, options, children, fallback }) {
   const [isVisible, setIsVisible] = useState(false);
   const containerRef = useRef(null);
-/**
- * components/shared/LazyThreeJS.jsx
- *
- * A production-grade lazy wrapper for any Three.js / WebGL scene.
- *
- * Features:// components/shared/LazyThreeJS.jsx
-import React, { useState, useEffect, useRef } from 'react';
-
-/**
- * LazyThreeJS
- * Defers rendering of heavy Three.js children until the container
- * enters the viewport (IntersectionObserver). Shows `fallback`
- * until then, which avoids wasted GPU work on off-screen sections.
- *
- * Props:
- *   children       – the Three.js component to render when visible
- *   fallback       – JSX shown before the component enters viewport
- *   componentId    – string identifier (for debugging)
- *   rootMargin     – IntersectionObserver rootMargin (default "200px")
- *   threshold      – IntersectionObserver threshold  (default 0)
- */
+  
 export default function LazyThreeJS({
   children,
   fallback  = null,
