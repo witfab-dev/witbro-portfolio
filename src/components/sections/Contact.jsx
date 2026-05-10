@@ -20,9 +20,6 @@ const SERVICE_ID  = 'service_r4cj7xg';
 const TEMPLATE_ID = 'template_mn5geej';
 const PUBLIC_KEY  = 'vNc8MXvN5Xl0NLVsy';
 
-// ✅ Initialize EmailJS ONCE at module level
-emailjs.init(PUBLIC_KEY);
-
 // ══════════════════════════════════════════════════════════════
 // WebGL Detection
 // ══════════════════════════════════════════════════════════════
