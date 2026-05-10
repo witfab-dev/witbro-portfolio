@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -8,8 +8,7 @@ import {
   LayoutGrid, List, Sparkles, TrendingUp,
   Calendar, Clock, Users, Zap, Award,
   ChevronDown, Code2, Layers, Smartphone,
-  Monitor, Maximize2, Minimize2, Heart,
-  Share2, Bookmark, SlidersHorizontal,
+  Monitor, Heart, SlidersHorizontal,
 } from 'lucide-react';
 
 const Projects = () => {
@@ -19,9 +18,9 @@ const Projects = () => {
   
   const [selectedProject, setSelectedProject] = useState(null);
   const [activeCategory, setActiveCategory] = useState('all');
-  const [viewMode, setViewMode] = useState('bento'); // bento | grid | list
+  const [viewMode, setViewMode] = useState('grid'); // grid | list (removed bento)
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState('featured'); // featured | recent | name
+  const [sortBy, setSortBy] = useState('featured');
   const [showFilters, setShowFilters] = useState(false);
 
   const projects = [
@@ -117,15 +116,15 @@ const Projects = () => {
   ];
 
   const categories = [
-    { id: 'all', label: 'All Projects', icon: Layers, count: projects.length },
-    { id: 'web', label: 'Web Apps', icon: Monitor, count: projects.filter(p => p.category === 'web').length },
-    { id: 'mobile', label: 'Mobile', icon: Smartphone, count: projects.filter(p => p.category === 'mobile').length },
+    { id: 'all', label: t('allProjects', 'All Projects'), icon: Layers, count: projects.length },
+    { id: 'web', label: t('webApps', 'Web Apps'), icon: Monitor, count: projects.filter(p => p.category === 'web').length },
+    { id: 'mobile', label: t('mobile', 'Mobile'), icon: Smartphone, count: projects.filter(p => p.category === 'mobile').length },
   ];
 
   const sortOptions = [
-    { id: 'featured', label: 'Featured', icon: Star },
-    { id: 'recent', label: 'Most Recent', icon: Clock },
-    { id: 'name', label: 'A-Z', icon: Filter },
+    { id: 'featured', label: t('featured', 'Featured'), icon: Star },
+    { id: 'recent', label: t('mostRecent', 'Most Recent'), icon: Clock },
+    { id: 'name', label: t('aToZ', 'A-Z'), icon: Filter },
   ];
 
   const filteredAndSortedProjects = useMemo(() => {
@@ -146,7 +145,7 @@ const Projects = () => {
         return [...filtered].sort((a, b) => b.year.localeCompare(a.year));
       case 'name':
         return [...filtered].sort((a, b) => a.title.localeCompare(b.title));
-      default: // featured
+      default:
         return [...filtered].sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
     }
   }, [activeCategory, searchTerm, sortBy]);
@@ -191,7 +190,7 @@ const Projects = () => {
               </div>
               <div>
                 <p className="text-2xl font-black text-orange-500">{projects.length}+</p>
-                <p className="text-[10px] uppercase tracking-wider opacity-50">Projects</p>
+                <p className="text-[10px] uppercase tracking-wider opacity-50">{t('projects', 'Projects')}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -200,7 +199,7 @@ const Projects = () => {
               </div>
               <div>
                 <p className="text-2xl font-black text-green-500">{projects.filter(p => p.featured).length}</p>
-                <p className="text-[10px] uppercase tracking-wider opacity-50">Featured</p>
+                <p className="text-[10px] uppercase tracking-wider opacity-50">{t('featured', 'Featured')}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -209,7 +208,7 @@ const Projects = () => {
               </div>
               <div>
                 <p className="text-2xl font-black text-blue-500">{new Set(projects.flatMap(p => p.technologies)).size}</p>
-                <p className="text-[10px] uppercase tracking-wider opacity-50">Technologies</p>
+                <p className="text-[10px] uppercase tracking-wider opacity-50">{t('technologies', 'Technologies')}</p>
               </div>
             </div>
           </div>
@@ -219,17 +218,17 @@ const Projects = () => {
             <div>
               <p className="flex items-center gap-2 text-[11px] font-semibold tracking-[0.2em] uppercase text-orange-500 mb-3">
                 <span className="block w-5 h-px bg-orange-500" />
-                Selected Works
+                {t('selectedWorks', 'Selected Works')}
               </p>
               <h2 className={`text-[clamp(38px,5.5vw,72px)] font-black leading-[0.93] tracking-tight ${
                 dark ? 'text-stone-100' : 'text-stone-900'
               }`}>
-                My{' '}
-                <span className="italic text-orange-500">Creative</span>
-                <br className="sm:hidden" /> Projects
+                {t('my', 'My')}{' '}
+                <span className="italic text-orange-500">{t('creative', 'Creative')}</span>
+                <br className="sm:hidden" /> {t('projects', 'Projects')}
               </h2>
               <p className="mt-4 text-sm leading-relaxed opacity-60 max-w-md">
-                A curated collection of digital experiences — from mobile apps to high-performance web platforms.
+                {t('projectsDescription', 'A curated collection of digital experiences — from mobile apps to high-performance web platforms.')}
               </p>
             </div>
 
@@ -242,7 +241,7 @@ const Projects = () => {
                 <Search size={14} className="opacity-40" />
                 <input
                   type="text"
-                  placeholder="Search projects..."
+                  placeholder={t('searchProjects', 'Search projects...')}
                   value={searchTerm}
                   onChange={e => setSearchTerm(e.target.value)}
                   className={`w-full sm:w-48 bg-transparent text-sm focus:outline-none ${
@@ -256,14 +255,13 @@ const Projects = () => {
                 )}
               </div>
 
-              {/* View Toggle */}
+              {/* View Toggle - Only Grid and List */}
               <div className={`flex rounded-xl border overflow-hidden ${
                 dark ? 'border-stone-800' : 'border-stone-200'
               }`}>
                 {[
-                  { mode: 'bento', icon: LayoutGrid, label: 'Bento' },
-                  { mode: 'grid', icon: Maximize2, label: 'Grid' },
-                  { mode: 'list', icon: List, label: 'List' },
+                  { mode: 'grid', icon: LayoutGrid, label: t('grid', 'Grid') },
+                  { mode: 'list', icon: List, label: t('list', 'List') },
                 ].map(({ mode, icon: Icon, label }) => (
                   <button
                     key={mode}
@@ -290,7 +288,7 @@ const Projects = () => {
                 >
                   <SlidersHorizontal size={14} className="opacity-60" />
                   <span className="text-[11px] font-bold uppercase tracking-wider opacity-60">
-                    Sort: {sortOptions.find(s => s.id === sortBy)?.label}
+                    {t('sort', 'Sort')}: {sortOptions.find(s => s.id === sortBy)?.label}
                   </span>
                   <ChevronDown size={14} className="opacity-40" />
                 </button>
@@ -359,129 +357,6 @@ const Projects = () => {
         {/* ── Projects Display ───────────────────────── */}
         <AnimatePresence mode="wait">
           
-          {/* Bento Layout */}
-          {viewMode === 'bento' && (
-            <motion.div
-              key="bento"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="grid grid-cols-1 md:grid-cols-12 gap-4 auto-rows-min"
-            >
-              {filteredAndSortedProjects.map((project, i) => {
-                const layouts = [
-                  'md:col-span-7 md:row-span-2',
-                  'md:col-span-5',
-                  'md:col-span-5',
-                  'md:col-span-7',
-                  'md:col-span-12 md:row-span-1',
-                ];
-                const layout = layouts[i % layouts.length];
-                const isLarge = layout.includes('row-span-2');
-                
-                return (
-                  <motion.article
-                    key={project.id}
-                    layout
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    transition={{ duration: 0.3, delay: i * 0.05 }}
-                    onClick={() => setSelectedProject(project)}
-                    className={`group relative overflow-hidden rounded-2xl border cursor-pointer transition-all duration-300 ${layout} ${
-                      dark 
-                        ? 'bg-stone-900/50 border-stone-800 hover:border-orange-500/50' 
-                        : 'bg-white border-stone-200 hover:border-orange-400 hover:shadow-2xl'
-                    }`}
-                  >
-                    <div className={`relative overflow-hidden ${isLarge ? 'h-full' : 'h-48 sm:h-56'}`}>
-                      <img
-                        src={project.image}
-                        alt={project.title}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                      />
-                      
-                      {/* Gradient overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                      
-                      {/* Featured badge */}
-                      {project.featured && (
-                        <div className="absolute top-3 left-3 flex items-center gap-1 bg-yellow-400 text-yellow-950 text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full shadow-lg">
-                          <Star size={9} fill="currentColor" /> Featured
-                        </div>
-                      )}
-                      
-                      {/* Category badge */}
-                      <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider backdrop-blur-md text-white border border-white/20"
-                        style={{ background: `${project.color}40` }}>
-                        {project.category}
-                      </div>
-
-                      {/* Hover actions */}
-                      <div className="absolute inset-0 flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0">
-                        <a
-                          href={project.links.demo}
-                          target="_blank"
-                          rel="noreferrer"
-                          onClick={e => e.stopPropagation()}
-                          className="px-4 py-2 bg-orange-500 text-white text-xs font-bold rounded-full hover:bg-orange-600 transition-all shadow-lg flex items-center gap-1.5"
-                        >
-                          <Eye size={12} /> Live Demo
-                        </a>
-                        <a
-                          href={project.links.github}
-                          target="_blank"
-                          rel="noreferrer"
-                          onClick={e => e.stopPropagation()}
-                          className="px-4 py-2 bg-white/20 backdrop-blur-md text-white text-xs font-bold rounded-full hover:bg-white/30 transition-all flex items-center gap-1.5 border border-white/20"
-                        >
-                          <Github size={12} /> Code
-                        </a>
-                      </div>
-                    </div>
-
-                    {!isLarge && (
-                      <div className="p-4 sm:p-5">
-                        <div className="flex items-center justify-between mb-2">
-                          <h3 className={`font-black text-sm sm:text-base leading-tight group-hover:text-orange-500 transition-colors ${
-                            dark ? 'text-stone-100' : 'text-stone-900'
-                          }`}>
-                            {project.title}
-                          </h3>
-                          <span className="text-[10px] font-mono opacity-40">{project.year}</span>
-                        </div>
-                        <p className={`text-xs leading-relaxed line-clamp-2 mb-3 ${
-                          dark ? 'text-stone-500' : 'text-stone-500'
-                        }`}>
-                          {project.description}
-                        </p>
-                        <div className="flex flex-wrap gap-1.5">
-                          {project.technologies.slice(0, 3).map(tech => (
-                            <span
-                              key={tech}
-                              className={`px-2 py-0.5 rounded-md text-[10px] font-semibold ${
-                                dark 
-                                  ? 'bg-stone-800 text-stone-400 border border-stone-700/50' 
-                                  : 'bg-stone-100 text-stone-600 border border-stone-200'
-                              }`}
-                            >
-                              {tech}
-                            </span>
-                          ))}
-                          {project.technologies.length > 3 && (
-                            <span className="px-2 py-0.5 rounded-md text-[10px] font-bold text-orange-500">
-                              +{project.technologies.length - 3}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </motion.article>
-                );
-              })}
-            </motion.div>
-          )}
-
           {/* Grid Layout */}
           {viewMode === 'grid' && (
             <motion.div
@@ -513,7 +388,7 @@ const Projects = () => {
                     <div className="absolute top-3 left-3 flex gap-2">
                       {project.featured && (
                         <span className="flex items-center gap-1 bg-yellow-400 text-yellow-950 text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full">
-                          <Star size={9} fill="currentColor" /> Featured
+                          <Star size={9} fill="currentColor" /> {t('featured', 'Featured')}
                         </span>
                       )}
                       <span className="px-2 py-0.5 rounded-full text-white text-[9px] font-bold uppercase tracking-wider backdrop-blur-md"
@@ -592,7 +467,7 @@ const Projects = () => {
                       </span>
                       {project.featured && (
                         <span className="flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-yellow-500">
-                          <Star size={9} fill="currentColor" /> Featured
+                          <Star size={9} fill="currentColor" /> {t('featured', 'Featured')}
                         </span>
                       )}
                       <span className="text-[10px] opacity-40 ml-auto">{project.year}</span>
@@ -638,13 +513,13 @@ const Projects = () => {
           >
             <Search size={40} className="mx-auto mb-4 opacity-20" />
             <p className={`text-lg font-bold opacity-40 ${dark ? 'text-stone-400' : 'text-stone-600'}`}>
-              No projects found
+              {t('noProjects', 'No projects found')}
             </p>
             <button
               onClick={() => { setActiveCategory('all'); setSearchTerm(''); setSortBy('featured'); }}
               className="mt-4 text-sm font-bold text-orange-500 hover:underline"
             >
-              Clear all filters
+              {t('clearFilters', 'Clear all filters')}
             </button>
           </motion.div>
         )}
@@ -694,7 +569,7 @@ const Projects = () => {
                       </span>
                       {selectedProject.featured && (
                         <span className="flex items-center gap-1 bg-yellow-400 text-yellow-950 text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full">
-                          <Star size={9} fill="currentColor" /> Featured
+                          <Star size={9} fill="currentColor" /> {t('featured', 'Featured')}
                         </span>
                       )}
                     </div>
@@ -718,19 +593,19 @@ const Projects = () => {
                     dark ? 'bg-stone-800/50' : 'bg-stone-50'
                   }`}>
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-widest opacity-50 mb-1">Year</p>
+                      <p className="text-[10px] font-bold uppercase tracking-widest opacity-50 mb-1">{t('year', 'Year')}</p>
                       <p className={`font-black text-lg ${dark ? 'text-stone-100' : 'text-stone-900'}`}>{selectedProject.year}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-widest opacity-50 mb-1">Category</p>
+                      <p className="text-[10px] font-bold uppercase tracking-widest opacity-50 mb-1">{t('category', 'Category')}</p>
                       <p className={`font-black text-lg capitalize ${dark ? 'text-stone-100' : 'text-stone-900'}`}>{selectedProject.category}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-widest opacity-50 mb-1">Views</p>
+                      <p className="text-[10px] font-bold uppercase tracking-widest opacity-50 mb-1">{t('views', 'Views')}</p>
                       <p className={`font-black text-lg ${dark ? 'text-stone-100' : 'text-stone-900'}`}>{selectedProject.stats.views}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-widest opacity-50 mb-1">Likes</p>
+                      <p className="text-[10px] font-bold uppercase tracking-widest opacity-50 mb-1">{t('likes', 'Likes')}</p>
                       <div className="flex items-center gap-1">
                         <Heart size={16} className="text-red-500 fill-red-500" />
                         <p className={`font-black text-lg ${dark ? 'text-stone-100' : 'text-stone-900'}`}>{selectedProject.stats.likes}</p>
@@ -740,7 +615,7 @@ const Projects = () => {
 
                   {/* Technologies */}
                   <div className="mb-8">
-                    <p className="text-[10px] font-bold uppercase tracking-widest opacity-50 mb-3">Technologies Used</p>
+                    <p className="text-[10px] font-bold uppercase tracking-widest opacity-50 mb-3">{t('technologiesUsed', 'Technologies Used')}</p>
                     <div className="flex flex-wrap gap-2">
                       {selectedProject.technologies.map((tech) => (
                         <span
@@ -765,7 +640,7 @@ const Projects = () => {
                       rel="noreferrer"
                       className="flex-1 flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-bold py-4 rounded-2xl text-sm transition-all shadow-lg shadow-orange-500/25"
                     >
-                      <Globe size={16} /> View Live Project
+                      <Globe size={16} /> {t('viewLive', 'View Live Project')}
                       <ArrowUpRight size={14} />
                     </a>
                     <a
@@ -778,7 +653,7 @@ const Projects = () => {
                           : 'bg-stone-900 text-white hover:bg-black'
                       }`}
                     >
-                      <Github size={16} /> View Source Code
+                      <Github size={16} /> {t('viewSource', 'View Source Code')}
                     </a>
                     <button
                       onClick={() => setSelectedProject(null)}
@@ -786,7 +661,7 @@ const Projects = () => {
                         dark ? 'border-stone-700 text-stone-400 hover:bg-stone-800' : 'border-stone-200 text-stone-600 hover:bg-stone-100'
                       }`}
                     >
-                      Close
+                      {t('close', 'Close')}
                     </button>
                   </div>
                 </div>
