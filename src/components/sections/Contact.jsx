@@ -15,7 +15,7 @@ import {
 
 const SERVICE_ID  = 'service_r4cj7xg';
 const TEMPLATE_ID = 'template_mn5geej';
-const PUBLIC_KEY  = 'service_r4cj7xg';
+const PUBLIC_KEY  = 'vNc8MXvN5Xl0NLVsy';
 
 function isWebGLSupported() {
   if (typeof window === 'undefined') return false;
