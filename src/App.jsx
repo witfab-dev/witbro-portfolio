@@ -7,7 +7,7 @@ import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import VoiceAssistant from './components/ui/VoiceAssistant';
 import ThreeJSErrorBoundary from './components/shared/ThreeJSErrorBoundary';
-import { webGLManager } from './hooks/WebGLManager';
+import { webGLManager } from './hooks/WebGLManager'; // ✅ Correct path - hooks folder
 
 import { Loader2, Bot } from 'lucide-react';
 
