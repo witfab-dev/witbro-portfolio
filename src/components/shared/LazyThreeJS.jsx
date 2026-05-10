@@ -1,73 +1,7 @@
 // components/shared/LazyThreeJS.jsx
-import React, { useState, useEffect, useRef } from 'react';
-import { useThreeJS } from '../../hooks/useThreeJS';
+import React, { useState, useEffect, useRef, useCallback, Component } from 'react';
 
-export default function LazyThreeJS({ componentId, options, children, fallback }) {
-  const [isVisible, setIsVisible] = useState(false);
-  const containerRef = useRef(null);
-  
-export default function LazyThreeJS({
-  children,
-  fallback  = null,
-  componentId = 'lazy-three',
-  rootMargin  = '200px',
-  threshold   = 0,
-}) {
-  const containerRef = useRef(null);
-  const [shouldRender, setShouldRender] = useState(false);
-
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-
-    // If IntersectionObserver not available (rare), render immediately
-    if (typeof IntersectionObserver === 'undefined') {
-      setShouldRender(true);
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          setShouldRender(true);
-          observer.disconnect(); // only need to trigger once
-        }
-      },
-      { rootMargin, threshold }
-    );
-
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [rootMargin, threshold]);
-
-  return (
-    <div ref={containerRef} className="absolute inset-0">
-      {shouldRender ? children : fallback}
-    </div>
-  );
-}
-  /**
- *  ✓ IntersectionObserver — only mounts the 3-D scene when near the viewport
- *  ✓ WebGL capability check — renders `fallback` immediately on unsupported devices
- *  ✓ React Error Boundary — catches runtime Three.js errors without crashing the page
- *  ✓ Idle-callback scheduling — defers heavy init to browser idle time on low-end devices
- *  ✓ Visibility API — pauses/resumes the animation loop when the tab is hidden
- *  ✓ Reduced-motion respect — skips the 3-D scene when the OS requests it
- *  ✓ Loading state with accessible spinner
- *  ✓ Graceful unmount — disconnects observer & cancels pending timers
- */
-
-import React, {
-  useState,
-  useEffect,
-  useRef,
-  useCallback,
-  Component,
-  createContext,
-  useContext,
-} from 'react';
-
-// ─── WebGL Detection ───────────────────────────────────────────────────────────
+// ─── WebGL Detection ──────────────────────────────────────────
 function detectWebGL() {
   if (typeof window === 'undefined') return false;
   try {
@@ -82,58 +16,18 @@ function detectWebGL() {
   }
 }
 
-function detectReducedMotion() {
-  if (typeof window === 'undefined') return false;
-  return window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
-}
-
-// ─── Context (lets children know about the lazy-mount lifecycle) ───────────────
-const LazyThreeContext = createContext({
-  isVisible:  false,
-  isReady:    false,
-  hasError:   false,
-  webGLSupported: true,
-});
-
-export function useLazyThreeContext() {
-  return useContext(LazyThreeContext);
-}
-
-// ─── Loading Spinner ───────────────────────────────────────────────────────────
-function LoadingOverlay({ className = '' }) {
+// ─── Loading Spinner ──────────────────────────────────────────
+function LoadingOverlay() {
   return (
-    <div
-      role="status"
-      aria-label="Loading 3D scene"
-      className={`absolute inset-0 flex items-center justify-center bg-transparent ${className}`}
-    >
+    <div className="absolute inset-0 flex items-center justify-center bg-transparent">
       <div className="flex flex-col items-center gap-3">
-        {/* Animated ring — pure CSS, no WebGL needed */}
         <div
-          className="relative w-10 h-10"
-          aria-hidden="true"
-        >
-          <div
-            className="absolute inset-0 rounded-full border-2 border-white/10"
-            style={{ borderTopColor: 'rgba(249,115,22,0.7)' }}
-            style={{
-              border: '2px solid rgba(255,255,255,0.08)',
-              borderTopColor: 'rgba(249,115,22,0.75)',
-              borderRadius: '50%',
-              animation: 'lazyThreeSpin 0.9s linear infinite',
-            }}
-          />
-          <div
-            style={{
-              position: 'absolute',
-              inset: 4,
-              border: '1.5px solid rgba(255,255,255,0.05)',
-              borderBottomColor: 'rgba(59,130,246,0.6)',
-              borderRadius: '50%',
-              animation: 'lazyThreeSpin 1.4s linear infinite reverse',
-            }}
-          />
-        </div>
+          className="w-10 h-10 rounded-full border-2 border-white/10"
+          style={{
+            borderTopColor: 'rgba(249,115,22,0.75)',
+            animation: 'lazyThreeSpin 0.9s linear infinite',
+          }}
+        />
         <span className="text-[10px] font-mono tracking-widest text-white/30 uppercase">
           Initialising
         </span>
@@ -147,24 +41,19 @@ function LoadingOverlay({ className = '' }) {
   );
 }
 
-// ─── Error Boundary ────────────────────────────────────────────────────────────
+// ─── Error Boundary ───────────────────────────────────────────
 class ThreeErrorBoundary extends Component {
   constructor(props) {
     super(props);
-    this.state = { hasError: false, message: '' };
+    this.state = { hasError: false };
   }
 
-  static getDerivedStateFromError(error) {
-    return {
-      hasError: true,
-      message: error?.message ?? 'Unknown Three.js error',
-    };
+  static getDerivedStateFromError() {
+    return { hasError: true };
   }
 
   componentDidCatch(error, info) {
-    if (process.env.NODE_ENV !== 'production') {
-      console.error('[LazyThreeJS] Runtime error in 3D scene:', error, info);
-    }
+    console.warn('[LazyThreeJS] 3D scene error:', error.message);
     this.props.onError?.(error);
   }
 
@@ -176,55 +65,54 @@ class ThreeErrorBoundary extends Component {
   }
 }
 
-// ─── Main Component ────────────────────────────────────────────────────────────
+// ─── Main Component ───────────────────────────────────────────
 /**
- * @param {object}  props
- * @param {string}  props.componentId       — unique key for debugging / context
- * @param {React.ReactNode} props.children  — the Three.js scene component
- * @param {React.ReactNode} [props.fallback]— shown while loading or on error/no-WebGL
- * @param {number}  [props.threshold=0.1]   — IntersectionObserver threshold
- * @param {string}  [props.rootMargin='120px'] — how far outside the viewport to start loading
- * @param {boolean} [props.respectReducedMotion=true] — skip 3D on prefers-reduced-motion
- * @param {boolean} [props.useIdleCallback=true]  — defer init to requestIdleCallback
- * @param {boolean} [props.pauseWhenHidden=true]  — stop rendering when tab loses focus
- * @param {string}  [props.className]        — extra classes on the root div
- * @param {function} [props.onError]         — called when the scene throws
- * @param {function} [props.onReady]         — called once the scene is mounted
+ * LazyThreeJS
+ * 
+ * Only mounts children when the component enters the viewport.
+ * Features:
+ *   - IntersectionObserver for lazy loading
+ *   - WebGL capability check
+ *   - Error boundary for runtime errors
+ *   - Loading spinner
+ *   - Reduced-motion respect
+ *
+ * @param {string}   componentId - Unique ID for debugging
+ * @param {ReactNode} children   - The Three.js scene component
+ * @param {ReactNode} fallback   - Shown while loading or on error
+ * @param {number}   threshold   - IntersectionObserver threshold (default 0)
+ * @param {string}   rootMargin  - IntersectionObserver rootMargin
+ * @param {boolean}  respectReducedMotion - Skip 3D for prefers-reduced-motion
+ * @param {boolean}  useIdleCallback - Defer init to requestIdleCallback
+ * @param {function} onError     - Called when scene throws an error
+ * @param {function} onReady     - Called once scene is mounted
  */
 export default function LazyThreeJS({
-  componentId        = 'three-scene',
+  componentId = 'lazy-three',
   children,
-  fallback           = null,
-  threshold          = 0.1,
-  rootMargin         = '120px',
+  fallback = null,
+  threshold = 0,
+  rootMargin = '120px',
   respectReducedMotion = true,
-  useIdleCallback    = true,
-  pauseWhenHidden    = true,
-  className          = '',
+  useIdleCallback = true,
   onError,
   onReady,
 }) {
   const containerRef = useRef(null);
-  const idleCallbackRef = useRef(null);
+  const idleRef = useRef(null);
   const observerRef = useRef(null);
 
   const [phase, setPhase] = useState('idle'); // idle | loading | ready | error
   const [webGLSupported] = useState(detectWebGL);
-  const [reducedMotion]  = useState(detectReducedMotion);
-  const [tabVisible, setTabVisible] = useState(true);
+  const [reducedMotion] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+  });
 
-  // Skip 3D when OS/browser requests reduced motion
+  // Skip 3D?
   const skip3D = (respectReducedMotion && reducedMotion) || !webGLSupported;
 
-  // ── Visibility API ───────────────────────────────────────
-  useEffect(() => {
-    if (!pauseWhenHidden) return;
-    const handleVisibility = () => setTabVisible(document.visibilityState === 'visible');
-    document.addEventListener('visibilitychange', handleVisibility);
-    return () => document.removeEventListener('visibilitychange', handleVisibility);
-  }, [pauseWhenHidden]);
-
-  // ── Mount trigger ────────────────────────────────────────
+  // ── Trigger mount ───────────────────────────────────────────
   const triggerMount = useCallback(() => {
     setPhase('loading');
 
@@ -234,19 +122,24 @@ export default function LazyThreeJS({
     };
 
     if (useIdleCallback && typeof window.requestIdleCallback === 'function') {
-      idleCallbackRef.current = window.requestIdleCallback(doMount, { timeout: 2000 });
+      idleRef.current = window.requestIdleCallback(doMount, { timeout: 2000 });
     } else {
-      // Small delay so the browser can paint the loading state first
-      idleCallbackRef.current = setTimeout(doMount, 60);
+      idleRef.current = setTimeout(doMount, 60);
     }
   }, [useIdleCallback, onReady]);
 
-  // ── Intersection Observer ────────────────────────────────
+  // ── Intersection Observer ───────────────────────────────────
   useEffect(() => {
     if (skip3D || phase !== 'idle') return;
 
     const el = containerRef.current;
     if (!el) return;
+
+    // If IntersectionObserver unavailable, mount immediately
+    if (typeof IntersectionObserver === 'undefined') {
+      triggerMount();
+      return;
+    }
 
     observerRef.current = new IntersectionObserver(
       ([entry]) => {
@@ -262,117 +155,61 @@ export default function LazyThreeJS({
     return () => observerRef.current?.disconnect();
   }, [skip3D, phase, threshold, rootMargin, triggerMount]);
 
-  // ── Cleanup ──────────────────────────────────────────────
+  // ── Cleanup ─────────────────────────────────────────────────
   useEffect(() => {
     return () => {
       observerRef.current?.disconnect();
-      if (typeof window.cancelIdleCallback === 'function' && idleCallbackRef.current) {
-        window.cancelIdleCallback(idleCallbackRef.current);
+      if (typeof window.cancelIdleCallback === 'function' && idleRef.current) {
+        window.cancelIdleCallback(idleRef.current);
       } else {
-        clearTimeout(idleCallbackRef.current);
+        clearTimeout(idleRef.current);
       }
     };
   }, []);
 
-  // ── Context value ────────────────────────────────────────
-  const ctx = {
-    componentId,
-    isVisible:      phase !== 'idle',
-    isReady:        phase === 'ready',
-    hasError:       phase === 'error',
-    webGLSupported,
-    tabVisible,
-  };
+  // ── Render ──────────────────────────────────────────────────
+  const rootCls = 'absolute inset-0';
 
-  // ── Render ───────────────────────────────────────────────
-  const rootCls = `absolute inset-0 ${className}`.trim();
-
-  // Case 1: WebGL not supported or reduced-motion preference
+  // Case 1: Skipped (no WebGL or reduced motion)
   if (skip3D) {
     return (
-      <LazyThreeContext.Provider value={ctx}>
-        <div ref={containerRef} className={rootCls} data-lazy-three-id={componentId} data-state="skipped">
-          {fallback}
-        </div>
-      </LazyThreeContext.Provider>
+      <div ref={containerRef} className={rootCls} data-lazy-three={componentId} data-state="skipped">
+        {fallback}
+      </div>
     );
   }
 
-  // Case 2: Not yet visible — show fallback quietly
+  // Case 2: Not yet visible
   if (phase === 'idle') {
     return (
-      <LazyThreeContext.Provider value={ctx}>
-        <div ref={containerRef} className={rootCls} data-lazy-three-id={componentId} data-state="idle">
-          {fallback}
-        </div>
-      </LazyThreeContext.Provider>
+      <div ref={containerRef} className={rootCls} data-lazy-three={componentId} data-state="idle">
+        {fallback}
+      </div>
     );
   }
 
-  // Case 3: Loading (intersection triggered, idle callback pending)
+  // Case 3: Loading
   if (phase === 'loading') {
     return (
-      <LazyThreeContext.Provider value={ctx}>
-        <div ref={containerRef} className={rootCls} data-lazy-three-id={componentId} data-state="loading">
-          {fallback}
-          <LoadingOverlay />
-        </div>
-      </LazyThreeContext.Provider>
+      <div ref={containerRef} className={rootCls} data-lazy-three={componentId} data-state="loading">
+        {fallback}
+        <LoadingOverlay />
+      </div>
     );
   }
 
-  // Case 4: Ready — mount the Three.js scene inside the error boundary
+  // Case 4: Ready — mount children inside error boundary
   return (
-    <LazyThreeContext.Provider value={ctx}>
-      <div
-        ref={containerRef}
-        className={rootCls}
-        data-lazy-three-id={componentId}
-        data-state={tabVisible ? 'ready' : 'paused'}
-        // Signal tab visibility to the child via a CSS custom property
-        // so the child's animation loop can optionally read it
-        style={{ '--tab-visible': tabVisible ? 1 : 0 }}
+    <div ref={containerRef} className={rootCls} data-lazy-three={componentId} data-state="ready">
+      <ThreeErrorBoundary
+        fallback={fallback}
+        onError={(err) => {
+          setPhase('error');
+          onError?.(err);
+        }}
       >
-        <ThreeErrorBoundary
-          fallback={fallback}
-          onError={(err) => {
-            setPhase('error');
-            onError?.(err);
-          }}
-        >
-          {/* Render children regardless of tab focus — let the child's
-              own useThreeJS hook handle pausing via the context above. */}
-          {children}
-        </ThreeErrorBoundary>
-      </div>
-    </LazyThreeContext.Provider>
-  );
-}
-  // Intersection Observer - only init when visible
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.disconnect();
-        }
-      },
-      { 
-        threshold: 0.1,
-        rootMargin: '100px' // Start loading slightly before visible
-      }
-    );
-
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
-    }
-
-    return () => observer.disconnect();
-  }, []);
-
-  return (
-    <div ref={containerRef} className="absolute inset-0">
-      {isVisible ? children : fallback}
+        {children}
+      </ThreeErrorBoundary>
     </div>
   );
 }
