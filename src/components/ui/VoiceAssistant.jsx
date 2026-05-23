@@ -190,93 +190,32 @@ export default function VoiceAssistant({ autoOpen = true, onClose }) {
     utt.onerror  = () => { setSpeaking(false); };
     synthRef.current = utt;
     window.speechSynthesis.speak(utt);
-  }, [muted]);
+  }, [muted, pushAIMessage]);
 
-  const animateVolume = () => {
-    clearInterval(volumeTimerRef.current);
-    volumeTimerRef.current = setInterval(() => {
-      setVolume(0.3 + Math.random() * 0.7);
-    }, 120);
-  };
-
-  // ── Claude API call ───────────────────────────────────────────
-  const callClaude = useCallback(async (userText) => {
-    // Build conversation history
-    historyRef.current.push({ role: 'user', content: userText });
-    // Keep last 10 turns to stay within context
-    if (historyRef.current.length > 20) historyRef.current = historyRef.current.slice(-20);
-
-    // Calls our own Vercel serverless proxy (/api/chat.js)
-    // which forwards to Anthropic server-side — avoids CORS & hides the API key
-    const response = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        system: SYSTEM_PROMPT,
-        messages: historyRef.current,
-      }),
-    });
-
-    if (!response.ok) {
-      const err = await response.json().catch(() => ({}));
-      throw new Error(err?.error?.message || `API error ${response.status}`);
-    }
-
-    const data = await response.json();
-    const text = data.content?.map(b => b.type === 'text' ? b.text : '').join('').trim();
-    if (!text) throw new Error('Empty response from AI');
-
-    historyRef.current.push({ role: 'assistant', content: text });
-    return text;
-  }, []);
-
-  // ── Stream-like typewriter push ───────────────────────────────
-  const pushMessage = useCallback((id, role, text, done = true) => {
-    setMessages(m => {
-      const exists = m.find(msg => msg.id === id);
-      if (exists) return m.map(msg => msg.id === id ? { ...msg, text, done } : msg);
-      return [...m, { id, role, text, done }];
-    });
-  }, []);
-
-  // ── Process query ─────────────────────────────────────────────
-  const process = useCallback(async (query) => {
-    const trimmed = query.trim();
-    if (!trimmed || loading) return;
-
+  // ── Command processor ─────────────────────────────────────────
+  const process = useCallback((q) => {
+    const trimmed = q.trim();
+    if (!trimmed) return;
+    setMessages(m => [...m, { id: Date.now(), role: 'user', text: trimmed }]);
     setInput('');
-    setError(null);
-    setLoading(true);
+    setProcessing(true);
 
-    const userId = `user-${Date.now()}`;
-    pushMessage(userId, 'user', trimmed);
+    const lower = trimmed.toLowerCase();
+    let route = 'default', best = 0;
+    Object.entries(ROUTES).forEach(([r, kws]) => {
+      const score = kws.reduce((a, kw) => a + (lower.includes(kw) ? kw.length : 0), 0);
+      if (score > best) { best = score; route = r; }
+    });
 
-    const aiId = `ai-${Date.now()}`;
-    try {
-      const aiText = await callClaude(trimmed);
+    const scrollTarget = QUICK_ACTIONS.find(a => a.cmd === trimmed)?.scroll;
+    if (scrollTarget) document.getElementById(scrollTarget)?.scrollIntoView({ behavior: 'smooth' });
 
-      // Typewriter effect
-      pushMessage(aiId, 'ai', '', false);
-      let i = 0;
-      const interval = setInterval(() => {
-        i += 2;
-        if (i >= aiText.length) {
-          clearInterval(interval);
-          pushMessage(aiId, 'ai', aiText, true);
-          speak(aiText.replace(/[*_`#]/g, '').replace(/\n/g, ' '));
-        } else {
-          pushMessage(aiId, 'ai', aiText.slice(0, i), false);
-        }
-      }, 12);
-    } catch (err) {
-      const errMsg = `Sorry, I ran into a hiccup — ${err.message}. Please try again!`;
-      pushMessage(aiId, 'ai', errMsg, true);
-      setError(err.message);
-      speak(errMsg);
-    } finally {
-      setLoading(false);
-    }
-  }, [loading, callClaude, pushMessage, speak]);
+    setTimeout(() => {
+      const response = (RESPONSES[route] || RESPONSES.default)();
+      setProcessing(false);
+      speak(response);
+    }, 350);
+  }, [speak]);
 
   // ── Voice recognition ─────────────────────────────────────────
   const toggleListen = useCallback(() => {
@@ -681,15 +620,10 @@ export default function VoiceAssistant({ autoOpen = true, onClose }) {
             </div>
 
             {/* ── Footer ── */}
-            <div
-              className="flex items-center justify-between px-5 py-2.5"
-              style={{ borderTop: '1px solid rgba(255,255,255,0.05)', background: 'rgba(0,0,0,0.2)' }}
-            >
-              <div className="flex items-center gap-1.5">
-                <Sparkles size={8} style={{ color: '#f97316', opacity: 0.7 }} />
-                <span className="text-[9px] uppercase tracking-widest font-bold" style={{ color: 'rgba(255,255,255,0.2)' }}>
-                  Powered by Claude AI
-                </span>
+            <div className="flex items-center justify-between px-5 py-3 border-t border-stone-100 dark:border-stone-800/60 bg-stone-50 dark:bg-stone-900/30">
+              <div className="flex items-center gap-2 text-[9px] text-stone-400 dark:text-stone-600 uppercase tracking-widest">
+                <Loader2 size={9} className={speaking || listening ? 'animate-spin' : 'opacity-30'} />
+                Portfolio Guide
               </div>
               <div className="flex items-center gap-3 text-[9px]" style={{ color: 'rgba(255,255,255,0.15)' }}>
                 <span>↵ send</span>
