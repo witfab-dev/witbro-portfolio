@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { 
   Search, Calendar, ArrowUpRight, Clock, 
@@ -111,7 +110,7 @@ const TRENDING_TOPICS = [
 const CATEGORIES = ['All', 'Development', 'Tech', 'Design'];
 
 /* ─── ARTICLE READER (MODAL) ────────────────────────────────── */
-const FullNewsModal = ({ article, onClose, dark }) => {
+const FullNewsModal = ({ article, onClose }) => {
   if (!article) return null;
 
   return (
@@ -120,33 +119,31 @@ const FullNewsModal = ({ article, onClose, dark }) => {
       animate={{ opacity: 1 }} 
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-[100] flex items-center justify-center p-0"
-      style={{ background: dark ? 'rgba(12,11,10,0.98)' : 'rgba(245,243,238,0.98)', backdropFilter: 'blur(30px)' }}
+      style={{ background: 'rgba(12,11,10,0.98)', backdropFilter: 'blur(30px)' }}
     >
       <motion.div 
         initial={{ scale: 0.95, y: 40 }} 
         animate={{ scale: 1, y: 0 }} 
         exit={{ scale: 0.95, y: 40 }}
         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-        className={`w-full h-full md:h-[90vh] md:max-w-5xl overflow-y-auto rounded-none md:rounded-[2.5rem] shadow-2xl relative ${
-          dark ? 'bg-[#121110] text-stone-100 border border-stone-800/50' : 'bg-white text-stone-900 border border-stone-200'
-        }`}
+        className="w-full h-full md:h-[90vh] md:max-w-5xl overflow-y-auto rounded-none md:rounded-[2.5rem] shadow-2xl relative bg-[#121110] text-stone-100 border border-stone-800/50"
       >
         {/* Sticky Navigation */}
-        <div className="sticky top-0 z-50 flex items-center justify-between p-4 sm:p-6 bg-inherit/80 backdrop-blur-md border-b border-stone-500/10">
+        <div className="sticky top-0 z-50 flex items-center justify-between p-4 sm:p-6 bg-[#121110]/80 backdrop-blur-md border-b border-stone-500/10">
           <button 
             onClick={onClose} 
-            className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest opacity-60 hover:opacity-100 hover:text-orange-500 transition-all"
+            className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-stone-400 hover:text-orange-500 transition-all"
           >
             <ArrowLeft size={16} /> Back
           </button>
           <div className="flex items-center gap-3 sm:gap-4">
-            <button className="p-2 rounded-xl hover:bg-stone-500/10 transition-all" title="Share">
-              <Share2 size={17} className="opacity-50 hover:opacity-100" />
+            <button className="p-2 rounded-xl hover:bg-stone-500/10 transition-all text-stone-400 hover:text-orange-500">
+              <Share2 size={17} />
             </button>
-            <button className="p-2 rounded-xl hover:bg-stone-500/10 transition-all" title="Bookmark">
-              <Bookmark size={17} className="opacity-50 hover:opacity-100" />
+            <button className="p-2 rounded-xl hover:bg-stone-500/10 transition-all text-stone-400 hover:text-orange-500">
+              <Bookmark size={17} />
             </button>
-            <button onClick={onClose} className="p-2 rounded-xl bg-stone-500/10 hover:bg-orange-500 hover:text-white transition-all">
+            <button onClick={onClose} className="p-2 rounded-xl bg-stone-500/10 hover:bg-orange-500 hover:text-white transition-all text-stone-400">
               <X size={18} />
             </button>
           </div>
@@ -163,26 +160,26 @@ const FullNewsModal = ({ article, onClose, dark }) => {
                 {article.source.logo}
               </div>
               <div>
-                <h4 className="font-black text-base sm:text-lg">{article.source.name}</h4>
-                <p className="text-[10px] sm:text-xs opacity-50 flex items-center gap-1 font-medium">
+                <h4 className="font-black text-base sm:text-lg text-stone-100">{article.source.name}</h4>
+                <p className="text-[10px] sm:text-xs text-stone-500 flex items-center gap-1 font-medium">
                   <MapPin size={11} className="text-orange-500" /> {article.source.origin}
                 </p>
               </div>
             </div>
-            <div className="flex gap-4 sm:gap-8 text-[9px] sm:text-[10px] font-black uppercase tracking-widest opacity-40">
+            <div className="flex gap-4 sm:gap-8 text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-stone-500">
               <div className="flex flex-col">
-                <span className="not-italic opacity-50 mb-1">Published</span>
+                <span className="not-italic text-stone-600 mb-1">Published</span>
                 {article.date}
               </div>
               <div className="flex flex-col">
-                <span className="not-italic opacity-50 mb-1">Read</span>
+                <span className="not-italic text-stone-600 mb-1">Read</span>
                 {article.readTime}
               </div>
             </div>
           </div>
 
           {/* Title */}
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-6 sm:mb-10 leading-[1.05] tracking-tight max-w-4xl">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-6 sm:mb-10 leading-[1.05] tracking-tight max-w-4xl text-stone-100">
             {article.title}
           </h1>
 
@@ -206,17 +203,15 @@ const FullNewsModal = ({ article, onClose, dark }) => {
             <p className="text-lg sm:text-xl md:text-2xl leading-relaxed font-medium mb-6 sm:mb-8 text-orange-500/90 italic border-l-4 border-orange-500 pl-4 sm:pl-6">
               {article.excerpt}
             </p>
-            <div className="prose prose-stone dark:prose-invert prose-base sm:prose-lg max-w-none mb-12 sm:mb-16 opacity-80 leading-relaxed whitespace-pre-line">
+            <div className="prose prose-invert prose-base sm:prose-lg max-w-none mb-12 sm:mb-16 text-stone-300 leading-relaxed whitespace-pre-line">
               {article.content}
             </div>
 
             {/* References Section */}
-            <div className={`p-6 sm:p-8 rounded-2xl sm:rounded-[2rem] border ${
-              dark ? 'bg-stone-900/40 border-stone-800' : 'bg-stone-50 border-stone-200'
-            }`}>
+            <div className="p-6 sm:p-8 rounded-2xl sm:rounded-[2rem] border bg-stone-900/40 border-stone-800">
               <div className="flex items-center gap-2 mb-6">
                 <BookOpen size={20} className="text-orange-500" />
-                <h3 className="text-xs sm:text-sm font-black uppercase tracking-[0.2em]">References & Sources</h3>
+                <h3 className="text-xs sm:text-sm font-black uppercase tracking-[0.2em] text-stone-300">References & Sources</h3>
               </div>
               <div className="grid gap-3">
                 {article.references.map((ref, i) => (
@@ -225,17 +220,13 @@ const FullNewsModal = ({ article, onClose, dark }) => {
                     href={ref.url} 
                     target="_blank" 
                     rel="noreferrer" 
-                    className={`group flex items-center justify-between p-4 sm:p-5 rounded-xl sm:rounded-2xl border transition-all ${
-                      dark 
-                        ? 'bg-stone-950/50 border-stone-800 hover:border-orange-500/50' 
-                        : 'bg-white border-stone-200 hover:shadow-xl hover:border-orange-300'
-                    }`}
+                    className="group flex items-center justify-between p-4 sm:p-5 rounded-xl sm:rounded-2xl border transition-all bg-stone-950/50 border-stone-800 hover:border-orange-500/50"
                   >
                     <div>
                       <p className="text-[10px] font-bold uppercase text-orange-500 mb-1">{ref.type}</p>
-                      <p className="text-sm font-bold">{ref.site}</p>
+                      <p className="text-sm font-bold text-stone-200">{ref.site}</p>
                     </div>
-                    <ExternalLink size={16} className="opacity-20 group-hover:opacity-100 group-hover:text-orange-500 group-hover:translate-x-1 transition-all" />
+                    <ExternalLink size={16} className="text-stone-500 group-hover:text-orange-500 group-hover:translate-x-1 transition-all" />
                   </a>
                 ))}
               </div>
@@ -248,7 +239,7 @@ const FullNewsModal = ({ article, onClose, dark }) => {
 };
 
 /* ─── NEWSLETTER SIGNUP ──────────────────────────────────────── */
-const NewsletterSection = ({ dark }) => {
+const NewsletterSection = () => {
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
 
@@ -266,11 +257,7 @@ const NewsletterSection = ({ dark }) => {
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className={`relative overflow-hidden p-6 sm:p-8 rounded-2xl sm:rounded-[2rem] ${
-        dark 
-          ? 'bg-gradient-to-br from-stone-900 to-stone-950 border border-stone-800' 
-          : 'bg-gradient-to-br from-orange-50 to-amber-50 border border-stone-200'
-      }`}
+      className="relative overflow-hidden p-6 sm:p-8 rounded-2xl sm:rounded-[2rem] bg-gradient-to-br from-stone-900 to-stone-950 border border-stone-800"
     >
       <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/10 rounded-full blur-3xl" />
       
@@ -280,8 +267,8 @@ const NewsletterSection = ({ dark }) => {
             <Mail size={20} className="text-orange-500" />
           </div>
           <div>
-            <h3 className="font-black text-lg sm:text-xl">Stay Updated</h3>
-            <p className="text-xs opacity-50">Weekly digest of tech insights</p>
+            <h3 className="font-black text-lg sm:text-xl text-stone-100">Stay Updated</h3>
+            <p className="text-xs text-stone-500">Weekly digest of tech insights</p>
           </div>
         </div>
 
@@ -303,9 +290,7 @@ const NewsletterSection = ({ dark }) => {
                 placeholder="your@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className={`flex-1 px-4 py-3 rounded-xl text-sm border focus:outline-none focus:border-orange-500 transition-colors ${
-                  dark ? 'bg-stone-800 border-stone-700 text-white' : 'bg-white border-stone-200'
-                }`}
+                className="flex-1 px-4 py-3 rounded-xl text-sm border focus:outline-none focus:border-orange-500 transition-colors bg-stone-800 border-stone-700 text-white placeholder:text-stone-500"
               />
               <button 
                 type="submit"
@@ -323,14 +308,12 @@ const NewsletterSection = ({ dark }) => {
 
 /* ─── MAIN COMPONENT ────────────────────────────────────────── */
 export default function NewsApp() {
-  const { theme } = useTheme();
   const { t } = useLanguage();
-  const dark = theme === 'dark';
   
   const [selectedArticle, setSelectedArticle] = useState(null);
   const [filter, setFilter] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
+  const [viewMode, setViewMode] = useState('grid');
   const [showFilters, setShowFilters] = useState(false);
 
   const filteredNews = useMemo(() => 
@@ -347,9 +330,7 @@ export default function NewsApp() {
   const regularArticles = filteredNews.filter(a => !a.featured);
 
   return (
-    <div className={`min-h-screen font-sans transition-colors duration-500 ${
-      dark ? 'bg-[#0c0b0a] text-stone-100' : 'bg-stone-50 text-stone-900'
-    }`}>
+    <div className="min-h-screen font-sans transition-colors duration-500 bg-[#0c0b0a] text-stone-100">
       
       {/* Full News Reader Overlay */}
       <AnimatePresence>
@@ -357,7 +338,6 @@ export default function NewsApp() {
           <FullNewsModal 
             article={selectedArticle} 
             onClose={() => setSelectedArticle(null)} 
-            dark={dark} 
           />
         )}
       </AnimatePresence>
@@ -377,7 +357,7 @@ export default function NewsApp() {
                 <span className="w-8 sm:w-12 h-px bg-orange-500" /> 
                 Global Tech {new Date().getFullYear()}
               </p>
-              <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tighter leading-[0.85]">
+              <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tighter leading-[0.85] text-stone-100">
                 The <br className="sm:hidden" /><span className="text-orange-500 italic">Dispatch.</span>
               </h1>
             </div>
@@ -386,11 +366,11 @@ export default function NewsApp() {
             <div className="flex gap-4 sm:gap-6">
               <div className="text-center">
                 <p className="text-2xl sm:text-3xl font-black text-orange-500">{NEWS_DATA.length}</p>
-                <p className="text-[9px] sm:text-[10px] uppercase tracking-widest opacity-50">Articles</p>
+                <p className="text-[9px] sm:text-[10px] uppercase tracking-widest text-stone-500">Articles</p>
               </div>
               <div className="text-center">
                 <p className="text-2xl sm:text-3xl font-black text-orange-500">{Object.keys(SOURCES).length}</p>
-                <p className="text-[9px] sm:text-[10px] uppercase tracking-widest opacity-50">Sources</p>
+                <p className="text-[9px] sm:text-[10px] uppercase tracking-widest text-stone-500">Sources</p>
               </div>
             </div>
           </div>
@@ -398,18 +378,16 @@ export default function NewsApp() {
           {/* Search & Filters */}
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
             <div className="relative flex-1 max-w-md">
-              <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 opacity-40" />
+              <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-500" />
               <input
                 type="text"
                 placeholder="Search articles..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className={`w-full pl-10 pr-4 py-3 rounded-xl border text-sm focus:outline-none focus:border-orange-500 transition-colors ${
-                  dark ? 'bg-stone-900 border-stone-800 text-white' : 'bg-white border-stone-200'
-                }`}
+                className="w-full pl-10 pr-4 py-3 rounded-xl border text-sm focus:outline-none focus:border-orange-500 transition-colors bg-stone-900 border-stone-800 text-white placeholder:text-stone-600"
               />
               {searchTerm && (
-                <button onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:text-orange-500">
+                <button onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-stone-400 hover:text-orange-500">
                   <X size={14} />
                 </button>
               )}
@@ -417,7 +395,7 @@ export default function NewsApp() {
             
             <div className="flex gap-2">
               {/* Category Filter */}
-              <div className="flex rounded-xl border overflow-hidden text-[10px] sm:text-[11px] font-bold uppercase tracking-widest">
+              <div className="flex rounded-xl border overflow-hidden text-[10px] sm:text-[11px] font-bold uppercase tracking-widest border-stone-800">
                 {CATEGORIES.map(cat => (
                   <button
                     key={cat}
@@ -425,7 +403,7 @@ export default function NewsApp() {
                     className={`px-3 sm:px-4 py-2.5 transition-all ${
                       filter === cat
                         ? 'bg-orange-500 text-white'
-                        : 'hover:bg-stone-100 dark:hover:bg-stone-800 opacity-60 hover:opacity-100'
+                        : 'bg-stone-900/50 text-stone-400 hover:bg-stone-800'
                     }`}
                   >
                     {cat}
@@ -434,16 +412,16 @@ export default function NewsApp() {
               </div>
 
               {/* View Toggle */}
-              <div className="flex rounded-xl border overflow-hidden">
+              <div className="flex rounded-xl border overflow-hidden border-stone-800">
                 <button
                   onClick={() => setViewMode('grid')}
-                  className={`p-2.5 transition-all ${viewMode === 'grid' ? 'bg-orange-500 text-white' : 'hover:bg-stone-100 dark:hover:bg-stone-800'}`}
+                  className={`p-2.5 transition-all ${viewMode === 'grid' ? 'bg-orange-500 text-white' : 'bg-stone-900/50 text-stone-400 hover:bg-stone-800'}`}
                 >
                   <Grid3X3 size={16} />
                 </button>
                 <button
                   onClick={() => setViewMode('list')}
-                  className={`p-2.5 transition-all ${viewMode === 'list' ? 'bg-orange-500 text-white' : 'hover:bg-stone-100 dark:hover:bg-stone-800'}`}
+                  className={`p-2.5 transition-all ${viewMode === 'list' ? 'bg-orange-500 text-white' : 'bg-stone-900/50 text-stone-400 hover:bg-stone-800'}`}
                 >
                   <List size={16} />
                 </button>
@@ -518,7 +496,7 @@ export default function NewsApp() {
                   {/* Regular Articles Grid */}
                   <div>
                     {regularArticles.length > 0 && (
-                      <h2 className="text-[10px] font-black uppercase tracking-[0.2em] opacity-50 mb-4">
+                      <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-500 mb-4">
                         Latest News
                       </h2>
                     )}
@@ -531,11 +509,7 @@ export default function NewsApp() {
                           transition={{ delay: index * 0.1 }}
                           whileHover={{ y: -5 }}
                           onClick={() => setSelectedArticle(article)}
-                          className={`group cursor-pointer p-4 sm:p-5 rounded-2xl sm:rounded-[2rem] border transition-all ${
-                            dark 
-                              ? 'bg-stone-900/50 border-stone-800 hover:border-orange-500/50' 
-                              : 'bg-white border-stone-200 hover:shadow-xl hover:border-orange-300'
-                          }`}
+                          className="group cursor-pointer p-4 sm:p-5 rounded-2xl sm:rounded-[2rem] border transition-all bg-stone-900/50 border-stone-800 hover:border-orange-500/50"
                         >
                           <div className="flex gap-4">
                             <div className="flex-1">
@@ -546,17 +520,17 @@ export default function NewsApp() {
                                 >
                                   {article.source.logo}
                                 </div>
-                                <span className="text-[10px] font-bold uppercase tracking-widest opacity-40">
+                                <span className="text-[10px] font-bold uppercase tracking-widest text-stone-500">
                                   {article.source.name}
                                 </span>
                               </div>
-                              <h3 className="font-black text-sm sm:text-base leading-tight mb-2 group-hover:text-orange-500 transition-colors">
+                              <h3 className="font-black text-sm sm:text-base leading-tight mb-2 text-stone-100 group-hover:text-orange-500 transition-colors">
                                 {article.title}
                               </h3>
-                              <p className="text-xs opacity-50 line-clamp-2 hidden sm:block">
+                              <p className="text-xs text-stone-500 line-clamp-2 hidden sm:block">
                                 {article.excerpt}
                               </p>
-                              <div className="flex items-center gap-3 mt-2 text-[10px] font-bold uppercase tracking-widest opacity-40">
+                              <div className="flex items-center gap-3 mt-2 text-[10px] font-bold uppercase tracking-widest text-stone-500">
                                 <span className="flex items-center gap-1">
                                   <Clock size={10} /> {article.readTime}
                                 </span>
@@ -576,8 +550,8 @@ export default function NewsApp() {
                       animate={{ opacity: 1 }}
                       className="text-center py-20"
                     >
-                      <Search size={40} className="mx-auto mb-4 opacity-20" />
-                      <p className="text-lg font-bold opacity-50">No articles found</p>
+                      <Search size={40} className="mx-auto mb-4 text-stone-600" />
+                      <p className="text-lg font-bold text-stone-500">No articles found</p>
                       <button 
                         onClick={() => { setFilter('All'); setSearchTerm(''); }}
                         className="mt-4 text-sm font-bold text-orange-500 hover:underline"
@@ -605,11 +579,7 @@ export default function NewsApp() {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.05 }}
                       onClick={() => setSelectedArticle(article)}
-                      className={`group cursor-pointer p-5 sm:p-6 rounded-2xl sm:rounded-[2rem] border transition-all flex gap-4 sm:gap-6 items-center ${
-                        dark 
-                          ? 'bg-stone-900/50 border-stone-800 hover:border-orange-500/50' 
-                          : 'bg-white border-stone-200 hover:shadow-xl hover:border-orange-300'
-                      }`}
+                      className="group cursor-pointer p-5 sm:p-6 rounded-2xl sm:rounded-[2rem] border transition-all flex gap-4 sm:gap-6 items-center bg-stone-900/50 border-stone-800 hover:border-orange-500/50"
                     >
                       <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl overflow-hidden shrink-0">
                         <img src={article.image} alt="" className="w-full h-full object-cover" />
@@ -620,20 +590,20 @@ export default function NewsApp() {
                             style={{ background: article.accent + '20', color: article.accent }}>
                             {article.category}
                           </span>
-                          <span className="text-[10px] opacity-40">•</span>
-                          <span className="text-[10px] font-bold opacity-40">{article.source.name}</span>
+                          <span className="text-[10px] text-stone-600">•</span>
+                          <span className="text-[10px] font-bold text-stone-500">{article.source.name}</span>
                         </div>
-                        <h3 className="font-black text-sm sm:text-lg leading-tight group-hover:text-orange-500 transition-colors truncate">
+                        <h3 className="font-black text-sm sm:text-lg leading-tight text-stone-100 group-hover:text-orange-500 transition-colors truncate">
                           {article.title}
                         </h3>
-                        <div className="flex items-center gap-3 mt-2 text-[10px] font-bold uppercase tracking-widest opacity-40">
+                        <div className="flex items-center gap-3 mt-2 text-[10px] font-bold uppercase tracking-widest text-stone-500">
                           <span className="flex items-center gap-1">
                             <Clock size={10} /> {article.readTime}
                           </span>
                           <span>{article.date}</span>
                         </div>
                       </div>
-                      <ChevronRight size={20} className="opacity-0 group-hover:opacity-100 group-hover:translate-x-2 transition-all shrink-0" />
+                      <ChevronRight size={20} className="text-stone-500 opacity-0 group-hover:opacity-100 group-hover:translate-x-2 transition-all shrink-0" />
                     </motion.article>
                   ))}
                 </motion.div>
@@ -649,45 +619,41 @@ export default function NewsApp() {
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className={`p-5 sm:p-6 rounded-2xl sm:rounded-[2rem] border ${
-                dark ? 'bg-stone-900/50 border-stone-800' : 'bg-white border-stone-200'
-              }`}
+              className="p-5 sm:p-6 rounded-2xl sm:rounded-[2rem] border bg-stone-900/50 border-stone-800"
             >
               <div className="flex items-center gap-2 mb-5 pb-4 border-b border-stone-500/10">
                 <TrendingUp size={16} className="text-orange-500" />
-                <h3 className="text-[10px] font-black uppercase tracking-[0.2em]">Trending Topics</h3>
+                <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-300">Trending Topics</h3>
               </div>
               <div className="space-y-3">
                 {TRENDING_TOPICS.map((topic, i) => (
                   <div key={i} className="flex items-center gap-3 p-2 rounded-xl hover:bg-stone-500/5 transition-colors cursor-pointer group">
-                    <span className="text-xs font-black opacity-30 w-6">0{i + 1}</span>
+                    <span className="text-xs font-black text-stone-600 w-6">0{i + 1}</span>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold group-hover:text-orange-500 transition-colors truncate">
+                      <p className="text-sm font-bold text-stone-200 group-hover:text-orange-500 transition-colors truncate">
                         {topic.label}
                       </p>
-                      <p className="text-[10px] opacity-40">{topic.readers} readers</p>
+                      <p className="text-[10px] text-stone-500">{topic.readers} readers</p>
                     </div>
-                    <topic.icon size={14} className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0" style={{ color: topic.color }} />
+                    <topic.icon size={14} className="text-stone-600 group-hover:text-orange-500 transition-colors shrink-0" />
                   </div>
                 ))}
               </div>
             </motion.div>
 
             {/* Newsletter */}
-            <NewsletterSection dark={dark} />
+            <NewsletterSection />
 
             {/* Source Filter */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className={`p-5 sm:p-6 rounded-2xl sm:rounded-[2rem] border ${
-                dark ? 'bg-stone-900/50 border-stone-800' : 'bg-white border-stone-200'
-              }`}
+              className="p-5 sm:p-6 rounded-2xl sm:rounded-[2rem] border bg-stone-900/50 border-stone-800"
             >
               <div className="flex items-center gap-2 mb-5 pb-4 border-b border-stone-500/10">
                 <Globe size={16} className="text-orange-500" />
-                <h3 className="text-[10px] font-black uppercase tracking-[0.2em]">News Sources</h3>
+                <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-300">News Sources</h3>
               </div>
               <div className="space-y-2">
                 {Object.values(SOURCES).map((source, i) => (
@@ -699,8 +665,8 @@ export default function NewsApp() {
                       {source.logo}
                     </div>
                     <div>
-                      <p className="text-xs font-bold">{source.name}</p>
-                      <p className="text-[10px] opacity-40 flex items-center gap-1">
+                      <p className="text-xs font-bold text-stone-200">{source.name}</p>
+                      <p className="text-[10px] text-stone-500 flex items-center gap-1">
                         <MapPin size={9} /> {source.origin}
                       </p>
                     </div>
