@@ -192,21 +192,51 @@ export default function VoiceAssistant({ autoOpen = true, onClose }) {
     clearInterval(volumeTimerRef.current);
   }, []);
 
-  // ── Anthropic API call (direct, no proxy) ─────────────────────
-  const callAI = useCallback(async (userText) => {
-    historyRef.current.push({ role: "user", content: userText });
-    if (historyRef.current.length > 20) historyRef.current = historyRef.current.slice(-20);
+  // ── API call through Vercel Backend ──
+const callAI = useCallback(async (userText) => {
+  historyRef.current.push({
+    role: "user",
+    content: userText,
+  });
 
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-6",
-        max_tokens: 1000,
-        system: SYSTEM_PROMPT,
-        messages: historyRef.current,
-      }),
-    });
+  if (historyRef.current.length > 20) {
+    historyRef.current = historyRef.current.slice(-20);
+  }
+
+  const res = await fetch("/api/chat", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      system: SYSTEM_PROMPT,
+      messages: historyRef.current,
+    }),
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.error || `API Error ${res.status}`);
+  }
+
+  const text =
+    data?.content
+      ?.map((block) => (block.type === "text" ? block.text : ""))
+      .join("")
+      .trim() || "";
+
+  if (!text) {
+    throw new Error("Empty response from AI");
+  }
+
+  historyRef.current.push({
+    role: "assistant",
+    content: text,
+  });
+
+  return text;
+}, []);
 
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
