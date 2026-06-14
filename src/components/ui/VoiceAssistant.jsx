@@ -13,8 +13,8 @@ const KNOWLEDGE_BASE = {
     email: "witnessfabrice@gmail.com",
     phone: "+250 783 568 337",
     location: "Kigali, Rwanda",
-    github: "github.com/witnessfabrice",
-    linkedin: "linkedin.com/in/witnessfabrice",
+    github: "github.com/witfab-dev",
+    linkedin: "linkedin.com/in/witness-fabrice",
   },
   education: {
     school: "Kirehe Adventist TVET School (KATSS)",
