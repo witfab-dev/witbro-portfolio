@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import * as THREE from 'three';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { useTheme } from '../../contexts/ThemeContext';
 import { useThreeJS } from '../../hooks/useThreeJS';
 import LazyThreeJS from '../shared/LazyThreeJS';
 import {
@@ -74,7 +73,7 @@ function ThreeJSOrbitalSystem({ skills, categoryColor, isDark, onSkillClick }) {
     isReady, 
     error,
     handleResize,
-    startAnimationLoop, // ✅ Use this to start the animation
+    startAnimationLoop,
   } = useThreeJS(`skills-orbit-${categoryColor.replace('#', '')}`, {
     cameraPosition: [0, 2, 10],
     fov: 45,
@@ -166,21 +165,18 @@ function ThreeJSOrbitalSystem({ skills, categoryColor, isDark, onSkillClick }) {
         canvas.height = 64;
         const ctx = canvas.getContext('2d');
         
-        // Background glow
         const gradient = ctx.createRadialGradient(128, 32, 0, 128, 32, 120);
         gradient.addColorStop(0, `${skill.color}40`);
         gradient.addColorStop(1, 'transparent');
         ctx.fillStyle = gradient; 
         ctx.fillRect(0, 0, 256, 64);
         
-        // Skill name
         ctx.font = 'bold 20px Inter, system-ui, sans-serif';
         ctx.fillStyle = skill.color; 
         ctx.textAlign = 'center'; 
         ctx.textBaseline = 'middle';
         ctx.fillText(skill.name, 128, 32);
         
-        // Skill level
         ctx.font = 'bold 14px Inter, system-ui, sans-serif';
         ctx.fillStyle = `${skill.color}99`;
         ctx.fillText(`${skill.level}%`, 128, 50);
@@ -299,15 +295,12 @@ function ThreeJSOrbitalSystem({ skills, categoryColor, isDark, onSkillClick }) {
       
       renderer.domElement.addEventListener('click', onClick);
 
-      // ✅ Start the animation loop with the animation function
       let elapsedTime = 0;
       startAnimationLoop(() => {
         elapsedTime += 0.016;
         
-        // Rotate main group
         mainGroup.rotation.y += 0.003;
         
-        // Core animations
         core.rotation.y += 0.01;
         core.rotation.x += 0.005;
         
@@ -318,12 +311,10 @@ function ThreeJSOrbitalSystem({ skills, categoryColor, isDark, onSkillClick }) {
         coreParticles.rotation.y += 0.02;
         pointLight.intensity = 0.8 + Math.sin(elapsedTime * 3) * 0.3;
 
-        // Rotate orbital rings
         rings.forEach(ring => { 
           ring.rotation.z += 0.002 * ring.userData.baseRotationSpeed; 
         });
 
-        // Animate planets
         planets.forEach(planetGroup => {
           const data = planetGroup.userData;
           data.angle += data.speed * 0.008;
@@ -341,27 +332,23 @@ function ThreeJSOrbitalSystem({ skills, categoryColor, isDark, onSkillClick }) {
           }
         });
 
-        // Rotate stars
         stars.rotation.y += 0.0005;
       });
       
-      // Cleanup function
       return () => {
         renderer.domElement.removeEventListener('click', onClick);
       };
     },
   });
 
-  // Resize
   useEffect(() => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, [handleResize]);
 
-  // Error state
   if (error) {
     return (
-      <div className="absolute inset-0 flex items-center justify-center" style={{ background: isDark ? '#0c0b0a' : '#f5f3ee' }}>
+      <div className="absolute inset-0 flex items-center justify-center bg-[#0c0b0a]">
         <div className="text-center">
           <Orbit size={40} className="mx-auto mb-3 opacity-30" />
           <p className="text-sm font-bold opacity-50">3D View Unavailable</p>
@@ -392,16 +379,16 @@ const SkillCard = ({ skill, onClick, delay, t }) => {
       transition={{ duration: 0.35, delay }} 
       onClick={onClick} 
       whileHover={{ y: -4 }}
-      className="group relative flex flex-col gap-3 p-4 rounded-2xl border bg-white dark:bg-[#161513] border-stone-200 dark:border-stone-800/60 text-left cursor-pointer hover:border-orange-400 hover:shadow-[0_0_0_1px_rgba(249,115,22,0.3),0_12px_32px_rgba(0,0,0,0.08)] transition-all duration-300"
+      className="group relative flex flex-col gap-3 p-4 rounded-2xl border bg-[#161513] border-stone-800/60 text-left cursor-pointer hover:border-orange-400 hover:shadow-[0_0_0_1px_rgba(249,115,22,0.3),0_12px_32px_rgba(0,0,0,0.08)] transition-all duration-300"
     >
       <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: `${skill.color}18`, border: `1px solid ${skill.color}30` }}>
         <Icon size={18} style={{ color: skill.color }} />
       </div>
       <div>
-        <p className="font-black text-sm text-stone-900 dark:text-stone-100 tracking-tight group-hover:text-orange-500 transition-colors">{skill.name}</p>
-        <p className="text-[10px] text-stone-400 dark:text-stone-600 mt-0.5">{skill.years}+ {t('years', 'yrs')}</p>
+        <p className="font-black text-sm text-stone-100 tracking-tight group-hover:text-orange-500 transition-colors">{skill.name}</p>
+        <p className="text-[10px] text-stone-600 mt-0.5">{skill.years}+ {t('years', 'yrs')}</p>
       </div>
-      <div className="w-full h-1 bg-stone-100 dark:bg-stone-800 rounded-full overflow-hidden">
+      <div className="w-full h-1 bg-stone-800 rounded-full overflow-hidden">
         <motion.div 
           initial={{ width: 0 }} 
           animate={{ width: `${skill.level}%` }} 
@@ -426,7 +413,7 @@ const SkillModal = ({ skill, onClose, t }) => {
       animate={{ opacity: 1 }} 
       exit={{ opacity: 0 }} 
       className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-6" 
-      style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(20px)' }} 
+      style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(20px)' }} 
       onClick={onClose}
     >
       <motion.div 
@@ -435,7 +422,7 @@ const SkillModal = ({ skill, onClose, t }) => {
         exit={{ scale: 0.92, y: 20, opacity: 0 }} 
         transition={{ type: 'spring', stiffness: 300, damping: 28 }} 
         onClick={e => e.stopPropagation()} 
-        className="relative w-full max-w-md bg-white dark:bg-[#161513] rounded-3xl overflow-hidden border border-stone-200 dark:border-stone-800 shadow-2xl"
+        className="relative w-full max-w-md bg-[#161513] rounded-3xl overflow-hidden border border-stone-800 shadow-2xl"
       >
         <div className="h-1 w-full" style={{ background: `linear-gradient(90deg, transparent, ${skill.color}, transparent)` }} />
         <div className="p-6 sm:p-8">
@@ -445,23 +432,23 @@ const SkillModal = ({ skill, onClose, t }) => {
                 <Icon size={28} style={{ color: skill.color }} />
               </div>
               <div>
-                <h3 className="text-xl font-black text-stone-900 dark:text-stone-100 tracking-tight">{skill.name}</h3>
-                <p className="text-[10px] text-stone-400 mt-0.5 uppercase tracking-widest">{skill.years}+ {t('yearsExperience', 'years experience')}</p>
+                <h3 className="text-xl font-black text-stone-100 tracking-tight">{skill.name}</h3>
+                <p className="text-[10px] text-stone-600 mt-0.5 uppercase tracking-widest">{skill.years}+ {t('yearsExperience', 'years experience')}</p>
               </div>
             </div>
-            <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-xl border border-stone-200 dark:border-stone-800 text-stone-400 hover:bg-orange-500 hover:text-white hover:border-orange-500 transition-all">
+            <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-xl border border-stone-800 text-stone-500 hover:bg-orange-500 hover:text-white hover:border-orange-500 transition-all">
               <X size={14} />
             </button>
           </div>
-          <p className="text-sm leading-relaxed text-stone-500 dark:text-stone-400 mb-6">
+          <p className="text-sm leading-relaxed text-stone-400 mb-6">
             {t('deepExpertise', 'Deep expertise in')} {skill.name}, {t('buildingSolutions', 'building high-performance, production-ready solutions')} with modern architectural patterns and best practices.
           </p>
           <div className="mb-6">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-[10px] uppercase tracking-widest text-stone-400">{t('mastery', 'Mastery')}</span>
-              <span className="text-sm font-black text-stone-900 dark:text-stone-100">{skill.level}%</span>
+              <span className="text-[10px] uppercase tracking-widest text-stone-600">{t('mastery', 'Mastery')}</span>
+              <span className="text-sm font-black text-stone-100">{skill.level}%</span>
             </div>
-            <div className="h-2 rounded-full bg-stone-100 dark:bg-stone-800 overflow-hidden">
+            <div className="h-2 rounded-full bg-stone-800 overflow-hidden">
               <motion.div 
                 initial={{ width: 0 }} 
                 animate={{ width: `${skill.level}%` }} 
@@ -476,9 +463,9 @@ const SkillModal = ({ skill, onClose, t }) => {
               { labelKey: 'mastery', value: `${skill.level}%` },
               { labelKey: 'experience', value: `${skill.years}+ ${t('years', 'yrs')}` }
             ].map(({ labelKey, value }) => (
-              <div key={labelKey} className="px-4 py-3 rounded-2xl bg-stone-50 dark:bg-stone-800/40 border border-stone-100 dark:border-stone-800">
-                <p className="text-[9px] uppercase tracking-widest text-stone-400 mb-1">{t(labelKey)}</p>
-                <p className="text-xl font-black text-stone-900 dark:text-stone-100">{value}</p>
+              <div key={labelKey} className="px-4 py-3 rounded-2xl bg-stone-800/40 border border-stone-800">
+                <p className="text-[9px] uppercase tracking-widest text-stone-600 mb-1">{t(labelKey)}</p>
+                <p className="text-xl font-black text-stone-100">{value}</p>
               </div>
             ))}
           </div>
@@ -499,8 +486,6 @@ const SkillModal = ({ skill, onClose, t }) => {
 // ─── Main Component ────────────────────────────────────────────
 export default function SkillsGalaxy() {
   const { t } = useLanguage();
-  const { theme } = useTheme();
-  const dark = theme === 'dark';
   const [activeCategory, setActiveCategory] = useState(skillsPayload.categories[0].name);
   const [hoveredSkill, setHoveredSkill] = useState(null);
   const [activeSkill, setActiveSkill] = useState(null);
@@ -521,15 +506,8 @@ export default function SkillsGalaxy() {
     [activeCategoryData]
   );
 
-  const bg = 'bg-stone-100 dark:bg-[#0c0b0a]';
-  const surface = 'bg-white dark:bg-[#161513]';
-  const border = 'border-stone-200 dark:border-stone-800/60';
-  const ink = 'text-stone-900 dark:text-stone-100';
-  const muted = 'text-stone-400 dark:text-stone-600';
-  const subtle = 'text-stone-500 dark:text-stone-500';
-
   return (
-    <section id="skills" className={`relative min-h-screen py-24 px-4 sm:px-6 overflow-hidden transition-colors duration-500 ${bg}`}>
+    <section id="skills" className="relative min-h-screen py-24 px-4 sm:px-6 overflow-hidden transition-colors duration-500 bg-[#0c0b0a]">
       <div className="pointer-events-none absolute -top-40 -right-32 w-[420px] h-[420px] rounded-full bg-orange-500/[0.06] blur-3xl" />
       <div className="pointer-events-none absolute -bottom-40 -left-20 w-[360px] h-[360px] rounded-full bg-blue-500/[0.04] blur-3xl" />
 
@@ -546,18 +524,18 @@ export default function SkillsGalaxy() {
               <span className="block w-5 h-px bg-orange-500" />
               {t('technicalSkills', 'Technical skills')}
             </p>
-            <h2 className={`text-[clamp(38px,5.5vw,64px)] font-black leading-[0.93] tracking-tight ${ink}`}>
+            <h2 className="text-[clamp(38px,5.5vw,64px)] font-black leading-[0.93] tracking-tight text-stone-100">
               {t('myTechStack', 'My')}{' '}
               <span className="text-orange-500 italic">{t('techStack', 'Tech')}</span>{' '}
               {t('stack', 'Stack')}
             </h2>
-            <p className={`mt-3 text-sm leading-relaxed max-w-xs ${subtle}`}>
+            <p className="mt-3 text-sm leading-relaxed max-w-xs text-stone-500">
               {t('skillsSubtitle', 'Tools and technologies I use to build fast, scalable, and beautiful products.')}
             </p>
           </motion.div>
           
           {/* View mode toggle */}
-          <div className={`flex items-center gap-1 p-1 rounded-xl border ${surface} ${border}`}>
+          <div className="flex items-center gap-1 p-1 rounded-xl border bg-[#161513] border-stone-800/60">
             {[
               { mode: 'grid', Icon: LayoutGrid, labelKey: 'grid' },
               { mode: '3d', Icon: Orbit, labelKey: '3dOrbit' }
@@ -568,7 +546,7 @@ export default function SkillsGalaxy() {
                 className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-[11px] font-bold uppercase tracking-widest transition-all duration-250 ${
                   viewMode === mode 
                     ? 'bg-orange-500 text-white shadow-md shadow-orange-500/25' 
-                    : `${muted} hover:${ink}`
+                    : 'text-stone-500 hover:text-stone-300'
                 }`}
               >
                 <Ic size={13} /> {t(labelKey, mode === 'grid' ? 'Grid' : '3D Orbit')}
@@ -589,7 +567,7 @@ export default function SkillsGalaxy() {
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-widest border transition-all duration-250 ${
                   active 
                     ? 'text-white border-transparent shadow-lg' 
-                    : `bg-transparent ${border} ${muted} hover:border-stone-300 dark:hover:border-stone-600`
+                    : 'bg-transparent border-stone-700 text-stone-500 hover:border-stone-500 hover:text-stone-300'
                 }`} 
                 style={active ? { background: cat.color, boxShadow: `0 8px 20px ${cat.color}35` } : {}}
               >
@@ -636,12 +614,10 @@ export default function SkillsGalaxy() {
               className="relative"
             >
               <div 
-                className="relative w-full rounded-3xl overflow-hidden border border-stone-200 dark:border-stone-800/60" 
+                className="relative w-full rounded-3xl overflow-hidden border border-stone-800/60" 
                 style={{ 
                   height: '550px', 
-                  background: dark 
-                    ? 'radial-gradient(circle at center, #1a1917 0%, #0c0b0a 100%)' 
-                    : 'radial-gradient(circle at center, #fafaf9 0%, #f5f3ee 100%)' 
+                  background: 'radial-gradient(circle at center, #1a1917 0%, #0c0b0a 100%)'
                 }}
               >
                 <LazyThreeJS 
@@ -650,7 +626,7 @@ export default function SkillsGalaxy() {
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="text-center">
                         <Loader2 size={24} className="animate-spin mx-auto mb-2 text-orange-500" />
-                        <p className="text-sm opacity-50">{t('loading3D', 'Loading 3D view...')}</p>
+                        <p className="text-sm opacity-50 text-white">{t('loading3D', 'Loading 3D view...')}</p>
                       </div>
                     </div>
                   }
@@ -658,7 +634,7 @@ export default function SkillsGalaxy() {
                   <ThreeJSOrbitalSystem 
                     skills={visibleSkills} 
                     categoryColor={activeCategoryData?.color || '#f97316'} 
-                    isDark={dark} 
+                    isDark={true} 
                     onSkillClick={(skill) => setActiveSkill(skill)} 
                   />
                 </LazyThreeJS>
@@ -691,7 +667,7 @@ export default function SkillsGalaxy() {
                       onClick={() => setActiveSkill(skill)} 
                       onMouseEnter={() => setHoveredSkill(skill.name)} 
                       onMouseLeave={() => setHoveredSkill(null)} 
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all border bg-white dark:bg-[#161513] border-stone-200 dark:border-stone-800/60 hover:border-orange-400 hover:shadow-md hover:scale-105" 
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all border bg-[#161513] border-stone-800/60 hover:border-orange-400 hover:shadow-md hover:scale-105" 
                       style={{ 
                         borderColor: hoveredSkill === skill.name ? skill.color : undefined, 
                         boxShadow: hoveredSkill === skill.name ? `0 0 12px ${skill.color}30` : undefined 
@@ -699,7 +675,7 @@ export default function SkillsGalaxy() {
                     >
                       <Icon size={11} style={{ color: skill.color }} />
                       <span style={{ color: skill.color }}>{skill.name}</span>
-                      <span className="text-stone-400">{skill.level}%</span>
+                      <span className="text-stone-500">{skill.level}%</span>
                     </button>
                   );
                 })}
@@ -714,13 +690,13 @@ export default function SkillsGalaxy() {
           whileInView={{ opacity: 1, y: 0 }} 
           viewport={{ once: true }} 
           transition={{ duration: 0.5, delay: 0.2 }} 
-          className={`mt-14 p-5 rounded-2xl border ${surface} ${border} flex flex-wrap items-center justify-between gap-4`}
+          className="mt-14 p-5 rounded-2xl border bg-[#161513] border-stone-800/60 flex flex-wrap items-center justify-between gap-4"
         >
           <div>
-            <p className={`text-[10px] font-bold uppercase tracking-[0.2em] ${muted} mb-1`}>
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-600 mb-1">
               {t('totalSkills', 'Total skills')}
             </p>
-            <p className={`text-2xl font-black ${ink}`}>
+            <p className="text-2xl font-black text-stone-100">
               {skillsPayload.categories.reduce((a, c) => a + c.skills.length, 0)}
               <span className="text-orange-500">+</span>
             </p>
