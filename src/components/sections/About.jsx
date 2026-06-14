@@ -6,10 +6,11 @@ import {
   Layers, Globe, Zap, ShieldCheck, Terminal,
   ArrowUpRight, Sparkles, Coffee, Code2,
   BookOpen, Eye, Lightbulb, User, Laptop, Monitor,
+  Cpu, Wifi, Battery,
 } from 'lucide-react';
 
-// ─── 3D Realistic Developer Portrait Component ────────────────────────────
-function RealisticDeveloperPortrait() {
+// ─── Complete Developer Workspace 3D Scene ────────────────────────────
+function DeveloperWorkspaceScene() {
   const mountRef = useRef(null);
   const [isReady, setIsReady] = useState(false);
   const [error, setError] = useState(null);
@@ -18,14 +19,14 @@ function RealisticDeveloperPortrait() {
     if (!mountRef.current) return;
 
     try {
-      // --- 1. SETUP SCENE, CAMERA, & RENDERER ---
+      // --- SETUP SCENE ---
       const scene = new THREE.Scene();
       scene.background = new THREE.Color(0x050a12);
-      scene.fog = new THREE.FogExp2(0x050a12, 0.006);
+      scene.fog = new THREE.FogExp2(0x050a12, 0.008);
 
-      const camera = new THREE.PerspectiveCamera(55, mountRef.current.clientWidth / mountRef.current.clientHeight, 0.1, 1000);
-      camera.position.set(0, 1.2, 5.2);
-      camera.lookAt(0, 0.9, 0);
+      const camera = new THREE.PerspectiveCamera(50, mountRef.current.clientWidth / mountRef.current.clientHeight, 0.1, 1000);
+      camera.position.set(0, 1.5, 5.5);
+      camera.lookAt(0, 1.2, 0);
 
       const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
       renderer.setSize(mountRef.current.clientWidth, mountRef.current.clientHeight);
@@ -33,345 +34,360 @@ function RealisticDeveloperPortrait() {
       renderer.setClearColor(0x050a12, 1);
       mountRef.current.appendChild(renderer.domElement);
 
-      // --- 2. CREATE A MORE REALISTIC HUMAN BUST WITH DETAILS ---
-      const portraitGeometry = new THREE.BufferGeometry();
-      const particleCount = 3500;
-      const positions = new Float32Array(particleCount * 3);
-      const colorsArray = new Float32Array(particleCount * 3);
-
-      for (let i = 0; i < particleCount; i++) {
-        let x, y, z;
-        const randZone = Math.random();
-
-        if (randZone < 0.42) {
-          // HEAD - More anatomically accurate
-          const theta = Math.random() * Math.PI * 2;
-          const phi = Math.acos((Math.random() * 2) - 1);
-          
-          // Anatomically correct proportions
-          let rx = 0.72;
-          let ry = 0.96;
-          let rz = 0.78;
-          
-          // Jaw definition
-          const jawEffect = Math.sin(phi * Math.PI) * 0.07;
-          rx += jawEffect * 0.1;
-          
-          // Forehead shaping
-          const foreheadEffect = Math.sin(phi * Math.PI * 1.5) * 0.03;
-          ry += foreheadEffect;
-          
-          x = rx * Math.sin(phi) * Math.cos(theta);
-          y = ry * Math.sin(phi) * Math.sin(theta) + 1.22;
-          z = rz * Math.cos(phi) * 0.96;
-          
-          // Nose bridge (more pronounced)
-          const noseRegion = Math.abs(theta) < 0.55 && phi > 0.68 && phi < 1.18;
-          if (noseRegion) {
-            z += 0.09 * (1 - Math.abs(theta) / 0.85);
-            x *= 0.96;
-          }
-          
-          // Cheekbones
-          if (phi > 0.72 && phi < 1.08 && Math.abs(theta) > 0.9 && Math.abs(theta) < 1.7) {
-            x += 0.028 * Math.sin(theta * 2.5);
-            z -= 0.015;
-          }
-          
-          // Chin definition
-          if (phi > 1.25 && phi < 1.55 && Math.abs(theta) < 0.8) {
-            z += 0.035;
-            y -= 0.02;
-          }
-        } else if (randZone < 0.55) {
-          // NECK - Muscular/defined neck
-          const theta = Math.random() * Math.PI * 2;
-          const rNeck = 0.34 * (0.82 + Math.random() * 0.32);
-          x = rNeck * Math.cos(theta);
-          y = Math.random() * 0.68 + 0.58;
-          z = rNeck * Math.sin(theta) * 0.85 - 0.06;
-          
-          // Forward tilt for natural posture
-          const t = (y - 0.58) / 0.68;
-          z -= t * 0.09;
-          
-          // Adam's apple hint
-          if (Math.abs(theta) < 0.4 && y > 0.85 && y < 1.05) {
-            z += 0.025;
-          }
-        } else {
-          // SHOULDERS & TORSO - Athletic developer build with laptop posture
-          let rawX = (Math.random() - 0.5) * 3.2;
-          let rawY = Math.random() * 1.5 - 0.45;
-          
-          // Taper effect for athletic build
-          const taperFactor = Math.max(0, (rawY + 0.45) / 1.5);
-          let widthFactor = 1.0;
-          if (taperFactor < 0.5) {
-            widthFactor = 0.65 + taperFactor * 0.5;
-          } else {
-            widthFactor = 0.9 + (taperFactor - 0.5) * 0.7;
-          }
-          
-          let xFinal = rawX * widthFactor;
-          
-          // Shoulder definition
-          if (rawY > 0.55 && Math.abs(rawX) > 1.1) {
-            xFinal += 0.09 * Math.sin(rawX * 3);
-          }
-          
-          // Chest definition
-          if (rawY > 0.4 && rawY < 0.95 && Math.abs(rawX) < 0.9) {
-            xFinal *= 0.95;
-          }
-          
-          x = xFinal;
-          y = rawY + 0.48;
-          
-          // Chest depth
-          let zDepth = (Math.random() - 0.5) * 0.78;
-          if (y > 0.55 && y < 1.08 && Math.abs(x) < 0.85) {
-            zDepth += 0.12;
-          }
-          z = zDepth * 0.92;
-        }
-        
-        // Organic noise
-        positions[i * 3] = x + (Math.random() - 0.5) * 0.012;
-        positions[i * 3 + 1] = y + (Math.random() - 0.5) * 0.012;
-        positions[i * 3 + 2] = z + (Math.random() - 0.5) * 0.012;
-        
-        // Sophisticated vertex colors
-        if (y > 1.08) {
-          // Head - warm skin with subtle variation
-          colorsArray[i * 3] = 0.88 + Math.random() * 0.1;
-          colorsArray[i * 3 + 1] = 0.62 + Math.random() * 0.1;
-          colorsArray[i * 3 + 2] = 0.52 + Math.random() * 0.08;
-        } else if (y > 0.75) {
-          // Neck transition
-          colorsArray[i * 3] = 0.72 + Math.random() * 0.09;
-          colorsArray[i * 3 + 1] = 0.58 + Math.random() * 0.09;
-          colorsArray[i * 3 + 2] = 0.52 + Math.random() * 0.07;
-        } else {
-          // Professional attire - dark navy with subtle sheen
-          colorsArray[i * 3] = 0.25 + Math.random() * 0.1;
-          colorsArray[i * 3 + 1] = 0.30 + Math.random() * 0.08;
-          colorsArray[i * 3 + 2] = 0.48 + Math.random() * 0.1;
-        }
-      }
-
-      portraitGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-      portraitGeometry.setAttribute('color', new THREE.BufferAttribute(colorsArray, 3));
-
-      // --- 3. PARTICLES WITH GLOW EFFECT ---
-      const particleMaterial = new THREE.PointsMaterial({
-        size: 0.019,
-        vertexColors: true,
-        transparent: true,
-        opacity: 0.94,
-        blending: THREE.AdditiveBlending
-      });
-
-      const particleSystem = new THREE.Points(portraitGeometry, particleMaterial);
-      scene.add(particleSystem);
-
-      // --- 4. ENHANCED SPIDER-WEB CONNECTIONS (Like neural network) ---
-      const lineMaterial = new THREE.LineBasicMaterial({
-        color: 0x5a8fcf,
-        transparent: true,
-        opacity: 0.22,
-        blending: THREE.AdditiveBlending
-      });
-
-      let lineSegmentsMesh = new THREE.LineSegments(new THREE.BufferGeometry(), lineMaterial);
-      scene.add(lineSegmentsMesh);
-
-      function updateSpiderWeb() {
-        const posArray = portraitGeometry.attributes.position.array;
-        const connections = [];
-        const maxDist = 0.29;
-
-        for (let i = 0; i < particleCount; i++) {
-          const ix = i * 3;
-          const ix1 = posArray[ix];
-          const iy1 = posArray[ix + 1];
-          const iz1 = posArray[ix + 2];
-          
-          for (let j = i + 1; j < particleCount; j++) {
-            const jx = j * 3;
-            const dx = ix1 - posArray[jx];
-            const dy = iy1 - posArray[jx + 1];
-            const dz = iz1 - posArray[jx + 2];
-            const distSq = dx * dx + dy * dy + dz * dz;
-            
-            if (distSq < maxDist * maxDist) {
-              connections.push(
-                ix1, iy1, iz1,
-                posArray[jx], posArray[jx + 1], posArray[jx + 2]
-              );
-            }
-          }
-        }
-
-        const newGeo = new THREE.BufferGeometry();
-        newGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(connections), 3));
-        scene.remove(lineSegmentsMesh);
-        if (lineSegmentsMesh.geometry) lineSegmentsMesh.geometry.dispose();
-        lineSegmentsMesh = new THREE.LineSegments(newGeo, lineMaterial);
-        scene.add(lineSegmentsMesh);
-      }
-
-      // --- 5. CODE RAIN EFFECT (Developer vibe) ---
-      const codeRainCount = 150;
-      const codeRainPositions = new Float32Array(codeRainCount * 3);
-      const codeRainSpeeds = [];
-      for (let i = 0; i < codeRainCount; i++) {
-        codeRainPositions[i * 3] = (Math.random() - 0.5) * 8;
-        codeRainPositions[i * 3 + 1] = Math.random() * 5 - 1;
-        codeRainPositions[i * 3 + 2] = (Math.random() - 0.5) * 6 - 3;
-        codeRainSpeeds.push(0.005 + Math.random() * 0.015);
-      }
-      const codeRainGeo = new THREE.BufferGeometry();
-      codeRainGeo.setAttribute('position', new THREE.BufferAttribute(codeRainPositions, 3));
-      const codeRainMat = new THREE.PointsMaterial({
-        color: 0x00ff88,
-        size: 0.008,
-        transparent: true,
-        opacity: 0.3,
-        blending: THREE.AdditiveBlending
-      });
-      const codeRain = new THREE.Points(codeRainGeo, codeRainMat);
-      scene.add(codeRain);
-
-      // --- 6. BACKGROUND TECH PARTICLES ---
-      const bgParticleCount = 800;
-      const bgGeo = new THREE.BufferGeometry();
-      const bgPositions = new Float32Array(bgParticleCount * 3);
-      for (let i = 0; i < bgParticleCount; i++) {
-        bgPositions[i * 3] = (Math.random() - 0.5) * 14;
-        bgPositions[i * 3 + 1] = (Math.random() - 0.5) * 8;
-        bgPositions[i * 3 + 2] = (Math.random() - 0.5) * 14 - 5;
-      }
-      bgGeo.setAttribute('position', new THREE.BufferAttribute(bgPositions, 3));
-      const bgParticleMat = new THREE.PointsMaterial({
-        color: 0x4a9eff,
-        size: 0.006,
-        transparent: true,
-        opacity: 0.2,
-        blending: THREE.AdditiveBlending
-      });
-      const bgStars = new THREE.Points(bgGeo, bgParticleMat);
-      scene.add(bgStars);
-
-      // --- 7. AMBIENT LIGHTING ---
+      // --- LIGHTING SYSTEM ---
       const ambientLight = new THREE.AmbientLight(0x1a1a2e, 0.5);
       scene.add(ambientLight);
       
-      const keyLight = new THREE.PointLight(0xff9966, 0.8);
-      keyLight.position.set(3, 4, 3);
-      scene.add(keyLight);
+      const mainLight = new THREE.DirectionalLight(0xfff5e6, 1.2);
+      mainLight.position.set(5, 8, 3);
+      mainLight.castShadow = true;
+      scene.add(mainLight);
       
-      const fillLight = new THREE.PointLight(0x4466cc, 0.5);
-      fillLight.position.set(-2, 2, 4);
+      const fillLight = new THREE.PointLight(0x4466cc, 0.6);
+      fillLight.position.set(-3, 2, 4);
       scene.add(fillLight);
       
-      const rimLight = new THREE.PointLight(0xff66cc, 0.4);
-      rimLight.position.set(1, 1, -3);
+      const rimLight = new THREE.PointLight(0xff66aa, 0.4);
+      rimLight.position.set(2, 2.5, -3);
       scene.add(rimLight);
+      
+      const screenGlow = new THREE.PointLight(0x44aaff, 0.8);
+      screenGlow.position.set(0, 1.3, 0.8);
+      scene.add(screenGlow);
 
-      // --- 8. FLOATING CODE SNIPPETS (spheres representing tech) ---
-      const techOrbs = [];
-      const techColors = [0xff4444, 0x44ff44, 0x4444ff, 0xffaa44, 0xff44ff];
-      for (let i = 0; i < 30; i++) {
-        const orb = new THREE.Mesh(
-          new THREE.SphereGeometry(0.04 + Math.random() * 0.06, 8, 8),
-          new THREE.MeshStandardMaterial({
-            color: techColors[Math.floor(Math.random() * techColors.length)],
-            emissiveIntensity: 0.3,
-            emissive: 0xffffff
-          })
-        );
-        orb.position.set(
-          (Math.random() - 0.5) * 5,
-          (Math.random() - 0.5) * 3 + 0.5,
-          (Math.random() - 0.5) * 4 - 2
-        );
-        orb.userData = {
-          speedX: (Math.random() - 0.5) * 0.005,
-          speedY: (Math.random() - 0.5) * 0.005,
-          speedZ: (Math.random() - 0.5) * 0.005,
-          radius: 0.5 + Math.random() * 1.5
-        };
-        scene.add(orb);
-        techOrbs.push(orb);
+      // --- DESK & WORKSPACE ---
+      const workspaceGroup = new THREE.Group();
+      
+      // Desk surface
+      const deskMat = new THREE.MeshStandardMaterial({ color: 0x2a1f1a, metalness: 0.3, roughness: 0.6 });
+      const deskTop = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.08, 2.2), deskMat);
+      deskTop.position.set(0, 0.6, 0);
+      deskTop.castShadow = true;
+      deskTop.receiveShadow = true;
+      workspaceGroup.add(deskTop);
+      
+      // Desk legs
+      const legMat = new THREE.MeshStandardMaterial({ color: 0x1a1210, metalness: 0.7, roughness: 0.4 });
+      const legPositions = [[-1.4, 0.3, -0.9], [1.4, 0.3, -0.9], [-1.4, 0.3, 0.8], [1.4, 0.3, 0.8]];
+      legPositions.forEach(pos => {
+        const leg = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.6, 0.1), legMat);
+        leg.position.set(pos[0], pos[1], pos[2]);
+        leg.castShadow = true;
+        workspaceGroup.add(leg);
+      });
+      
+      // Laptop - Base
+      const laptopBaseMat = new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.8, roughness: 0.3 });
+      const laptopBase = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.05, 0.65), laptopBaseMat);
+      laptopBase.position.set(0, 0.68, -0.2);
+      laptopBase.castShadow = true;
+      workspaceGroup.add(laptopBase);
+      
+      // Laptop - Screen
+      const screenMat = new THREE.MeshStandardMaterial({ color: 0x111122, metalness: 0.9, roughness: 0.2, emissive: 0x224466, emissiveIntensity: 0.3 });
+      const laptopScreen = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.55, 0.03), screenMat);
+      laptopScreen.position.set(0, 0.96, -0.18);
+      laptopScreen.castShadow = true;
+      workspaceGroup.add(laptopScreen);
+      
+      // Screen glow effect
+      const screenGlowLight = new THREE.PointLight(0x4488ff, 0.5);
+      screenGlowLight.position.set(0, 0.96, -0.1);
+      workspaceGroup.add(screenGlowLight);
+      
+      // Keyboard keys effect
+      for (let i = -4; i <= 4; i++) {
+        for (let j = -2; j <= 2; j++) {
+          if (Math.random() > 0.7) {
+            const key = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.01, 0.045), new THREE.MeshStandardMaterial({ color: 0x444444, metalness: 0.5 }));
+            key.position.set(i * 0.065, 0.71, j * 0.065 - 0.1);
+            workspaceGroup.add(key);
+          }
+        }
       }
+      
+      // Mouse
+      const mouse = new THREE.Mesh(new THREE.SphereGeometry(0.045, 16, 16), new THREE.MeshStandardMaterial({ color: 0x555555, metalness: 0.6 }));
+      mouse.position.set(0.5, 0.7, 0.3);
+      mouse.castShadow = true;
+      workspaceGroup.add(mouse);
+      
+      // Coffee mug
+      const mugMat = new THREE.MeshStandardMaterial({ color: 0xcc6633, metalness: 0.2 });
+      const mug = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.06, 0.1, 16), mugMat);
+      mug.position.set(-0.6, 0.69, 0.4);
+      mug.castShadow = true;
+      workspaceGroup.add(mug);
+      
+      // Steam effect (particles)
+      const steamCount = 30;
+      const steamPositions = new Float32Array(steamCount * 3);
+      for (let i = 0; i < steamCount; i++) {
+        steamPositions[i * 3] = -0.6 + (Math.random() - 0.5) * 0.1;
+        steamPositions[i * 3 + 1] = 0.75 + Math.random() * 0.3;
+        steamPositions[i * 3 + 2] = 0.4 + (Math.random() - 0.5) * 0.1;
+      }
+      const steamGeo = new THREE.BufferGeometry();
+      steamGeo.setAttribute('position', new THREE.BufferAttribute(steamPositions, 3));
+      const steamMat = new THREE.PointsMaterial({ color: 0x88aaff, size: 0.005, transparent: true, opacity: 0.4, blending: THREE.AdditiveBlending });
+      const steam = new THREE.Points(steamGeo, steamMat);
+      workspaceGroup.add(steam);
+      
+      workspaceGroup.position.y = -0.2;
+      scene.add(workspaceGroup);
 
-      // --- 9. INTERACTION & ANIMATION ---
-      const mouse = { x: 0, y: 0 };
-      let targetRotationX = 0;
-      let targetRotationY = 0;
+      // --- HUMAN FIGURE (Sitting at desk) ---
+      const humanGroup = new THREE.Group();
+      
+      // Body/Torso (leaning slightly forward)
+      const torsoMat = new THREE.MeshStandardMaterial({ color: 0x2a2a3a, metalness: 0.1, roughness: 0.5 });
+      const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.3, 0.7, 8), torsoMat);
+      torso.position.set(0, 0.45, -0.3);
+      torso.castShadow = true;
+      humanGroup.add(torso);
+      
+      // Shoulders
+      const shoulderMat = new THREE.MeshStandardMaterial({ color: 0x2a2a3a });
+      const leftShoulder = new THREE.Mesh(new THREE.SphereGeometry(0.18, 8, 8), shoulderMat);
+      leftShoulder.position.set(-0.4, 0.8, -0.25);
+      humanGroup.add(leftShoulder);
+      
+      const rightShoulder = new THREE.Mesh(new THREE.SphereGeometry(0.18, 8, 8), shoulderMat);
+      rightShoulder.position.set(0.4, 0.8, -0.25);
+      humanGroup.add(rightShoulder);
+      
+      // Arms reaching to keyboard
+      const armMat = new THREE.MeshStandardMaterial({ color: 0xd4a574 });
+      const leftArm = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.55, 6), armMat);
+      leftArm.position.set(-0.48, 0.65, -0.15);
+      leftArm.rotation.z = 0.3;
+      leftArm.rotation.x = 0.5;
+      leftArm.castShadow = true;
+      humanGroup.add(leftArm);
+      
+      const rightArm = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.55, 6), armMat);
+      rightArm.position.set(0.48, 0.65, -0.15);
+      rightArm.rotation.z = -0.3;
+      rightArm.rotation.x = 0.5;
+      rightArm.castShadow = true;
+      humanGroup.add(rightArm);
+      
+      // Hands
+      const handMat = new THREE.MeshStandardMaterial({ color: 0xd4a574 });
+      const leftHand = new THREE.Mesh(new THREE.SphereGeometry(0.09, 6, 6), handMat);
+      leftHand.position.set(-0.48, 0.42, 0.1);
+      humanGroup.add(leftHand);
+      
+      const rightHand = new THREE.Mesh(new THREE.SphereGeometry(0.09, 6, 6), handMat);
+      rightHand.position.set(0.48, 0.42, 0.1);
+      humanGroup.add(rightHand);
+      
+      // Head
+      const headMat = new THREE.MeshStandardMaterial({ color: 0xd4a574, roughness: 0.3 });
+      const head = new THREE.Mesh(new THREE.SphereGeometry(0.22, 32, 32), headMat);
+      head.position.set(0, 1.02, -0.25);
+      head.castShadow = true;
+      humanGroup.add(head);
+      
+      // Hair
+      const hairMat = new THREE.MeshStandardMaterial({ color: 0x1a1a2a });
+      const hair = new THREE.Mesh(new THREE.SphereGeometry(0.24, 16, 16), hairMat);
+      hair.position.set(0, 1.1, -0.28);
+      hair.scale.set(1, 0.4, 0.9);
+      humanGroup.add(hair);
+      
+      // Glasses (developer style)
+      const glassesMat = new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 0.9 });
+      const leftLens = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.08, 0.03), glassesMat);
+      leftLens.position.set(-0.12, 1.02, -0.1);
+      humanGroup.add(leftLens);
+      
+      const rightLens = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.08, 0.03), glassesMat);
+      rightLens.position.set(0.12, 1.02, -0.1);
+      humanGroup.add(rightLens);
+      
+      const glassesBridge = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.03, 0.03), glassesMat);
+      glassesBridge.position.set(0, 1.02, -0.1);
+      humanGroup.add(glassesBridge);
+      
+      humanGroup.position.set(0, 0.3, 0.2);
+      scene.add(humanGroup);
+      
+      // --- CHAIR ---
+      const chairGroup = new THREE.Group();
+      const chairMat = new THREE.MeshStandardMaterial({ color: 0x1a1a2a, metalness: 0.2 });
+      
+      // Seat
+      const seat = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.08, 0.55), chairMat);
+      seat.position.set(0, 0.2, -0.4);
+      seat.castShadow = true;
+      chairGroup.add(seat);
+      
+      // Backrest
+      const backrest = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.5, 0.08), chairMat);
+      backrest.position.set(0, 0.5, -0.75);
+      backrest.castShadow = true;
+      chairGroup.add(backrest);
+      
+      chairGroup.position.set(0, 0.1, 0);
+      scene.add(chairGroup);
+      
+      // --- FLOATING CODE PARTICLES (Developer aura) ---
+      const codeParticleCount = 800;
+      const codeParticlesPos = new Float32Array(codeParticleCount * 3);
+      const codeParticlesColors = new Float32Array(codeParticleCount * 3);
+      for (let i = 0; i < codeParticleCount; i++) {
+        codeParticlesPos[i * 3] = (Math.random() - 0.5) * 5;
+        codeParticlesPos[i * 3 + 1] = Math.random() * 3;
+        codeParticlesPos[i * 3 + 2] = (Math.random() - 0.5) * 4 - 1;
+        
+        const colorChoice = Math.random();
+        if (colorChoice < 0.33) {
+          codeParticlesColors[i * 3] = 0.3;
+          codeParticlesColors[i * 3 + 1] = 0.8;
+          codeParticlesColors[i * 3 + 2] = 0.4;
+        } else if (colorChoice < 0.66) {
+          codeParticlesColors[i * 3] = 0.9;
+          codeParticlesColors[i * 3 + 1] = 0.5;
+          codeParticlesColors[i * 3 + 2] = 0.2;
+        } else {
+          codeParticlesColors[i * 3] = 0.4;
+          codeParticlesColors[i * 3 + 1] = 0.6;
+          codeParticlesColors[i * 3 + 2] = 0.9;
+        }
+      }
+      const codeParticlesGeo = new THREE.BufferGeometry();
+      codeParticlesGeo.setAttribute('position', new THREE.BufferAttribute(codeParticlesPos, 3));
+      codeParticlesGeo.setAttribute('color', new THREE.BufferAttribute(codeParticlesColors, 3));
+      const codeParticlesMat = new THREE.PointsMaterial({ size: 0.012, vertexColors: true, transparent: true, opacity: 0.6, blending: THREE.AdditiveBlending });
+      const codeParticles = new THREE.Points(codeParticlesGeo, codeParticlesMat);
+      scene.add(codeParticles);
+      
+      // --- BACKGROUND TECH GRID ---
+      const gridHelper = new THREE.GridHelper(12, 30, 0x3b82f6, 0x1f3a5f);
+      gridHelper.material.transparent = true;
+      gridHelper.material.opacity = 0.15;
+      gridHelper.position.y = -0.5;
+      scene.add(gridHelper);
+      
+      // --- STARFIELD BACKGROUND ---
+      const starCount = 1000;
+      const starPositions = new Float32Array(starCount * 3);
+      for (let i = 0; i < starCount; i++) {
+        starPositions[i * 3] = (Math.random() - 0.5) * 30;
+        starPositions[i * 3 + 1] = (Math.random() - 0.5) * 20;
+        starPositions[i * 3 + 2] = (Math.random() - 0.5) * 20 - 10;
+      }
+      const starGeo = new THREE.BufferGeometry();
+      starGeo.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+      const starMat = new THREE.PointsMaterial({ color: 0x88aaff, size: 0.02, transparent: true, opacity: 0.4 });
+      const stars = new THREE.Points(starGeo, starMat);
+      scene.add(stars);
+      
+      // --- NEURAL NETWORK CONNECTIONS (Spider-web around person) ---
+      const neuralPoints = [];
+      for (let i = 0; i < 150; i++) {
+        const point = new THREE.Vector3(
+          (Math.random() - 0.5) * 3.5,
+          Math.random() * 2.2,
+          (Math.random() - 0.5) * 3 - 0.5
+        );
+        neuralPoints.push(point);
+      }
+      
+      const neuralConnections = [];
+      for (let i = 0; i < neuralPoints.length; i++) {
+        for (let j = i + 1; j < neuralPoints.length; j++) {
+          const dist = neuralPoints[i].distanceTo(neuralPoints[j]);
+          if (dist < 0.6) {
+            neuralConnections.push(neuralPoints[i].x, neuralPoints[i].y, neuralPoints[i].z);
+            neuralConnections.push(neuralPoints[j].x, neuralPoints[j].y, neuralPoints[j].z);
+          }
+        }
+      }
+      const neuralGeo = new THREE.BufferGeometry();
+      neuralGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(neuralConnections), 3));
+      const neuralMat = new THREE.LineBasicMaterial({ color: 0x44aaff, transparent: true, opacity: 0.15 });
+      const neuralNetwork = new THREE.LineSegments(neuralGeo, neuralMat);
+      scene.add(neuralNetwork);
+      
+      // --- FLOATING TECH ICONS (Cube shapes) ---
+      const techCubes = [];
+      const cubeColors = [0xff4444, 0x44ff44, 0x4444ff, 0xffaa44, 0xff44ff];
+      for (let i = 0; i < 40; i++) {
+        const cube = new THREE.Mesh(
+          new THREE.BoxGeometry(0.06, 0.06, 0.06),
+          new THREE.MeshStandardMaterial({ color: cubeColors[Math.floor(Math.random() * cubeColors.length)], emissiveIntensity: 0.3 })
+        );
+        cube.position.set(
+          (Math.random() - 0.5) * 4,
+          Math.random() * 2.5,
+          (Math.random() - 0.5) * 3.5 - 1
+        );
+        cube.userData = { speedX: (Math.random() - 0.5) * 0.005, speedY: (Math.random() - 0.5) * 0.005, rotSpeed: Math.random() * 0.02 };
+        scene.add(cube);
+        techCubes.push(cube);
+      }
+      
+      // --- ANIMATION LOOP ---
       let time = 0;
-
+      let mouseX = 0, mouseY = 0;
+      let targetRotX = 0, targetRotY = 0;
+      
       const onMouseMove = (event) => {
         const rect = renderer.domElement.getBoundingClientRect();
-        mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-        mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-        targetRotationY = mouse.x * 0.35;
-        targetRotationX = mouse.y * 0.2;
+        mouseX = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        mouseY = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+        targetRotY = mouseX * 0.3;
+        targetRotX = mouseY * 0.15;
       };
       
       renderer.domElement.addEventListener('mousemove', onMouseMove);
-
-      setTimeout(() => updateSpiderWeb(), 200);
-
-      let animationId;
+      
       function animate() {
-        animationId = requestAnimationFrame(animate);
+        requestAnimationFrame(animate);
         time += 0.016;
-
-        // Smooth rotation
-        particleSystem.rotation.y += (targetRotationY - particleSystem.rotation.y) * 0.07;
-        particleSystem.rotation.x += (targetRotationX - particleSystem.rotation.x) * 0.07;
         
-        if (lineSegmentsMesh) {
-          lineSegmentsMesh.rotation.copy(particleSystem.rotation);
-        }
-
-        // Code rain animation
-        const positionsAttr = codeRain.geometry.attributes.position.array;
-        for (let i = 0; i < codeRainCount; i++) {
-          positionsAttr[i * 3 + 1] -= codeRainSpeeds[i];
-          if (positionsAttr[i * 3 + 1] < -1.5) {
-            positionsAttr[i * 3 + 1] = 3.5;
-            positionsAttr[i * 3] = (Math.random() - 0.5) * 8;
-            positionsAttr[i * 3 + 2] = (Math.random() - 0.5) * 6 - 3;
+        // Smooth camera follow
+        camera.position.x += (targetRotY * 0.5 - camera.position.x) * 0.05;
+        camera.position.y += (targetRotX * 0.3 - camera.position.y) * 0.05;
+        camera.lookAt(0, 1.2, 0);
+        
+        // Screen glow pulse
+        screenGlow.intensity = 0.7 + Math.sin(time * 3) * 0.2;
+        screenGlowLight.intensity = 0.4 + Math.sin(time * 2.5) * 0.15;
+        
+        // Floating particles rotation
+        codeParticles.rotation.y += 0.002;
+        codeParticles.rotation.x += 0.001;
+        
+        // Tech cubes animation
+        techCubes.forEach(cube => {
+          cube.rotation.x += cube.userData.rotSpeed;
+          cube.rotation.y += cube.userData.rotSpeed;
+          cube.position.x += Math.sin(time * 0.5) * 0.0005;
+          cube.position.y += Math.cos(time * 0.7) * 0.0005;
+        });
+        
+        // Stars rotation
+        stars.rotation.y += 0.0002;
+        stars.rotation.x += 0.0001;
+        
+        // Steam animation
+        const steamPosAttr = steam.geometry.attributes.position.array;
+        for (let i = 0; i < steamCount; i++) {
+          steamPosAttr[i * 3 + 1] += 0.003;
+          if (steamPosAttr[i * 3 + 1] > 1.1) {
+            steamPosAttr[i * 3 + 1] = 0.75;
           }
         }
-        codeRain.geometry.attributes.position.needsUpdate = true;
-
-        // Orbiting tech particles
-        bgStars.rotation.y += 0.0003;
-        bgStars.rotation.x += 0.0002;
+        steam.geometry.attributes.position.needsUpdate = true;
         
-        // Floating orbs animation
-        techOrbs.forEach(orb => {
-          orb.position.x += Math.sin(time * 0.5) * 0.001;
-          orb.position.y += Math.cos(time * 0.7) * 0.001;
-        });
-
-        // Pulse particle size
-        const pulse = 0.019 + Math.sin(time * 2.5) * 0.0015;
-        particleMaterial.size = pulse;
-
-        // Pulsing lights
-        keyLight.intensity = 0.7 + Math.sin(time * 1.8) * 0.15;
-        rimLight.intensity = 0.35 + Math.sin(time * 2.2) * 0.1;
-
         renderer.render(scene, camera);
       }
-
+      
       animate();
-
+      
       const handleResize = () => {
         if (!mountRef.current) return;
         const width = mountRef.current.clientWidth;
@@ -383,23 +399,20 @@ function RealisticDeveloperPortrait() {
       
       window.addEventListener('resize', handleResize);
       setIsReady(true);
-
+      
       return () => {
         window.removeEventListener('resize', handleResize);
         renderer.domElement.removeEventListener('mousemove', onMouseMove);
-        cancelAnimationFrame(animationId);
         if (mountRef.current && renderer.domElement) {
           mountRef.current.removeChild(renderer.domElement);
         }
-        if (lineSegmentsMesh && lineSegmentsMesh.geometry) lineSegmentsMesh.geometry.dispose();
-        portraitGeometry.dispose();
       };
     } catch (err) {
-      console.error('3D Portrait Error:', err);
+      console.error('3D Scene Error:', err);
       setError(err);
     }
   }, []);
-
+  
   if (error) {
     return (
       <div className="absolute inset-0 flex items-center justify-center bg-[#080c14]">
@@ -407,12 +420,12 @@ function RealisticDeveloperPortrait() {
           <div className="w-16 h-16 mx-auto mb-3 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center">
             <Code2 size={24} className="text-orange-500 opacity-60" />
           </div>
-          <p className="text-[10px] font-mono text-stone-600">3D portrait preview unavailable</p>
+          <p className="text-[10px] font-mono text-stone-600">3D workspace preview unavailable</p>
         </div>
       </div>
     );
   }
-
+  
   return (
     <div ref={mountRef} className="absolute inset-0 cursor-crosshair" style={{ touchAction: 'none' }}>
       {!isReady && (
@@ -591,7 +604,7 @@ export default function About() {
               className="relative aspect-square rounded-3xl overflow-hidden
                          border border-stone-800/60 bg-[#080c14]"
             >
-              <RealisticDeveloperPortrait />
+              <DeveloperWorkspaceScene />
 
               <div
                 className="absolute inset-0 pointer-events-none rounded-3xl"
@@ -600,11 +613,11 @@ export default function About() {
 
               <div className="absolute top-4 left-4 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/50 backdrop-blur-sm border border-white/10 z-10 pointer-events-none">
                 <span className="relative flex h-1.5 w-1.5">
-                  <span className="animate-ping absolute h-full w-full rounded-full bg-orange-400 opacity-70" />
-                  <span className="relative rounded-full h-1.5 w-1.5 bg-orange-500" />
+                  <span className="animate-ping absolute h-full w-full rounded-full bg-green-400 opacity-70" />
+                  <span className="relative rounded-full h-1.5 w-1.5 bg-green-500" />
                 </span>
                 <span className="text-[9px] font-bold uppercase tracking-widest text-white/70">
-                  Neural Portrait
+                  Live Workspace
                 </span>
               </div>
 
@@ -612,20 +625,20 @@ export default function About() {
                 animate={{ y: [0, -8, 0] }}
                 transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
                 className="absolute bottom-5 right-5 flex items-center gap-3 px-3.5 py-2.5
-                           rounded-2xl bg-white/10 backdrop-blur-md border border-white/20
+                           rounded-2xl bg-black/50 backdrop-blur-md border border-white/20
                            shadow-xl z-10 pointer-events-none"
               >
                 <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shrink-0">
-                  <Laptop size={15} className="text-white" />
+                  <Cpu size={15} className="text-white" />
                 </div>
                 <div>
-                  <p className="text-[9px] font-bold uppercase tracking-widest text-white/60">Live</p>
-                  <p className="text-[11px] font-bold text-white leading-tight">Developer in Action</p>
+                  <p className="text-[9px] font-bold uppercase tracking-widest text-white/60">Coding in Progress</p>
+                  <p className="text-[11px] font-bold text-white leading-tight">Full-Stack Developer</p>
                 </div>
               </motion.div>
 
               <p className="absolute bottom-5 left-5 text-[9px] font-mono text-white/25 z-10 pointer-events-none">
-                move cursor to explore 3D
+                drag to explore 3D workspace
               </p>
             </motion.div>
 
