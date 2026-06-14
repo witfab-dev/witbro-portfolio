@@ -2,8 +2,7 @@ import React, { useRef, useState, useMemo, useEffect } from 'react';
 import { motion, useScroll, useSpring, AnimatePresence } from 'framer-motion';
 import * as THREE from 'three';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { useTheme } from '../../contexts/ThemeContext';
-import {useThreeJS} from '../../hooks/useThreeJS';  // ✅ Fixed import
+import { useThreeJS } from '../../hooks/useThreeJS';
 import LazyThreeJS from '../shared/LazyThreeJS';
 import {
   MapPin, Calendar, Briefcase, ChevronDown,
@@ -369,8 +368,8 @@ const StatTile = ({ icon: Icon, label, value, accent }) => (
 // ─── Skill bar ─────────────────────────────────────────────────
 const SkillBar = ({ label, level, accent, delay }) => (
   <div className="flex items-center gap-2">
-    <span className="text-[10px] font-medium text-stone-500 dark:text-stone-500 w-20 shrink-0 truncate">{label}</span>
-    <div className="flex-1 h-1.5 rounded-full bg-stone-100 dark:bg-stone-800 overflow-hidden">
+    <span className="text-[10px] font-medium text-stone-500 w-20 shrink-0 truncate">{label}</span>
+    <div className="flex-1 h-1.5 rounded-full bg-stone-800 overflow-hidden">
       <motion.div
         initial={{ width: 0 }}
         animate={{ width: `${level}%` }}
@@ -398,7 +397,7 @@ const ExpCard = ({ exp, index, isActive, onClick, t }) => (
       boxShadow: isActive ? `0 0 0 1px ${exp.accent}25, 0 16px 40px ${exp.accent}15` : undefined,
     }}
   >
-    <div className="absolute inset-0 rounded-2xl pointer-events-none border border-stone-200 dark:border-stone-800/60 transition-opacity duration-300"
+    <div className="absolute inset-0 rounded-2xl pointer-events-none border border-stone-800/60 transition-opacity duration-300"
       style={{ opacity: isActive ? 0 : 1 }} />
 
     <div className="h-1 w-full" style={{ background: isActive ? exp.accent : `${exp.accent}35` }} />
@@ -408,7 +407,7 @@ const ExpCard = ({ exp, index, isActive, onClick, t }) => (
         style={{ background: `linear-gradient(to top, ${exp.accent}, transparent)` }} />
     )}
 
-    <div className="bg-white dark:bg-[#161513] p-5">
+    <div className="bg-[#161513] p-5">
       <div className="flex items-start justify-between mb-3">
         <div
           className="w-8 h-8 rounded-xl flex items-center justify-center text-[11px] font-black shrink-0"
@@ -438,27 +437,27 @@ const ExpCard = ({ exp, index, isActive, onClick, t }) => (
         </div>
       </div>
 
-      <h3 className="font-black text-sm leading-tight text-stone-900 dark:text-stone-100 mb-0.5 transition-colors"
+      <h3 className="font-black text-sm leading-tight text-stone-100 mb-0.5 transition-colors"
         style={isActive ? { color: exp.accent } : {}}>
         {exp.role}
       </h3>
       <p className="text-[10px] font-semibold mb-2" style={{ color: exp.accent }}>{exp.company}</p>
 
       <div className="flex items-center gap-2 mb-3 flex-wrap">
-        <span className="flex items-center gap-1 text-[10px] text-stone-400 dark:text-stone-600">
+        <span className="flex items-center gap-1 text-[10px] text-stone-600">
           <Calendar size={9} /> {exp.period}
         </span>
-        <span className="flex items-center gap-1 text-[10px] text-stone-400 dark:text-stone-600">
+        <span className="flex items-center gap-1 text-[10px] text-stone-600">
           <MapPin size={9} /> {exp.location}
         </span>
       </div>
 
       <div className="flex items-center gap-1.5 mb-2.5">
         <Zap size={10} style={{ color: exp.accent }} />
-        <span className="text-[10px] font-semibold text-stone-500 dark:text-stone-500 italic">{exp.highlight}</span>
+        <span className="text-[10px] font-semibold text-stone-500 italic">{exp.highlight}</span>
       </div>
 
-      <p className="text-xs leading-relaxed text-stone-500 dark:text-stone-400 mb-3">{exp.description}</p>
+      <p className="text-xs leading-relaxed text-stone-400 mb-3">{exp.description}</p>
 
       <div className="flex flex-wrap gap-1">
         {exp.skills.slice(0, 4).map(s => (
@@ -468,7 +467,7 @@ const ExpCard = ({ exp, index, isActive, onClick, t }) => (
           </span>
         ))}
         {exp.skills.length > 4 && (
-          <span className="px-2 py-0.5 rounded-md text-[9px] font-bold text-stone-400">+{exp.skills.length - 4}</span>
+          <span className="px-2 py-0.5 rounded-md text-[9px] font-bold text-stone-500">+{exp.skills.length - 4}</span>
         )}
       </div>
 
@@ -483,7 +482,7 @@ const ExpCard = ({ exp, index, isActive, onClick, t }) => (
           >
             <div className="mt-4 pt-4 border-t space-y-4" style={{ borderColor: `${exp.accent}20` }}>
               <div>
-                <p className="text-[9px] uppercase tracking-widest text-stone-400 dark:text-stone-600 mb-2">
+                <p className="text-[9px] uppercase tracking-widest text-stone-600 mb-2">
                   {t('keyMetrics', 'Key metrics')}
                 </p>
                 <div className="grid grid-cols-3 gap-2">
@@ -493,7 +492,7 @@ const ExpCard = ({ exp, index, isActive, onClick, t }) => (
                 </div>
               </div>
               <div>
-                <p className="text-[9px] uppercase tracking-widest text-stone-400 dark:text-stone-600 mb-2">
+                <p className="text-[9px] uppercase tracking-widest text-stone-600 mb-2">
                   {t('proficiency', 'Proficiency')}
                 </p>
                 <div className="flex flex-col gap-2">
@@ -519,8 +518,6 @@ const ExpCard = ({ exp, index, isActive, onClick, t }) => (
 // ─── Main Component ────────────────────────────────────────────
 export default function Experience() {
   const { t } = useLanguage();
-  const { theme } = useTheme();
-  const dark = theme === 'dark';
   
   const experiences = getExperiences(t);
   const [activeIdx, setActiveIdx] = useState(0);
@@ -558,7 +555,7 @@ export default function Experience() {
     <section
       id="experience"
       className="relative py-24 px-4 sm:px-6 overflow-hidden
-                 bg-stone-100 dark:bg-[#0c0b0a] transition-colors duration-500"
+                 bg-[#0c0b0a] transition-colors duration-500"
     >
       <div className="pointer-events-none absolute -top-40 -right-32 w-[420px] h-[420px] rounded-full bg-orange-500/[0.05] blur-3xl" />
       <div className="pointer-events-none absolute -bottom-40 -left-20 w-[360px] h-[360px] rounded-full bg-blue-500/[0.04] blur-3xl" />
@@ -577,10 +574,10 @@ export default function Experience() {
               <span className="block w-5 h-px bg-orange-500" />
               {t('careerPath', 'Career path')}
             </p>
-            <h2 className="text-[clamp(38px,5.5vw,64px)] font-black leading-[0.93] tracking-tight text-stone-900 dark:text-stone-100">
+            <h2 className="text-[clamp(38px,5.5vw,64px)] font-black leading-[0.93] tracking-tight text-stone-100">
               {t('work', 'Work')} <span className="text-orange-500 italic">{t('experience', 'Experience')}</span>
             </h2>
-            <p className="mt-3 text-sm leading-relaxed max-w-xs text-stone-500 dark:text-stone-500">
+            <p className="mt-3 text-sm leading-relaxed max-w-xs text-stone-500">
               {t('experienceDesc', 'Each peak represents a milestone — click a mountain to explore.')}
             </p>
           </motion.div>
@@ -599,7 +596,7 @@ export default function Experience() {
                 className={`px-5 py-2.5 rounded-full text-[11px] font-bold uppercase tracking-widest border transition-all duration-250 ${
                   filter === f.key
                     ? 'bg-orange-500 border-orange-500 text-white shadow-lg shadow-orange-500/25'
-                    : 'bg-transparent border-stone-300 dark:border-stone-700 text-stone-400 dark:text-stone-500 hover:border-stone-500 hover:text-stone-800 dark:hover:text-stone-200'
+                    : 'bg-transparent border-stone-700 text-stone-500 hover:border-stone-500 hover:text-stone-300'
                 }`}
               >
                 {f.label}
@@ -626,10 +623,10 @@ export default function Experience() {
               whileInView={{ opacity: 1, scale: 1 }} 
               viewport={{ once: true }} 
               transition={{ delay: i * 0.06 }}
-              className="flex flex-col items-center py-4 px-3 rounded-2xl bg-white dark:bg-[#161513] border border-stone-200 dark:border-stone-800/60 text-center"
+              className="flex flex-col items-center py-4 px-3 rounded-2xl bg-[#161513] border border-stone-800/60 text-center"
             >
               <span className="text-2xl font-black leading-none" style={{ color: s.color }}>{s.value}</span>
-              <span className="text-[9px] uppercase tracking-widest mt-1.5 text-stone-400 dark:text-stone-600">{s.label}</span>
+              <span className="text-[9px] uppercase tracking-widest mt-1.5 text-stone-600">{s.label}</span>
             </motion.div>
           ))}
         </motion.div>
@@ -722,7 +719,7 @@ export default function Experience() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.45, delay: 0.2 }}
-          className="mt-6 flex items-center gap-4 p-4 rounded-2xl bg-white dark:bg-[#161513] border border-stone-200 dark:border-stone-800/60 hover:border-orange-400 transition-all"
+          className="mt-6 flex items-center gap-4 p-4 rounded-2xl bg-[#161513] border border-stone-800/60 hover:border-orange-400 transition-all"
         >
           <motion.div
             animate={{ boxShadow: ['0 0 0 0 rgba(249,115,22,0.4)', '0 0 0 10px rgba(249,115,22,0)', '0 0 0 0 rgba(249,115,22,0)'] }}
@@ -732,8 +729,8 @@ export default function Experience() {
             <Star size={14} fill="white" stroke="none" />
           </motion.div>
           <div>
-            <p className="text-sm font-black text-stone-900 dark:text-stone-100">{t('whatsNext', "What's Next?")}</p>
-            <p className="text-xs text-stone-400 dark:text-stone-600 mt-0.5">
+            <p className="text-sm font-black text-stone-100">{t('whatsNext', "What's Next?")}</p>
+            <p className="text-xs text-stone-600 mt-0.5">
               {t('nextPeak', 'The next peak is yet to be climbed — open to new challenges')}
             </p>
           </div>
