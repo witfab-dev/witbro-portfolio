@@ -1,523 +1,618 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect, useCallback, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
-  Mic, X, Terminal, Volume2, VolumeX, Bot,
-  Mail, Phone, Info, Zap, Sparkles, ChevronRight,
-  Lightbulb, Code2, Folder, User, MessageSquare, RotateCcw
-} from 'lucide-react';
+  Mic, MicOff, Volume2, VolumeX, X, Send,
+  User, Zap, Code2, Mail, Briefcase, MapPin,
+  Bot, Loader2, RotateCcw, Sparkles, GraduationCap,
+} from "lucide-react";
 
-// ─────────────────────────────────────────────
-// KNOWLEDGE BASE  (no external API needed)
-// ─────────────────────────────────────────────
-const KB = {
-  person: {
-    name: "Witness Fabrice",
-    title: "Full-Stack Architect",
-    location: "Kirehe, Rwanda",
-    email: "witnessfabrice@gmail.com",
-    phone: "+250 783 568 337",
-    hobbies: ["3D graphics", "music production", "travel"],
-    education: "Kirehe Technical Secondary School (KATSS)",
-    languages: ["JavaScript", "Python", "PHP"],
-    stack: ["React", "Vue", "Node.js", "MongoDB", "Express", "Tailwind CSS"],
-    soft_skills: ["UI/UX design", "technical leadership", "client communication"],
-    availability: "Open to remote and on-site collaborations",
-    bio: "Witness Fabrice is a Rwanda-based Full-Stack Architect who graduated from KATSS. He specialises in cinematic user interfaces and robust backend systems, blending engineering precision with visual artistry.",
-  },
-  projects: [
-    {
-      id: "market-kigali",
-      name: "Market-Kigali",
-      type: "E-commerce Platform",
-      tags: ["e-commerce", "market", "shop", "buy", "sell", "kigali"],
-      desc: "A full-featured e-commerce platform tailored for the Kigali market. Built with React on the frontend and Node.js with MongoDB on the backend, it supports product listings, cart management, and secure checkout.",
-      tech: ["React", "Node.js", "MongoDB", "Stripe"],
-      status: "Live",
-    },
-    {
-      id: "pssms",
-      name: "PSSMS",
-      type: "Parking Management System",
-      tags: ["parking", "pssms", "slots", "management", "vehicle"],
-      desc: "The Parking Spot & Slot Management System handles vehicle registration, real-time slot tracking, and automated billing at 500 RWF per hour. It provides a live dashboard for attendants and an admin panel for reporting.",
-      tech: ["Vue", "Node.js", "MongoDB"],
-      status: "Production",
-    },
-    {
-      id: "katss-website",
-      name: "KATSS Website",
-      type: "Institutional Website",
-      tags: ["katss", "school", "website", "institution"],
-      desc: "The official website for Kirehe Technical Secondary School — showcasing departments, academic news, staff profiles, and student resources with a clean, accessible design.",
-      tech: ["React", "Tailwind CSS", "Node.js"],
-      status: "Live",
-    },
-    {
-      id: "rwanda-explorer",
-      name: "Rwanda Explorer Game",
-      type: "Interactive Geography Game",
-      tags: ["game", "rwanda", "explorer", "geography", "interactive"],
-      desc: "An educational interactive game that guides players through Rwanda's provinces, landmarks, and culture. Built to make geographic learning engaging for students of all ages.",
-      tech: ["React", "Canvas API", "Node.js"],
-      status: "Beta",
-    },
-  ],
-  faq: [
-    {
-      triggers: ["experience", "years", "how long", "career"],
-      response: "Witness has been crafting digital products for several years, starting with web development during his studies at KATSS and growing into full-stack architecture with a focus on cinematic UI and scalable backends.",
-    },
-    {
-      triggers: ["price", "rate", "cost", "charge", "how much"],
-      response: "Rates vary by project scope. The best way to get an accurate quote is to reach out directly via email at witnessfabrice@gmail.com with your project details — Witness typically responds within 24 hours.",
-    },
-    {
-      triggers: ["freelance", "hire", "available", "work together", "collaborate"],
-      response: "Witness is open to freelance and contract work, both remote and on-site. Whether it's a startup MVP or a full enterprise platform, you can reach him at witnessfabrice@gmail.com or call +250 783 568 337.",
-    },
-    {
-      triggers: ["timeline", "deadline", "how fast", "turnaround"],
-      response: "Project timelines depend on complexity. A simple landing page could take 1–2 weeks, while a full-stack application may need 4–8 weeks. Witness always scopes timelines transparently upfront.",
-    },
-    {
-      triggers: ["design", "ui", "ux", "interface", "figma"],
-      response: "Yes — Witness handles both design and development. He creates high-fidelity prototypes and cinematic interfaces before writing a single line of code, ensuring the visual vision is locked before engineering begins.",
-    },
-  ],
-};
+// ─── System Prompt ─────────────────────────────────────────────
+const SYSTEM_PROMPT = `You are Witbri AI, a smart, friendly voice assistant embedded in Witness Fabrice's personal developer portfolio. Your job is to help visitors learn about Witness and potentially hire or connect with him.
 
-// ─────────────────────────────────────────────
-// SMART RESPONSE ENGINE
-// ─────────────────────────────────────────────
-function resolveResponse(input) {
-  const q = input.toLowerCase().trim();
+Here is everything you know about Witness Fabrice:
 
-  // Greetings
-  if (/^(hi|hello|hey|good\s*(morning|afternoon|evening)|howdy|yo)\b/.test(q)) {
-    return {
-      text: `Hello! I'm Witbri, Witness Fabrice's AI assistant. I can tell you about his background, projects, tech stack, availability, and how to get in touch. What would you like to explore?`,
-      action: null,
-    };
-  }
+PERSONAL:
+- Full name: Witness Fabrice
+- Email: witnessfabrice@gmail.com
+- Phone: +250 783 568 337
+- Location: Kigali, Rwanda
+- GitHub: github.com/witnessfabrice
+- LinkedIn: linkedin.com/in/witnessfabrice
 
-  // Thank you
-  if (/thank|thanks|appreciate/.test(q)) {
-    return { text: "You're welcome! Is there anything else I can help you discover about Witness Fabrice?", action: null };
-  }
+EDUCATION:
+- Graduated with distinction from Kirehe Adventist TVET School (KATSS)
+- Awards: Best Tech Project & Leadership Excellence
+- Focus: Software Engineering & Web Technologies
 
-  // Contact / hire
-  if (/contact|email|phone|call|hire|reach|message|get in touch/.test(q)) {
-    return {
-      text: `You can reach Witness Fabrice directly at ${KB.person.email} by email, or call him at ${KB.person.phone}. He's ${KB.person.availability}.`,
-      action: "contact",
-    };
-  }
+SKILLS:
+- Frontend: React, Next.js, Vue.js, Three.js, TypeScript, Tailwind CSS, Framer Motion
+- Backend: Node.js, Express, Python, Django, GraphQL, REST APIs
+- Databases: PostgreSQL, MongoDB, MySQL, Redis
+- Infrastructure: Docker, AWS, Vercel, Nginx, CI/CD pipelines
+- Other: IoT integration, WebGL, WebSockets, PWA
 
-  // Project — specific match first
-  for (const proj of KB.projects) {
-    if (proj.tags.some(tag => q.includes(tag))) {
-      return {
-        text: `${proj.name} — ${proj.type}. ${proj.desc} Built with ${proj.tech.join(", ")}. Status: ${proj.status}.`,
-        action: "projects",
-      };
-    }
-  }
+PROJECTS:
+1. Market-Kigali — E-commerce platform for local Kigali vendors
+   - 500+ active users | React, Node.js, Stripe, PostgreSQL
+   - Real-time inventory, vendor dashboard, mobile-first
 
-  // Projects — general
-  if (/project|work|portfolio|build|built|made|create|develop/.test(q)) {
-    const list = KB.projects.map(p => p.name).join(", ");
-    return {
-      text: `Witness has built ${KB.projects.length} notable projects: ${list}. Ask me about any of them for a full breakdown, or tap "Work Vault" below to browse them on the page.`,
-      action: "projects",
-    };
-  }
+2. KATSS Platform — Academic management system for schools
+   - 1000+ students managed | React, Express.js, MongoDB
+   - Grade tracking, attendance, parent portal, notifications
 
-  // Skills / stack
-  if (/skill|tech|stack|language|tool|framework|react|vue|node|mongo/.test(q)) {
-    return {
-      text: `Witness's core stack covers ${KB.person.stack.join(", ")} on the technical side. He also brings ${KB.person.soft_skills.join(" and ")} to every engagement. Languages include ${KB.person.languages.join(", ")}.`,
-      action: null,
-    };
-  }
+3. Rwanda Explorer — Immersive 3D tourism experience
+   - 4.8★ app store rating | Three.js, WebGL, React
+   - 360° virtual tours, interactive maps, cultural content
 
-  // Education
-  if (/education|school|study|graduate|degree|katss/.test(q)) {
-    return {
-      text: `Witness graduated from ${KB.person.education}, where he laid the foundations of his programming career. The same institution later commissioned him to build their official website — a full-circle moment.`,
-      action: "about",
-    };
-  }
+4. PSSMS — Parking & Slot Management System
+   - 200+ slots managed | Vue.js, Python, IoT sensors
+   - Real-time availability, automated billing, sensor integration
 
-  // Hobbies
-  if (/hobby|hobbies|interest|like|passion|fun|free time|outside work/.test(q)) {
-    return {
-      text: `Outside of engineering, Witness is passionate about ${KB.person.hobbies.join(", ")}. These creative pursuits deeply influence the cinematic quality he brings to his interfaces.`,
-      action: null,
-    };
-  }
+PERSONALITY:
+- Passionate about impactful tech solutions for Africa
+- Detail-oriented, ships high-quality code
+- Collaborative, fast learner, cross-functional team player
+- Open to freelance, full-time remote, and relocation
 
-  // Location
-  if (/location|where|based|live|country|rwanda|kirehe/.test(q)) {
-    return {
-      text: `Witness is based in ${KB.person.location}. He works both locally and with remote clients globally.`,
-      action: null,
-    };
-  }
+RESPONSE RULES:
+- Be warm, conversational, and concise (2–4 sentences max unless detail is asked)
+- Use plain text only — no markdown, no asterisks, no headers
+- If asked about hiring: enthusiastically recommend witnessfabrice@gmail.com
+- Never make up facts not listed above
+- Always gently redirect off-topic questions back to Witness
+- Responses must be natural for text-to-speech (no symbols, no lists with dashes)`;
 
-  // About / bio / who
-  if (/who|about|bio|yourself|background|intro|tell me/.test(q)) {
-    return {
-      text: KB.person.bio + ` He's currently ${KB.person.availability}.`,
-      action: "about",
-    };
-  }
-
-  // FAQ matching
-  for (const faq of KB.faq) {
-    if (faq.triggers.some(t => q.includes(t))) {
-      return { text: faq.response, action: null };
-    }
-  }
-
-  // Capabilities — what can you do
-  if (/what can you|help me|guide|assist|capable|do for me/.test(q)) {
-    return {
-      text: `I can help you learn about Witness's background, explore his projects, understand his tech stack, check his availability, or get his contact details. Try asking "Show me his projects" or "How do I hire him?"`,
-      action: null,
-    };
-  }
-
-  // Fallback
-  return {
-    text: `I didn't quite catch that. I'm best at answering questions about Witness Fabrice — his projects, skills, background, or contact info. Try something like "What has he built?" or "How do I reach him?"`,
-    action: null,
-  };
-}
-
-// ─────────────────────────────────────────────
-// QUICK ACTION PROMPTS
-// ─────────────────────────────────────────────
+// ─── Quick Actions ─────────────────────────────────────────────
 const QUICK_ACTIONS = [
-  { label: "Who is Witness?",     icon: User,          query: "Tell me about Witness Fabrice" },
-  { label: "His Projects",        icon: Folder,         query: "Show me his projects" },
-  { label: "Tech Stack",          icon: Code2,          query: "What is his tech stack?" },
-  { label: "Hire Him",            icon: Mail,           query: "How do I hire Witness?" },
-  { label: "Contact Details",     icon: Phone,          query: "Contact information" },
-  { label: "Hobbies & Interests", icon: Lightbulb,      query: "What are his hobbies?" },
+  { icon: User,          label: "About",     cmd: "Tell me about Witness Fabrice",          color: "blue"    },
+  { icon: Zap,           label: "Projects",  cmd: "What projects has Witness built?",        color: "amber"   },
+  { icon: Code2,         label: "Skills",    cmd: "What technologies does Witness use?",     color: "emerald" },
+  { icon: Mail,          label: "Contact",   cmd: "How can I contact or hire Witness?",      color: "rose"    },
+  { icon: GraduationCap, label: "Education", cmd: "Tell me about his education background",  color: "violet"  },
+  { icon: MapPin,        label: "Location",  cmd: "Where is Witness based?",                 color: "cyan"    },
 ];
 
-// ─────────────────────────────────────────────
-// TYPEWRITER HOOK
-// ─────────────────────────────────────────────
-function useTypewriter(text, speed = 18) {
-  const [displayed, setDisplayed] = useState("");
-  const timerRef = useRef(null);
+const COLOR_HOVER = {
+  blue:    { text: "#60a5fa", border: "rgba(96,165,250,0.35)",    bg: "rgba(59,130,246,0.08)"  },
+  amber:   { text: "#fbbf24", border: "rgba(251,191,36,0.35)",    bg: "rgba(245,158,11,0.08)"  },
+  emerald: { text: "#34d399", border: "rgba(52,211,153,0.35)",    bg: "rgba(16,185,129,0.08)"  },
+  rose:    { text: "#fb7185", border: "rgba(251,113,133,0.35)",   bg: "rgba(239,68,68,0.08)"   },
+  violet:  { text: "#a78bfa", border: "rgba(167,139,250,0.35)",   bg: "rgba(139,92,246,0.08)"  },
+  cyan:    { text: "#22d3ee", border: "rgba(34,211,238,0.35)",    bg: "rgba(6,182,212,0.08)"   },
+};
 
+// ─── Waveform ──────────────────────────────────────────────────
+const BAR_PROFILE = Array.from({ length: 28 }, (_, i) => {
+  const t = i / 27;
+  return 0.12 + 0.76 * Math.sin(t * Math.PI);
+});
+
+const Waveform = ({ active, color, volume = 0.5 }) => (
+  <div className="flex items-end justify-center gap-[2px]" style={{ height: 28, flex: 1 }}>
+    {BAR_PROFILE.map((base, i) => (
+      <motion.div
+        key={i}
+        className="rounded-full origin-bottom"
+        style={{ width: 2, height: 28, background: color }}
+        animate={
+          active
+            ? {
+                scaleY: [base * 0.25, base * (0.5 + volume * 1.1), base * 0.25],
+                opacity: [0.35, 0.95, 0.35],
+              }
+            : { scaleY: 0.08, opacity: 0.18 }
+        }
+        transition={
+          active
+            ? { duration: 0.32 + (i % 5) * 0.07, repeat: Infinity, delay: (i / 28) * 0.28, ease: "easeInOut" }
+            : { duration: 0.4 }
+        }
+      />
+    ))}
+  </div>
+);
+
+// ─── Typing dots ───────────────────────────────────────────────
+const TypingDots = () => (
+  <div className="flex items-center gap-1 px-3 py-2.5">
+    {[0, 0.16, 0.32].map((d, i) => (
+      <motion.span
+        key={i}
+        className="w-1.5 h-1.5 rounded-full"
+        style={{ background: "#f97316" }}
+        animate={{ opacity: [0.25, 1, 0.25], y: [0, -3, 0] }}
+        transition={{ duration: 0.65, repeat: Infinity, delay: d, ease: "easeInOut" }}
+      />
+    ))}
+  </div>
+);
+
+// ─── Main Component ────────────────────────────────────────────
+export default function VoiceAssistant({ autoOpen = true, onClose }) {
+  const [input,     setInput]    = useState("");
+  const [messages,  setMessages] = useState([]);
+  const [listening, setListening]= useState(false);
+  const [speaking,  setSpeaking] = useState(false);
+  const [loading,   setLoading]  = useState(false);
+  const [muted,     setMuted]    = useState(false);
+  const [volume,    setVolume]   = useState(0.5);
+  const [error,     setError]    = useState(null);
+
+  const recognitionRef  = useRef(null);
+  const inputRef        = useRef(null);
+  const scrollRef       = useRef(null);
+  const volumeTimerRef  = useRef(null);
+  const historyRef      = useRef([]);
+  const hasGreetedRef   = useRef(false);
+
+  // ── Auto-scroll ───────────────────────────────────────────────
   useEffect(() => {
-    clearInterval(timerRef.current);
-    setDisplayed("");
-    if (!text) return;
-    let i = 0;
-    timerRef.current = setInterval(() => {
-      i++;
-      setDisplayed(text.slice(0, i));
-      if (i >= text.length) clearInterval(timerRef.current);
-    }, speed);
-    return () => clearInterval(timerRef.current);
-  }, [text, speed]);
+    const el = scrollRef.current;
+    if (el) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+  }, [messages, loading]);
 
-  return displayed;
-}
-
-// ─────────────────────────────────────────────
-// MAIN COMPONENT
-// ─────────────────────────────────────────────
-const VoiceAssistant = ({ autoOpen, onClose }) => {
-  const [isSpeaking, setIsSpeaking]   = useState(false);
-  const [isListening, setIsListening] = useState(false);
-  const [isMuted, setIsMuted]         = useState(false);
-  const [inputText, setInputText]     = useState("");
-  const [currentMsg, setCurrentMsg]   = useState(
-    "Witbri AI online — synced with Witness Fabrice's portfolio. Ask me anything or pick a topic below."
-  );
-  const [showGuide, setShowGuide]     = useState(true);
-  const [history, setHistory]         = useState([]);
-  const recognitionRef                = useRef(null);
-  const inputRef                      = useRef(null);
-  const displayed                     = useTypewriter(currentMsg, 16);
-
-  // TTS
+  // ── TTS ───────────────────────────────────────────────────────
   const speak = useCallback((text) => {
-    if (isMuted) { window.speechSynthesis?.cancel(); return; }
-    window.speechSynthesis?.cancel();
-    const utt = new SpeechSynthesisUtterance(text);
-    utt.rate  = 1.05;
-    utt.pitch = 0.9;
-    utt.onstart = () => setIsSpeaking(true);
-    utt.onend   = () => setIsSpeaking(false);
-    window.speechSynthesis?.speak(utt);
-  }, [isMuted]);
+    if (muted || !window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
 
-  // Process a query
-  const process = useCallback((query) => {
-    if (!query.trim()) return;
-    const { text, action } = resolveResponse(query);
+    const clean = text.replace(/[*_`#•\-]/g, "").replace(/\n+/g, " ").trim();
+    const utt   = new SpeechSynthesisUtterance(clean);
 
-    setHistory(h => [...h, { role: "user", text: query }, { role: "bot", text }]);
-    setCurrentMsg(text);
-    setShowGuide(false);
-    speak(text);
-
-    // Scroll to section if action provided
-    if (action) {
-      setTimeout(() => document.getElementById(action)?.scrollIntoView({ behavior: "smooth" }), 400);
-    }
-  }, [speak]);
-
-  // STT
-  const startListening = () => {
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) { process("voice recognition not supported"); return; }
-    recognitionRef.current = new SR();
-    recognitionRef.current.lang = "en-US";
-    recognitionRef.current.onstart  = () => setIsListening(true);
-    recognitionRef.current.onend    = () => setIsListening(false);
-    recognitionRef.current.onresult = (e) => {
-      const t = e.results[0][0].transcript;
-      setInputText(t);
-      process(t);
+    const loadVoice = () => {
+      const voices   = window.speechSynthesis.getVoices();
+      const preferred = ["Google UK English Female", "Samantha", "Microsoft Aria", "Karen", "Google US English", "Alex"];
+      for (const name of preferred) {
+        const v = voices.find(v => v.name.includes(name.split(" ")[0]));
+        if (v) { utt.voice = v; break; }
+      }
     };
-    recognitionRef.current.start();
-  };
+    loadVoice();
+    if (!utt.voice) window.speechSynthesis.onvoiceschanged = loadVoice;
 
-  const handleSubmit = () => {
-    process(inputText);
-    setInputText("");
-  };
+    utt.rate   = 1.0;
+    utt.pitch  = 1.05;
+    utt.volume = 1;
 
-  const clearHistory = () => {
-    setHistory([]);
-    setCurrentMsg("History cleared. Ask me anything about Witness Fabrice!");
-    setShowGuide(true);
-  };
+    utt.onstart = () => {
+      setSpeaking(true);
+      clearInterval(volumeTimerRef.current);
+      volumeTimerRef.current = setInterval(() => setVolume(0.25 + Math.random() * 0.75), 110);
+    };
+    utt.onend  = () => { setSpeaking(false); setVolume(0.5); clearInterval(volumeTimerRef.current); };
+    utt.onerror= () => { setSpeaking(false); clearInterval(volumeTimerRef.current); };
 
-  // Welcome on open
-  useEffect(() => {
-    if (autoOpen) {
-      const t = setTimeout(() => speak(currentMsg), 900);
-      return () => clearTimeout(t);
+    window.speechSynthesis.speak(utt);
+  }, [muted]);
+
+  const stopSpeaking = useCallback(() => {
+    window.speechSynthesis?.cancel();
+    setSpeaking(false);
+    setVolume(0.5);
+    clearInterval(volumeTimerRef.current);
+  }, []);
+
+  // ── Anthropic API call (direct, no proxy) ─────────────────────
+  const callAI = useCallback(async (userText) => {
+    historyRef.current.push({ role: "user", content: userText });
+    if (historyRef.current.length > 20) historyRef.current = historyRef.current.slice(-20);
+
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: 1000,
+        system: SYSTEM_PROMPT,
+        messages: historyRef.current,
+      }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err?.error?.message || `API error ${res.status}`);
     }
-  // eslint-disable-next-line
-  }, [autoOpen]);
+
+    const data = await res.json();
+    const text = data.content?.map(b => b.type === "text" ? b.text : "").join("").trim();
+    if (!text) throw new Error("Empty response");
+
+    historyRef.current.push({ role: "assistant", content: text });
+    return text;
+  }, []);
+
+  // ── Push / update message ─────────────────────────────────────
+  const pushMsg = useCallback((id, role, text, done = true) => {
+    setMessages(m => {
+      const exists = m.find(msg => msg.id === id);
+      if (exists) return m.map(msg => msg.id === id ? { ...msg, text, done } : msg);
+      return [...m, { id, role, text, done }];
+    });
+  }, []);
+
+  // ── Process query ─────────────────────────────────────────────
+  const process = useCallback(async (query) => {
+    const trimmed = query.trim();
+    if (!trimmed || loading) return;
+
+    setInput("");
+    setError(null);
+    setLoading(true);
+    stopSpeaking();
+
+    const userId = `u-${Date.now()}`;
+    pushMsg(userId, "user", trimmed);
+
+    const aiId = `a-${Date.now() + 1}`;
+    try {
+      const aiText = await callAI(trimmed);
+
+      // Typewriter reveal
+      pushMsg(aiId, "ai", "", false);
+      let i = 0;
+      const STEP = 3;
+      const tick = setInterval(() => {
+        i += STEP;
+        if (i >= aiText.length) {
+          clearInterval(tick);
+          pushMsg(aiId, "ai", aiText, true);
+          speak(aiText);
+        } else {
+          pushMsg(aiId, "ai", aiText.slice(0, i), false);
+        }
+      }, 14);
+    } catch (err) {
+      const msg = "Sorry, I hit a snag. Please try again in a moment!";
+      pushMsg(aiId, "ai", msg, true);
+      setError(err.message);
+      speak(msg);
+    } finally {
+      setLoading(false);
+    }
+  }, [loading, callAI, pushMsg, speak, stopSpeaking]);
+
+  // ── Voice recognition ─────────────────────────────────────────
+  const toggleListen = useCallback(() => {
+    if (listening) { recognitionRef.current?.stop(); setListening(false); return; }
+
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) { process("Voice input isn't supported here — please type your question."); return; }
+
+    stopSpeaking();
+
+    const rec = new SR();
+    rec.lang            = "en-US";
+    rec.continuous      = false;
+    rec.interimResults  = true;
+    rec.maxAlternatives = 1;
+
+    rec.onstart  = () => setListening(true);
+    rec.onresult = (e) => {
+      const t = Array.from(e.results).map(r => r[0].transcript).join("");
+      setInput(t);
+      if (e.results[e.results.length - 1].isFinal) {
+        setListening(false);
+        process(t);
+      }
+    };
+    rec.onerror = () => setListening(false);
+    rec.onend   = () => setListening(false);
+
+    recognitionRef.current = rec;
+    rec.start();
+  }, [listening, process, stopSpeaking]);
+
+  // ── Clear chat ────────────────────────────────────────────────
+  const clearChat = useCallback(() => {
+    setMessages([]);
+    historyRef.current  = [];
+    hasGreetedRef.current = false;
+    stopSpeaking();
+    setError(null);
+  }, [stopSpeaking]);
+
+  // ── Welcome ───────────────────────────────────────────────────
+  useEffect(() => {
+    if (!autoOpen || hasGreetedRef.current) return;
+    hasGreetedRef.current = true;
+    const h = new Date().getHours();
+    const greet = h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening";
+    const t = setTimeout(() => {
+      process(`${greet}! Give me a short friendly intro and tell me the 2–3 most useful things a visitor can ask you.`);
+    }, 800);
+    return () => clearTimeout(t);
+  }, [autoOpen]); // eslint-disable-line
+
+  // ── Keyboard shortcuts ────────────────────────────────────────
+  useEffect(() => {
+    const h = (e) => {
+      if (e.key === "Escape") onClose?.();
+      if ((e.ctrlKey || e.metaKey) && e.key === "m") { e.preventDefault(); setMuted(m => !m); }
+      if ((e.ctrlKey || e.metaKey) && e.key === "l") { e.preventDefault(); clearChat(); }
+    };
+    window.addEventListener("keydown", h);
+    return () => window.removeEventListener("keydown", h);
+  }, [onClose, clearChat]);
+
+  // ── Cleanup ───────────────────────────────────────────────────
+  useEffect(() => () => {
+    clearInterval(volumeTimerRef.current);
+    window.speechSynthesis?.cancel();
+  }, []);
+
+  const statusColor = listening ? "#ef4444" : speaking ? "#f97316" : loading ? "#a78bfa" : "#22c55e";
+  const statusLabel = listening ? "Listening…"  : speaking ? "Speaking"   : loading ? "Thinking…"  : "Ready";
 
   return (
     <AnimatePresence>
       {autoOpen && (
         <motion.div
-          initial={{ opacity: 0, y: 80, scale: 0.92, filter: "blur(8px)" }}
-          animate={{ opacity: 1, y: 0, scale: 1,    filter: "blur(0px)" }}
-          exit={{   opacity: 0, y: 40, scale: 0.94, filter: "blur(8px)" }}
-          transition={{ type: "spring", damping: 22, stiffness: 260 }}
-          className="fixed bottom-6 right-5 z-[100] w-full max-w-[460px] px-3"
+          initial={{ opacity: 0, y: 28, scale: 0.93 }}
+          animate={{ opacity: 1, y: 0,  scale: 1     }}
+          exit={{   opacity: 0, y: 20,  scale: 0.95  }}
+          transition={{ type: "spring", stiffness: 340, damping: 30 }}
+          className="fixed bottom-28 right-5 z-[998] w-[420px] max-w-[calc(100vw-1.25rem)]"
         >
-          {/* Glow border */}
-          <div className="relative rounded-[2.5rem] p-[1.5px] bg-gradient-to-br from-blue-500/70 via-violet-500/30 to-blue-700/60 shadow-[0_24px_60px_rgba(0,0,0,0.6)]">
-            
-            {/* Panel */}
-            <div className="bg-[#03050f]/97 backdrop-blur-3xl rounded-[2.4rem] relative overflow-hidden">
-              
-              {/* Ambient bg glow */}
-              <div className="absolute -top-20 -left-10 w-48 h-48 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
-              <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-violet-600/10 rounded-full blur-3xl pointer-events-none" />
+          {/* Ambient glow */}
+          <motion.div
+            className="pointer-events-none absolute -inset-10 rounded-[3rem]"
+            style={{ background: "radial-gradient(ellipse at 50% 65%, rgba(249,115,22,0.10) 0%, transparent 68%)" }}
+            animate={{ opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: 4.5, repeat: Infinity }}
+          />
 
-              <div className="relative z-10 p-7">
+          {/* Shell */}
+          <div
+            className="relative rounded-3xl overflow-hidden"
+            style={{
+              background: "linear-gradient(158deg, #1c1917 0%, #0d0c0b 100%)",
+              border: "1px solid rgba(255,255,255,0.07)",
+              boxShadow: "0 28px 60px rgba(0,0,0,0.65), 0 0 0 1px rgba(249,115,22,0.10)",
+            }}
+          >
+            {/* Top line accent */}
+            <div style={{ height: 1, background: "linear-gradient(90deg, transparent 5%, rgba(249,115,22,0.55) 50%, transparent 95%)" }} />
 
-                {/* ── Header ── */}
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-3">
-                    <div className="relative">
-                      <motion.div
-                        animate={{ scale: [1, 1.5, 1], opacity: [0.15, 0.4, 0.15] }}
-                        transition={{ duration: 3.5, repeat: Infinity }}
-                        className="absolute inset-0 bg-blue-500 blur-xl rounded-full"
-                      />
-                      <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-500 to-violet-700 flex items-center justify-center relative z-10 shadow-lg border border-white/10">
-                        <Bot size={22} className="text-white" />
-                      </div>
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-white font-black text-sm tracking-tight">Witbri AI</span>
-                        <Sparkles size={10} className="text-blue-400" />
-                      </div>
-                      <span className="text-[9px] font-mono text-blue-500 tracking-[0.18em] uppercase font-semibold">
-                        Witness_OS v2.1 · Local KB
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-1">
-                    {history.length > 0 && (
-                      <button
-                        onClick={clearHistory}
-                        title="Clear history"
-                        className="p-2 rounded-full text-slate-500 hover:text-slate-300 hover:bg-white/5 transition-all"
-                      >
-                        <RotateCcw size={15} />
-                      </button>
-                    )}
-                    <button
-                      onClick={() => setIsMuted(m => !m)}
-                      className="p-2 rounded-full text-slate-500 hover:text-slate-300 hover:bg-white/5 transition-all"
-                    >
-                      {isMuted ? <VolumeX size={15} /> : <Volume2 size={15} />}
-                    </button>
-                    <button
-                      onClick={onClose}
-                      className="p-2 rounded-full text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-all"
-                    >
-                      <X size={15} />
-                    </button>
-                  </div>
-                </div>
-
-                {/* ── Terminal display ── */}
-                <div className="bg-black/50 border border-white/[0.06] rounded-2xl p-5 mb-5 min-h-[120px] relative">
-                  <div className="flex items-center gap-1.5 mb-3">
-                    <div className="w-2 h-2 rounded-full bg-red-500/60" />
-                    <div className="w-2 h-2 rounded-full bg-yellow-500/60" />
-                    <div className="w-2 h-2 rounded-full bg-green-500/60" />
-                    <span className="text-[9px] font-mono text-slate-600 ml-1 tracking-widest">WITBRI_TERMINAL</span>
-                  </div>
-                  <p className="text-[13px] text-blue-100/80 font-mono leading-relaxed">
-                    <span className="text-blue-500 font-bold mr-1.5">›</span>
-                    {displayed}
-                    <motion.span
-                      animate={{ opacity: [1, 0] }}
-                      transition={{ repeat: Infinity, duration: 0.7 }}
-                      className="inline-block w-[7px] h-[14px] bg-blue-400 ml-0.5 align-middle opacity-90"
-                    />
-                  </p>
-                </div>
-
-                {/* ── Waveform ── */}
-                <div className="flex items-end justify-center gap-[3px] h-8 mb-5">
-                  {[...Array(28)].map((_, i) => (
-                    <motion.div
-                      key={i}
-                      animate={
-                        isSpeaking
-                          ? { height: [3, 20 + Math.random() * 16, 3], backgroundColor: ["#3b82f6", "#8b5cf6", "#3b82f6"] }
-                          : isListening
-                          ? { height: [6, 18, 6], backgroundColor: "#ef4444" }
-                          : { height: 3, backgroundColor: "#1e293b" }
-                      }
-                      transition={{ repeat: Infinity, duration: 0.55 + i * 0.01, delay: i * 0.025 }}
-                      style={{ width: 3, borderRadius: 2 }}
-                    />
-                  ))}
-                </div>
-
-                {/* ── Conversation history (last 2 exchanges) ── */}
-                {history.length > 0 && (
-                  <div className="mb-4 space-y-2 max-h-[110px] overflow-y-auto pr-1 scrollbar-none">
-                    {history.slice(-4).map((msg, i) => (
-                      <div
-                        key={i}
-                        className={`flex gap-2 items-start ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-                      >
-                        {msg.role === "bot" && (
-                          <div className="w-5 h-5 rounded-full bg-blue-600/30 flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <Bot size={10} className="text-blue-400" />
-                          </div>
-                        )}
-                        <span
-                          className={`text-[11px] font-mono rounded-xl px-3 py-1.5 max-w-[80%] leading-relaxed ${
-                            msg.role === "user"
-                              ? "bg-blue-600/20 text-blue-200 border border-blue-500/20"
-                              : "bg-white/5 text-slate-300 border border-white/5"
-                          }`}
-                        >
-                          {msg.text.length > 100 ? msg.text.slice(0, 100) + "…" : msg.text}
-                        </span>
-                        {msg.role === "user" && (
-                          <div className="w-5 h-5 rounded-full bg-slate-700 flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <User size={9} className="text-slate-400" />
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* ── Input bar ── */}
-                <div className="relative mb-5">
-                  <MessageSquare size={13} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600" />
-                  <input
-                    ref={inputRef}
-                    type="text"
-                    value={inputText}
-                    onChange={e => setInputText(e.target.value)}
-                    onKeyDown={e => { if (e.key === "Enter") { handleSubmit(); } }}
-                    placeholder={isListening ? "Listening…" : "Ask anything about Witness…"}
-                    className="w-full bg-slate-900/70 border border-white/8 rounded-2xl py-4 pl-10 pr-14 text-[12px] text-white placeholder:text-slate-600 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/15 transition-all font-mono"
+            {/* ── Header ── */}
+            <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.055)" }}>
+              <div className="flex items-center gap-3">
+                {/* Avatar */}
+                <div className="relative w-9 h-9 shrink-0">
+                  <motion.div
+                    className="absolute inset-0 rounded-xl blur-md"
+                    style={{ background: "rgba(249,115,22,0.38)" }}
+                    animate={{ opacity: [0.28, 0.65, 0.28], scale: [0.88, 1.12, 0.88] }}
+                    transition={{ duration: 2.6, repeat: Infinity }}
                   />
-                  <button
-                    onClick={startListening}
-                    className={`absolute right-2.5 top-1/2 -translate-y-1/2 p-2 rounded-xl transition-all ${
-                      isListening
-                        ? "bg-red-500 text-white animate-pulse shadow-[0_0_16px_rgba(239,68,68,0.35)]"
-                        : "bg-blue-600 text-white hover:bg-blue-500 shadow-md shadow-blue-600/25"
-                    }`}
-                  >
-                    <Mic size={16} />
-                  </button>
-                </div>
-
-                {/* ── Guided quick-actions ── */}
-                <div className="space-y-2">
-                  {showGuide && (
-                    <p className="text-[9px] text-slate-600 font-mono uppercase tracking-widest mb-2 px-1">
-                      — Try asking —
-                    </p>
-                  )}
-                  <div className="grid grid-cols-2 gap-2">
-                    {QUICK_ACTIONS.map(({ label, icon: Icon, query }) => (
-                      <button
-                        key={label}
-                        onClick={() => { process(query); }}
-                        className="flex items-center gap-2.5 px-3 py-3 bg-white/[0.03] border border-white/[0.06] rounded-xl text-[10px] text-slate-400 font-semibold tracking-wide hover:bg-blue-600/10 hover:text-blue-300 hover:border-blue-500/25 transition-all text-left group"
-                      >
-                        <Icon size={12} className="flex-shrink-0 group-hover:text-blue-400 transition-colors" />
-                        <span className="truncate">{label}</span>
-                        <ChevronRight size={9} className="ml-auto flex-shrink-0 opacity-0 group-hover:opacity-60 transition-opacity" />
-                      </button>
-                    ))}
+                  <div className="relative w-9 h-9 rounded-xl flex items-center justify-center"
+                    style={{ background: "linear-gradient(140deg, #f97316, #c2410c)" }}>
+                    <Bot size={16} className="text-white" />
                   </div>
+                  <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2"
+                    style={{ background: statusColor, borderColor: "#0d0c0b", transition: "background 0.3s" }} />
                 </div>
 
-                {/* ── Status bar ── */}
-                <div className="flex items-center justify-between mt-4 pt-3 border-t border-white/[0.04]">
-                  <div className="flex items-center gap-1.5">
-                    <motion.div
-                      animate={{ opacity: [0.5, 1, 0.5] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                      className={`w-1.5 h-1.5 rounded-full ${isSpeaking ? "bg-violet-400" : isListening ? "bg-red-400" : "bg-green-500"}`}
-                    />
-                    <span className="text-[9px] font-mono text-slate-600">
-                      {isSpeaking ? "Speaking…" : isListening ? "Listening…" : "Ready"}
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[13px] font-black tracking-tight text-white" style={{ letterSpacing: "-0.025em" }}>
+                      Witbri AI
+                    </span>
+                    <span className="px-1.5 py-[2px] rounded-md text-[8.5px] font-bold uppercase tracking-widest"
+                      style={{ background: "rgba(249,115,22,0.13)", color: "#f97316", border: "1px solid rgba(249,115,22,0.22)" }}>
+                      Live
                     </span>
                   </div>
-              
+                  <div className="flex items-center gap-1.5 mt-[2px]">
+                    <motion.span className="w-1.5 h-1.5 rounded-full"
+                      style={{ background: statusColor, transition: "background 0.3s" }}
+                      animate={{ opacity: [1, 0.4, 1] }}
+                      transition={{ duration: 1.1, repeat: Infinity }} />
+                    <span className="text-[9px] uppercase tracking-[0.14em] font-semibold" style={{ color: "rgba(255,255,255,0.3)" }}>
+                      {statusLabel}
+                    </span>
+                  </div>
                 </div>
+              </div>
 
+              {/* Controls */}
+              <div className="flex items-center gap-1">
+                {[
+                  { icon: RotateCcw, action: clearChat,                  title: "Clear (⌘L)", hoverColor: "#f97316" },
+                  { icon: muted ? VolumeX : Volume2, action: () => { setMuted(m => !m); if (speaking) stopSpeaking(); }, title: "Mute (⌘M)", hoverColor: "#f97316", active: muted },
+                  { icon: X, action: onClose, title: "Close (Esc)", hoverColor: "#ef4444" },
+                ].map(({ icon: Ic, action, title, hoverColor, active }, i) => (
+                  <button key={i} onClick={action} title={title}
+                    className="w-8 h-8 flex items-center justify-center rounded-xl transition-all duration-200"
+                    style={{ border: "1px solid rgba(255,255,255,0.08)", color: active ? hoverColor : "rgba(255,255,255,0.28)" }}
+                    onMouseEnter={e => { e.currentTarget.style.color = hoverColor; e.currentTarget.style.borderColor = hoverColor + "55"; e.currentTarget.style.background = hoverColor + "12"; }}
+                    onMouseLeave={e => { e.currentTarget.style.color = active ? hoverColor : "rgba(255,255,255,0.28)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"; e.currentTarget.style.background = "transparent"; }}>
+                    <Ic size={13} />
+                  </button>
+                ))}
               </div>
             </div>
+
+            {/* ── Waveform bar ── */}
+            <div className="px-5 pt-3 pb-2">
+              <div className="flex items-center gap-3 px-4 py-2.5 rounded-2xl"
+                style={{ background: "rgba(255,255,255,0.035)", border: "1px solid rgba(255,255,255,0.055)" }}>
+                <Waveform active={speaking || listening} color={listening ? "#ef4444" : "#f97316"} volume={volume} />
+                <div className="flex flex-col items-end shrink-0 min-w-[48px]">
+                  <span className="text-[8.5px] uppercase tracking-widest font-bold" style={{ color: "rgba(255,255,255,0.18)" }}>
+                    {listening ? "Input" : speaking ? "Output" : "Standby"}
+                  </span>
+                  {speaking && (
+                    <button onClick={stopSpeaking} className="text-[9px] mt-0.5 font-semibold" style={{ color: "#f97316" }}>
+                      Stop ▪
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* ── Messages ── */}
+            <div ref={scrollRef} className="px-4 py-1.5 space-y-2.5 overflow-y-auto" style={{ maxHeight: 232, scrollbarWidth: "none" }}>
+              <AnimatePresence initial={false}>
+                {messages.length === 0 && !loading && (
+                  <motion.div
+                    initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                    className="flex flex-col items-center justify-center py-6 gap-2"
+                  >
+                    <div className="w-10 h-10 rounded-2xl flex items-center justify-center"
+                      style={{ background: "rgba(249,115,22,0.10)", border: "1px solid rgba(249,115,22,0.18)" }}>
+                      <Sparkles size={16} style={{ color: "#f97316" }} />
+                    </div>
+                    <p className="text-[11px] text-center" style={{ color: "rgba(255,255,255,0.28)", maxWidth: 240 }}>
+                      Ask me anything about Witness — his projects, skills, background, or how to hire him.
+                    </p>
+                  </motion.div>
+                )}
+
+                {messages.map((msg) => (
+                  <motion.div
+                    key={msg.id}
+                    initial={{ opacity: 0, y: 6, scale: 0.97 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    transition={{ duration: 0.18 }}
+                    className={`flex gap-2 ${msg.role === "user" ? "flex-row-reverse" : "flex-row"}`}
+                  >
+                    {/* Icon */}
+                    <div className="shrink-0 w-6 h-6 rounded-lg flex items-center justify-center mt-0.5"
+                      style={msg.role === "ai"
+                        ? { background: "rgba(249,115,22,0.13)", border: "1px solid rgba(249,115,22,0.22)" }
+                        : { background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.09)" }}>
+                      {msg.role === "ai"
+                        ? <Bot size={11} style={{ color: "#f97316" }} />
+                        : <User size={11} style={{ color: "rgba(255,255,255,0.45)" }} />}
+                    </div>
+
+                    {/* Bubble */}
+                    <div
+                      className="max-w-[78%] px-3 py-2 text-[11.5px] leading-relaxed"
+                      style={msg.role === "user"
+                        ? { background: "linear-gradient(135deg, #f97316, #c2410c)", color: "white", borderRadius: "14px 3px 14px 14px" }
+                        : { background: "rgba(255,255,255,0.055)", color: "rgba(255,255,255,0.82)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: "3px 14px 14px 14px" }}
+                    >
+                      {msg.text}
+                      {msg.role === "ai" && !msg.done && (
+                        <motion.span
+                          animate={{ opacity: [1, 0] }}
+                          transition={{ duration: 0.48, repeat: Infinity }}
+                          className="inline-block w-[5px] h-[10px] ml-0.5 align-middle rounded-sm"
+                          style={{ background: "#f97316" }}
+                        />
+                      )}
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+
+              {/* Loading bubble */}
+              {loading && (
+                <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="flex gap-2">
+                  <div className="shrink-0 w-6 h-6 rounded-lg flex items-center justify-center"
+                    style={{ background: "rgba(249,115,22,0.13)", border: "1px solid rgba(249,115,22,0.22)" }}>
+                    <Bot size={11} style={{ color: "#f97316" }} />
+                  </div>
+                  <div className="rounded-[3px_14px_14px_14px]"
+                    style={{ background: "rgba(255,255,255,0.055)", border: "1px solid rgba(255,255,255,0.07)" }}>
+                    <TypingDots />
+                  </div>
+                </motion.div>
+              )}
+            </div>
+
+            {/* ── Input row ── */}
+            <div className="px-4 pt-2 pb-3">
+              <div className="flex items-center gap-2">
+                <input
+                  ref={inputRef}
+                  value={input}
+                  onChange={e => setInput(e.target.value)}
+                  onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey && input.trim()) { e.preventDefault(); process(input); } }}
+                  placeholder={listening ? "Listening…" : "Ask anything about Witness…"}
+                  disabled={loading}
+                  className="flex-1 text-[12px] px-4 py-2.5 rounded-xl transition-all duration-200 outline-none"
+                  style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.82)", caretColor: "#f97316" }}
+                  onFocus={e => { e.target.style.borderColor = "rgba(249,115,22,0.42)"; e.target.style.background = "rgba(255,255,255,0.07)"; }}
+                  onBlur={e =>  { e.target.style.borderColor = "rgba(255,255,255,0.08)"; e.target.style.background = "rgba(255,255,255,0.05)"; }}
+                />
+
+                {/* Mic */}
+                <motion.button
+                  onClick={toggleListen}
+                  whileTap={{ scale: 0.88 }}
+                  disabled={loading}
+                  className="w-10 h-10 shrink-0 flex items-center justify-center rounded-xl transition-all duration-200"
+                  style={listening
+                    ? { background: "#ef4444", boxShadow: "0 0 18px rgba(239,68,68,0.45)" }
+                    : { background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.09)", color: "rgba(255,255,255,0.45)" }}
+                >
+                  {listening ? <MicOff size={14} className="text-white" /> : <Mic size={14} />}
+                </motion.button>
+
+                {/* Send */}
+                <motion.button
+                  onClick={() => input.trim() && process(input)}
+                  whileTap={{ scale: 0.88 }}
+                  disabled={!input.trim() || loading}
+                  className="w-10 h-10 shrink-0 flex items-center justify-center rounded-xl transition-all duration-200"
+                  style={input.trim() && !loading
+                    ? { background: "linear-gradient(135deg, #f97316, #c2410c)", boxShadow: "0 3px 14px rgba(249,115,22,0.38)" }
+                    : { background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.18)" }}
+                >
+                  {loading
+                    ? <Loader2 size={14} className="text-white animate-spin" />
+                    : <Send size={14} style={{ color: input.trim() ? "white" : undefined }} />}
+                </motion.button>
+              </div>
+            </div>
+
+            {/* ── Quick-action grid ── */}
+            <div className="px-4 pb-4">
+              <p className="text-[8.5px] uppercase tracking-[0.16em] font-bold mb-2 px-0.5" style={{ color: "rgba(255,255,255,0.18)" }}>
+                Quick topics
+              </p>
+              <div className="grid grid-cols-3 gap-1.5">
+                {QUICK_ACTIONS.map(({ icon: Ic, label, cmd, color }, i) => {
+                  const c = COLOR_HOVER[color];
+                  return (
+                    <motion.button
+                      key={label}
+                      onClick={() => process(cmd)}
+                      disabled={loading}
+                      whileHover={{ y: -1, scale: 1.025 }}
+                      whileTap={{ scale: 0.95 }}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.04 + 0.08, duration: 0.2 }}
+                      className="flex flex-col items-center gap-1 py-2.5 rounded-xl transition-all duration-200"
+                      style={{ background: "rgba(255,255,255,0.035)", border: "1px solid rgba(255,255,255,0.065)" }}
+                      onMouseEnter={e => { e.currentTarget.style.background = c.bg; e.currentTarget.style.borderColor = c.border; }}
+                      onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.035)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.065)"; }}
+                    >
+                      <Ic size={13} style={{ color: "rgba(255,255,255,0.32)", transition: "color 0.2s" }} />
+                      <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.32)" }}>
+                        {label}
+                      </span>
+                    </motion.button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* ── Footer ── */}
+            <div className="flex items-center justify-between px-5 py-2" style={{ borderTop: "1px solid rgba(255,255,255,0.045)", background: "rgba(0,0,0,0.18)" }}>
+              <div className="flex items-center gap-2.5 text-[8.5px]" style={{ color: "rgba(255,255,255,0.14)" }}>
+                <span>↵ send</span><span>⌘M mute</span><span>⌘L clear</span><span>Esc close</span>
+              </div>
+            </div>
+
+            {/* Bottom line accent */}
+            <div style={{ height: 1, background: "linear-gradient(90deg, transparent 5%, rgba(249,115,22,0.28) 50%, transparent 95%)" }} />
           </div>
         </motion.div>
       )}
     </AnimatePresence>
   );
-};
-
-export default VoiceAssistant;
+}
