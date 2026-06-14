@@ -193,50 +193,26 @@ export default function VoiceAssistant({ autoOpen = true, onClose }) {
   }, []);
 
   // ── API call through Vercel Backend ──
-const callAI = useCallback(async (userText) => {
-  historyRef.current.push({
-    role: "user",
-    content: userText,
-  });
+  const callAI = useCallback(async (userText) => {
+    historyRef.current.push({
+      role: "user",
+      content: userText,
+    });
 
-  if (historyRef.current.length > 20) {
-    historyRef.current = historyRef.current.slice(-20);
-  }
+    if (historyRef.current.length > 20) {
+      historyRef.current = historyRef.current.slice(-20);
+    }
 
-  const res = await fetch("/api/chat", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      system: SYSTEM_PROMPT,
-      messages: historyRef.current,
-    }),
-  });
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    throw new Error(data.error || `API Error ${res.status}`);
-  }
-
-  const text =
-    data?.content
-      ?.map((block) => (block.type === "text" ? block.text : ""))
-      .join("")
-      .trim() || "";
-
-  if (!text) {
-    throw new Error("Empty response from AI");
-  }
-
-  historyRef.current.push({
-    role: "assistant",
-    content: text,
-  });
-
-  return text;
-}, []);
+    const res = await fetch("/api/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        system: SYSTEM_PROMPT,
+        messages: historyRef.current,
+      }),
+    });
 
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
@@ -244,10 +220,22 @@ const callAI = useCallback(async (userText) => {
     }
 
     const data = await res.json();
-    const text = data.content?.map(b => b.type === "text" ? b.text : "").join("").trim();
-    if (!text) throw new Error("Empty response");
 
-    historyRef.current.push({ role: "assistant", content: text });
+    const text =
+      data?.content
+        ?.map((block) => (block.type === "text" ? block.text : ""))
+        .join("")
+        .trim() || "";
+
+    if (!text) {
+      throw new Error("Empty response from AI");
+    }
+
+    historyRef.current.push({
+      role: "assistant",
+      content: text,
+    });
+
     return text;
   }, []);
 
@@ -351,7 +339,7 @@ const callAI = useCallback(async (userText) => {
       process(`${greet}! Give me a short friendly intro and tell me the 2–3 most useful things a visitor can ask you.`);
     }, 800);
     return () => clearTimeout(t);
-  }, [autoOpen]); // eslint-disable-line
+  }, [autoOpen, process]);
 
   // ── Keyboard shortcuts ────────────────────────────────────────
   useEffect(() => {
@@ -563,83 +551,25 @@ const callAI = useCallback(async (userText) => {
                   placeholder={listening ? "Listening…" : "Ask anything about Witness…"}
                   disabled={loading}
                   className="flex-1 text-[12px] px-4 py-2.5 rounded-xl transition-all duration-200 outline-none"
-                  style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.82)", caretColor: "#f97316" }}
-                  onFocus={e => { e.target.style.borderColor = "rgba(249,115,22,0.42)"; e.target.style.background = "rgba(255,255,255,0.07)"; }}
-                  onBlur={e =>  { e.target.style.borderColor = "rgba(255,255,255,0.08)"; e.target.style.background = "rgba(255,255,255,0.05)"; }}
+                  style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "white" }}
                 />
-
-                {/* Mic */}
-                <motion.button
+                <button
                   onClick={toggleListen}
-                  whileTap={{ scale: 0.88 }}
-                  disabled={loading}
-                  className="w-10 h-10 shrink-0 flex items-center justify-center rounded-xl transition-all duration-200"
-                  style={listening
-                    ? { background: "#ef4444", boxShadow: "0 0 18px rgba(239,68,68,0.45)" }
-                    : { background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.09)", color: "rgba(255,255,255,0.45)" }}
+                  className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200 ${listening ? "animate-pulse" : ""}`}
+                  style={{ background: listening ? "#ef4444" : "rgba(249,115,22,0.85)", border: "none" }}
                 >
-                  {listening ? <MicOff size={14} className="text-white" /> : <Mic size={14} />}
-                </motion.button>
-
-                {/* Send */}
-                <motion.button
-                  onClick={() => input.trim() && process(input)}
-                  whileTap={{ scale: 0.88 }}
+                  <Mic size={14} className="text-white" />
+                </button>
+                <button
+                  onClick={() => process(input)}
                   disabled={!input.trim() || loading}
-                  className="w-10 h-10 shrink-0 flex items-center justify-center rounded-xl transition-all duration-200"
-                  style={input.trim() && !loading
-                    ? { background: "linear-gradient(135deg, #f97316, #c2410c)", boxShadow: "0 3px 14px rgba(249,115,22,0.38)" }
-                    : { background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.18)" }}
+                  className="w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200"
+                  style={{ background: input.trim() && !loading ? "rgba(249,115,22,0.85)" : "rgba(255,255,255,0.08)", border: "none", opacity: input.trim() && !loading ? 1 : 0.4 }}
                 >
-                  {loading
-                    ? <Loader2 size={14} className="text-white animate-spin" />
-                    : <Send size={14} style={{ color: input.trim() ? "white" : undefined }} />}
-                </motion.button>
+                  <Send size={13} className={input.trim() && !loading ? "text-white" : "text-gray-500"} />
+                </button>
               </div>
             </div>
-
-            {/* ── Quick-action grid ── */}
-            <div className="px-4 pb-4">
-              <p className="text-[8.5px] uppercase tracking-[0.16em] font-bold mb-2 px-0.5" style={{ color: "rgba(255,255,255,0.18)" }}>
-                Quick topics
-              </p>
-              <div className="grid grid-cols-3 gap-1.5">
-                {QUICK_ACTIONS.map(({ icon: Ic, label, cmd, color }, i) => {
-                  const c = COLOR_HOVER[color];
-                  return (
-                    <motion.button
-                      key={label}
-                      onClick={() => process(cmd)}
-                      disabled={loading}
-                      whileHover={{ y: -1, scale: 1.025 }}
-                      whileTap={{ scale: 0.95 }}
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: i * 0.04 + 0.08, duration: 0.2 }}
-                      className="flex flex-col items-center gap-1 py-2.5 rounded-xl transition-all duration-200"
-                      style={{ background: "rgba(255,255,255,0.035)", border: "1px solid rgba(255,255,255,0.065)" }}
-                      onMouseEnter={e => { e.currentTarget.style.background = c.bg; e.currentTarget.style.borderColor = c.border; }}
-                      onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.035)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.065)"; }}
-                    >
-                      <Ic size={13} style={{ color: "rgba(255,255,255,0.32)", transition: "color 0.2s" }} />
-                      <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.32)" }}>
-                        {label}
-                      </span>
-                    </motion.button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* ── Footer ── */}
-            <div className="flex items-center justify-between px-5 py-2" style={{ borderTop: "1px solid rgba(255,255,255,0.045)", background: "rgba(0,0,0,0.18)" }}>
-              <div className="flex items-center gap-2.5 text-[8.5px]" style={{ color: "rgba(255,255,255,0.14)" }}>
-                <span>↵ send</span><span>⌘M mute</span><span>⌘L clear</span><span>Esc close</span>
-              </div>
-            </div>
-
-            {/* Bottom line accent */}
-            <div style={{ height: 1, background: "linear-gradient(90deg, transparent 5%, rgba(249,115,22,0.28) 50%, transparent 95%)" }} />
           </div>
         </motion.div>
       )}
