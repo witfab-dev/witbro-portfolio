@@ -5,12 +5,11 @@ import * as THREE from 'three';
 import {
   Layers, Globe, Zap, ShieldCheck, Terminal,
   ArrowUpRight, Sparkles, Coffee, Code2,
-  BookOpen, Eye, Lightbulb, User, Laptop, Monitor,
-  Cpu, Wifi, Battery,
+  BookOpen, Eye, Lightbulb, User, Monitor, Cpu,
 } from 'lucide-react';
 
-// ─── Real Person Developer Workspace 3D Scene ────────────────────────────
-function RealPersonWorkspaceScene({ personImageUrl = '/wit.png' }) {
+// ─── Complete PC Workspace with Real Person on Screen ────────────────────
+function CompletePCWorkspace({ personImageUrl = '/wit.png' }) {
   const mountRef = useRef(null);
   const [isReady, setIsReady] = useState(false);
   const [error, setError] = useState(null);
@@ -23,11 +22,11 @@ function RealPersonWorkspaceScene({ personImageUrl = '/wit.png' }) {
       // --- SETUP SCENE ---
       const scene = new THREE.Scene();
       scene.background = new THREE.Color(0x050a12);
-      scene.fog = new THREE.FogExp2(0x050a12, 0.008);
+      scene.fog = new THREE.FogExp2(0x050a12, 0.006);
 
-      const camera = new THREE.PerspectiveCamera(42, mountRef.current.clientWidth / mountRef.current.clientHeight, 0.1, 1000);
-      camera.position.set(0, 1.4, 5.5);
-      camera.lookAt(0, 1.1, 0);
+      const camera = new THREE.PerspectiveCamera(40, mountRef.current.clientWidth / mountRef.current.clientHeight, 0.1, 1000);
+      camera.position.set(0, 1.3, 5.2);
+      camera.lookAt(0, 1.0, 0);
 
       const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
       renderer.setSize(mountRef.current.clientWidth, mountRef.current.clientHeight);
@@ -36,7 +35,7 @@ function RealPersonWorkspaceScene({ personImageUrl = '/wit.png' }) {
       renderer.shadowMap.enabled = true;
       mountRef.current.appendChild(renderer.domElement);
 
-      // Load person texture for photo frame and screen
+      // Load person texture for screen
       const personTexture = new THREE.TextureLoader().load(personImageUrl, () => {
         setTextureLoaded(true);
       });
@@ -45,274 +44,276 @@ function RealPersonWorkspaceScene({ personImageUrl = '/wit.png' }) {
       const ambientLight = new THREE.AmbientLight(0x1a1a2e, 0.55);
       scene.add(ambientLight);
       
-      const mainLight = new THREE.DirectionalLight(0xfff5e6, 1.3);
+      const mainLight = new THREE.DirectionalLight(0xfff5e6, 1.2);
       mainLight.position.set(5, 8, 3);
       mainLight.castShadow = true;
-      mainLight.receiveShadow = true;
       scene.add(mainLight);
       
-      const fillLight = new THREE.PointLight(0x4466cc, 0.6);
+      const fillLight = new THREE.PointLight(0x4466cc, 0.5);
       fillLight.position.set(-3, 2, 4);
       scene.add(fillLight);
       
-      const rimLight = new THREE.PointLight(0xff66aa, 0.5);
+      const rimLight = new THREE.PointLight(0xff66aa, 0.4);
       rimLight.position.set(2, 2.5, -3);
       scene.add(rimLight);
       
-      const screenGlow = new THREE.PointLight(0x44aaff, 0.9);
-      screenGlow.position.set(0, 1.25, 0.7);
+      // Screen glow
+      const screenGlow = new THREE.PointLight(0x44aaff, 1.0);
+      screenGlow.position.set(0, 1.15, 0.9);
       scene.add(screenGlow);
-
-      const backLight = new THREE.PointLight(0x88aaff, 0.4);
-      backLight.position.set(0, 1.5, -2);
+      
+      const backLight = new THREE.PointLight(0x88aaff, 0.3);
+      backLight.position.set(0, 1.2, -2);
       scene.add(backLight);
 
       // --- DESK ---
-      const workspaceGroup = new THREE.Group();
+      const deskGroup = new THREE.Group();
       
-      // Desk surface
-      const deskMat = new THREE.MeshStandardMaterial({ color: 0x2a1f1a, metalness: 0.25, roughness: 0.65, side: THREE.DoubleSide });
-      const deskTop = new THREE.Mesh(new THREE.BoxGeometry(3.5, 0.08, 2.4), deskMat);
-      deskTop.position.set(0, 0.6, 0);
+      // Desk surface (wooden)
+      const deskMat = new THREE.MeshStandardMaterial({ color: 0x3a2a1a, metalness: 0.2, roughness: 0.7 });
+      const deskTop = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.08, 2.0), deskMat);
+      deskTop.position.set(0, 0.65, 0);
       deskTop.castShadow = true;
       deskTop.receiveShadow = true;
-      workspaceGroup.add(deskTop);
+      deskGroup.add(deskTop);
       
       // Desk legs
       const legMat = new THREE.MeshStandardMaterial({ color: 0x1a1210, metalness: 0.7, roughness: 0.4 });
-      const legPositions = [[-1.5, 0.3, -1.0], [1.5, 0.3, -1.0], [-1.5, 0.3, 0.9], [1.5, 0.3, 0.9]];
+      const legPositions = [[-1.4, 0.32, -0.8], [1.4, 0.32, -0.8], [-1.4, 0.32, 0.7], [1.4, 0.32, 0.7]];
       legPositions.forEach(pos => {
-        const leg = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.6, 0.12), legMat);
+        const leg = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.65, 0.1), legMat);
         leg.position.set(pos[0], pos[1], pos[2]);
         leg.castShadow = true;
-        workspaceGroup.add(leg);
+        deskGroup.add(leg);
       });
       
-      // --- LAPTOP WITH REAL PERSON PHOTO ON SCREEN ---
-      // Laptop Base
-      const laptopBaseMat = new THREE.MeshStandardMaterial({ color: 0x2a2a2a, metalness: 0.85, roughness: 0.25 });
-      const laptopBase = new THREE.Mesh(new THREE.BoxGeometry(1.05, 0.05, 0.75), laptopBaseMat);
-      laptopBase.position.set(0, 0.68, -0.25);
-      laptopBase.castShadow = true;
-      workspaceGroup.add(laptopBase);
+      scene.add(deskGroup);
       
-      // Laptop Screen Frame
-      const screenFrameMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, metalness: 0.7 });
-      const screenFrame = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.68, 0.05), screenFrameMat);
-      screenFrame.position.set(0, 1.02, -0.22);
-      screenFrame.castShadow = true;
-      workspaceGroup.add(screenFrame);
+      // --- PC MONITOR (Large Screen) ---
+      const monitorGroup = new THREE.Group();
       
-      // Laptop Screen (Displaying Real Person)
+      // Monitor stand
+      const standMat = new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.6 });
+      const standBase = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.05, 0.3), standMat);
+      standBase.position.set(0, 0.7, 0);
+      standBase.castShadow = true;
+      monitorGroup.add(standBase);
+      
+      const standNeck = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.15, 0.08), standMat);
+      standNeck.position.set(0, 0.79, 0);
+      standNeck.castShadow = true;
+      monitorGroup.add(standNeck);
+      
+      // Monitor body
+      const monitorBodyMat = new THREE.MeshStandardMaterial({ color: 0x222222, metalness: 0.7, roughness: 0.3 });
+      const monitorBody = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.95, 0.08), monitorBodyMat);
+      monitorBody.position.set(0, 1.15, 0);
+      monitorBody.castShadow = true;
+      monitorGroup.add(monitorBody);
+      
+      // Monitor bezel
+      const bezelMat = new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 0.8 });
+      const bezel = new THREE.Mesh(new THREE.BoxGeometry(1.35, 0.9, 0.02), bezelMat);
+      bezel.position.set(0, 1.15, 0.04);
+      monitorGroup.add(bezel);
+      
+      // Monitor SCREEN with Real Person Photo
       const screenMat = new THREE.MeshStandardMaterial({ 
         map: personTexture,
-        emissive: 0x224466, 
-        emissiveIntensity: 0.25,
+        emissive: 0x4488ff, 
+        emissiveIntensity: 0.35,
         color: 0xffffff
       });
-      const laptopScreen = new THREE.Mesh(new THREE.BoxGeometry(0.92, 0.6, 0.02), screenMat);
-      laptopScreen.position.set(0, 1.02, -0.19);
-      laptopScreen.castShadow = true;
-      workspaceGroup.add(laptopScreen);
+      const monitorScreen = new THREE.Mesh(new THREE.BoxGeometry(1.28, 0.83, 0.015), screenMat);
+      monitorScreen.position.set(0, 1.15, 0.045);
+      monitorScreen.castShadow = true;
+      monitorGroup.add(monitorScreen);
       
-      // Keyboard area
+      // Screen reflection effect
+      const reflectionMat = new THREE.MeshStandardMaterial({ color: 0x88aaff, transparent: true, opacity: 0.1 });
+      const reflection = new THREE.Mesh(new THREE.BoxGeometry(1.28, 0.83, 0.005), reflectionMat);
+      reflection.position.set(0, 1.15, 0.052);
+      monitorGroup.add(reflection);
+      
+      scene.add(monitorGroup);
+      
+      // --- KEYBOARD ---
+      const keyboardMat = new THREE.MeshStandardMaterial({ color: 0x2a2a2a, metalness: 0.5 });
+      const keyboardBase = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.04, 0.28), keyboardMat);
+      keyboardBase.position.set(0, 0.73, -0.35);
+      keyboardBase.castShadow = true;
+      scene.add(keyboardBase);
+      
+      // Keyboard keys
       for (let i = -5; i <= 5; i++) {
         for (let j = -2; j <= 2; j++) {
-          if (Math.random() > 0.65) {
-            const key = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.008, 0.045), new THREE.MeshStandardMaterial({ color: 0x444444, metalness: 0.5 }));
-            key.position.set(i * 0.072, 0.71, j * 0.07 - 0.2);
-            workspaceGroup.add(key);
+          if (Math.random() > 0.6) {
+            const key = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.008, 0.045), new THREE.MeshStandardMaterial({ color: 0x444444, metalness: 0.4 }));
+            key.position.set(i * 0.068, 0.75, j * 0.058 - 0.35);
+            key.castShadow = true;
+            scene.add(key);
           }
         }
       }
       
-      // --- PHOTO FRAME ON DESK (Real Person Picture) ---
-      const photoFrameBack = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.6, 0.03), new THREE.MeshStandardMaterial({ color: 0x8B4513, metalness: 0.3 }));
-      photoFrameBack.position.set(-0.9, 0.85, 0.55);
-      photoFrameBack.castShadow = true;
-      workspaceGroup.add(photoFrameBack);
+      // --- MOUSE ---
+      const mouseMat = new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.6 });
+      const mouse = new THREE.Mesh(new THREE.SphereGeometry(0.045, 16, 16), mouseMat);
+      mouse.position.set(0.55, 0.73, -0.15);
+      mouse.scale.set(1.2, 0.5, 0.8);
+      mouse.castShadow = true;
+      scene.add(mouse);
       
-      const photoMat = new THREE.MeshStandardMaterial({ map: personTexture });
-      const photoImage = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.54, 0.02), photoMat);
-      photoImage.position.set(-0.9, 0.85, 0.565);
-      workspaceGroup.add(photoImage);
+      // Mouse pad
+      const mousePadMat = new THREE.MeshStandardMaterial({ color: 0x1a1a2a, roughness: 0.8 });
+      const mousePad = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.01, 0.28), mousePadMat);
+      mousePad.position.set(0.55, 0.715, -0.15);
+      mousePad.castShadow = true;
+      scene.add(mousePad);
       
-      // Small plant on desk
-      const plantPotMat = new THREE.MeshStandardMaterial({ color: 0x4a6741 });
-      const pot = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.08, 0.12, 8), plantPotMat);
-      pot.position.set(1.2, 0.68, 0.6);
-      pot.castShadow = true;
-      workspaceGroup.add(pot);
+      // --- PC TOWER (Computer Case) ---
+      const towerGroup = new THREE.Group();
       
-      const plantMat = new THREE.MeshStandardMaterial({ color: 0x5a8f4a });
-      for (let i = 0; i < 5; i++) {
-        const leaf = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.15, 6), plantMat);
-        leaf.position.set(1.2 + (Math.random() - 0.5) * 0.1, 0.78 + Math.random() * 0.1, 0.6 + (Math.random() - 0.5) * 0.1);
-        leaf.castShadow = true;
-        workspaceGroup.add(leaf);
-      }
+      const towerMat = new THREE.MeshStandardMaterial({ color: 0x1a1a2a, metalness: 0.8, roughness: 0.3 });
+      const towerCase = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.55, 0.45), towerMat);
+      towerCase.position.set(1.2, 0.42, 0.45);
+      towerCase.castShadow = true;
+      towerGroup.add(towerCase);
       
-      // --- REAL PERSON SILHOUETTE (3D figure with photo texture) ---
-      const personGroup = new THREE.Group();
+      // Glass side panel
+      const glassMat = new THREE.MeshStandardMaterial({ color: 0x4488ff, metalness: 0.9, transparent: true, opacity: 0.3 });
+      const glassPanel = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.48, 0.02), glassMat);
+      glassPanel.position.set(1.2, 0.42, 0.68);
+      towerGroup.add(glassPanel);
       
-      // Body/Torso
-      const torsoMat2 = new THREE.MeshStandardMaterial({ color: 0x2a2a3a, metalness: 0.1, roughness: 0.5 });
-      const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.32, 0.75, 8), torsoMat2);
-      torso.position.set(0, 0.48, -0.35);
-      torso.castShadow = true;
-      personGroup.add(torso);
+      // Power button LED
+      const ledMat = new THREE.MeshStandardMaterial({ color: 0x00ff88, emissive: 0x00ff88, emissiveIntensity: 0.5 });
+      const powerLED = new THREE.Mesh(new THREE.SphereGeometry(0.012, 8, 8), ledMat);
+      powerLED.position.set(1.33, 0.62, 0.48);
+      towerGroup.add(powerLED);
       
-      // Upper body / Chest
-      const chest = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.38, 0.4, 8), torsoMat2);
-      chest.position.set(0, 0.85, -0.32);
-      chest.castShadow = true;
-      personGroup.add(chest);
+      scene.add(towerGroup);
       
-      // Head with photo texture
-      const headMat = new THREE.MeshStandardMaterial({ map: personTexture, roughness: 0.2 });
-      const head = new THREE.Mesh(new THREE.SphereGeometry(0.24, 48, 48), headMat);
-      head.position.set(0, 1.12, -0.3);
-      head.castShadow = true;
-      personGroup.add(head);
+      // --- SPEAKERS ---
+      const speakerMat = new THREE.MeshStandardMaterial({ color: 0x2a2a2a, metalness: 0.5 });
       
-      // Hair
-      const hairMat2 = new THREE.MeshStandardMaterial({ color: 0x1a1a2a });
-      const hair = new THREE.Mesh(new THREE.SphereGeometry(0.26, 24, 24), hairMat2);
-      hair.position.set(0, 1.21, -0.33);
-      hair.scale.set(1, 0.35, 0.9);
-      personGroup.add(hair);
+      const leftSpeaker = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.18, 0.1), speakerMat);
+      leftSpeaker.position.set(-1.2, 0.78, 0.55);
+      leftSpeaker.castShadow = true;
+      scene.add(leftSpeaker);
       
-      // Glasses frames
-      const glassesMat = new THREE.MeshStandardMaterial({ color: 0xccccaa, metalness: 0.9 });
-      const leftLens = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.09, 0.03), glassesMat);
-      leftLens.position.set(-0.13, 1.12, -0.12);
-      personGroup.add(leftLens);
+      const rightSpeaker = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.18, 0.1), speakerMat);
+      rightSpeaker.position.set(1.2, 0.78, 0.55);
+      rightSpeaker.castShadow = true;
+      scene.add(rightSpeaker);
       
-      const rightLens = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.09, 0.03), glassesMat);
-      rightLens.position.set(0.13, 1.12, -0.12);
-      personGroup.add(rightLens);
+      // --- DESK LAMP ---
+      const lampMat = new THREE.MeshStandardMaterial({ color: 0x444444, metalness: 0.7 });
+      const lampBase = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.08, 0.1, 8), lampMat);
+      lampBase.position.set(-1.1, 0.71, -0.55);
+      lampBase.castShadow = true;
+      scene.add(lampBase);
       
-      const bridge = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.04, 0.03), glassesMat);
-      bridge.position.set(0, 1.12, -0.12);
-      personGroup.add(bridge);
+      const lampNeck = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.25, 6), lampMat);
+      lampNeck.position.set(-1.1, 0.84, -0.55);
+      lampNeck.rotation.x = 0.4;
+      lampNeck.castShadow = true;
+      scene.add(lampNeck);
       
-      // Arms
-      const armMat2 = new THREE.MeshStandardMaterial({ color: 0xd4a574 });
-      const leftArm = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.09, 0.6, 6), armMat2);
-      leftArm.position.set(-0.52, 0.7, -0.18);
-      leftArm.rotation.z = 0.35;
-      leftArm.rotation.x = 0.45;
-      leftArm.castShadow = true;
-      personGroup.add(leftArm);
+      const lampLight = new THREE.PointLight(0xffaa66, 0.4);
+      lampLight.position.set(-1.1, 0.95, -0.5);
+      scene.add(lampLight);
       
-      const rightArm = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.09, 0.6, 6), armMat2);
-      rightArm.position.set(0.52, 0.7, -0.18);
-      rightArm.rotation.z = -0.35;
-      rightArm.rotation.x = 0.45;
-      rightArm.castShadow = true;
-      personGroup.add(rightArm);
-      
-      // Hands on keyboard
-      const handMat = new THREE.MeshStandardMaterial({ color: 0xd4a574 });
-      const leftHand = new THREE.Mesh(new THREE.SphereGeometry(0.09, 8, 8), handMat);
-      leftHand.position.set(-0.52, 0.45, 0.05);
-      personGroup.add(leftHand);
-      
-      const rightHand = new THREE.Mesh(new THREE.SphereGeometry(0.09, 8, 8), handMat);
-      rightHand.position.set(0.52, 0.45, 0.05);
-      personGroup.add(rightHand);
-      
-      personGroup.position.set(0, 0.28, 0.15);
-      scene.add(personGroup);
-      
-      // --- CHAIR ---
+      // --- OFFICE CHAIR (Empty, waiting for you) ---
       const chairGroup = new THREE.Group();
-      const chairMat2 = new THREE.MeshStandardMaterial({ color: 0x1a1a2a, metalness: 0.2, roughness: 0.7 });
+      const chairMat = new THREE.MeshStandardMaterial({ color: 0x1a1a2a, metalness: 0.2, roughness: 0.7 });
       
-      const seat = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.08, 0.6), chairMat2);
-      seat.position.set(0, 0.22, -0.45);
+      const seat = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.08, 0.55), chairMat);
+      seat.position.set(0, 0.25, -0.85);
       seat.castShadow = true;
       chairGroup.add(seat);
       
-      const backrest = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.55, 0.08), chairMat2);
-      backrest.position.set(0, 0.55, -0.82);
+      const backrest = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.48, 0.08), chairMat);
+      backrest.position.set(0, 0.55, -1.18);
       backrest.castShadow = true;
       chairGroup.add(backrest);
       
-      const armrestLeft = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.08, 0.4), chairMat2);
-      armrestLeft.position.set(-0.4, 0.45, -0.45);
+      const armrestLeft = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, 0.35), chairMat);
+      armrestLeft.position.set(-0.38, 0.48, -0.85);
       chairGroup.add(armrestLeft);
       
-      const armrestRight = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.08, 0.4), chairMat2);
-      armrestRight.position.set(0.4, 0.45, -0.45);
+      const armrestRight = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, 0.35), chairMat);
+      armrestRight.position.set(0.38, 0.48, -0.85);
       chairGroup.add(armrestRight);
       
-      chairGroup.position.set(0, 0.1, 0);
+      chairGroup.position.set(0, 0.12, 0);
       scene.add(chairGroup);
       
-      // --- FLOATING CODE PARTICLES ---
-      const codeParticleCount = 800;
-      const codeParticlesPos = new Float32Array(codeParticleCount * 3);
-      const codeParticlesColors = new Float32Array(codeParticleCount * 3);
-      for (let i = 0; i < codeParticleCount; i++) {
-        codeParticlesPos[i * 3] = (Math.random() - 0.5) * 5.5;
-        codeParticlesPos[i * 3 + 1] = Math.random() * 3;
-        codeParticlesPos[i * 3 + 2] = (Math.random() - 0.5) * 4.5 - 1;
+      // --- FLOATING CODE PARTICLES (Developer Aura) ---
+      const particleCount = 1200;
+      const particlePositions = new Float32Array(particleCount * 3);
+      const particleColors = new Float32Array(particleCount * 3);
+      
+      for (let i = 0; i < particleCount; i++) {
+        particlePositions[i * 3] = (Math.random() - 0.5) * 5;
+        particlePositions[i * 3 + 1] = Math.random() * 2.5;
+        particlePositions[i * 3 + 2] = (Math.random() - 0.5) * 4 - 1;
         
-        const colorChoice = Math.random();
-        if (colorChoice < 0.34) {
-          codeParticlesColors[i * 3] = 0.3;
-          codeParticlesColors[i * 3 + 1] = 0.85;
-          codeParticlesColors[i * 3 + 2] = 0.4;
-        } else if (colorChoice < 0.67) {
-          codeParticlesColors[i * 3] = 0.95;
-          codeParticlesColors[i * 3 + 1] = 0.55;
-          codeParticlesColors[i * 3 + 2] = 0.2;
+        const choice = Math.random();
+        if (choice < 0.33) {
+          particleColors[i * 3] = 0.3;
+          particleColors[i * 3 + 1] = 0.9;
+          particleColors[i * 3 + 2] = 0.4;
+        } else if (choice < 0.66) {
+          particleColors[i * 3] = 0.9;
+          particleColors[i * 3 + 1] = 0.5;
+          particleColors[i * 3 + 2] = 0.2;
         } else {
-          codeParticlesColors[i * 3] = 0.4;
-          codeParticlesColors[i * 3 + 1] = 0.65;
-          codeParticlesColors[i * 3 + 2] = 0.95;
+          particleColors[i * 3] = 0.4;
+          particleColors[i * 3 + 1] = 0.6;
+          particleColors[i * 3 + 2] = 0.9;
         }
       }
-      const codeParticlesGeo = new THREE.BufferGeometry();
-      codeParticlesGeo.setAttribute('position', new THREE.BufferAttribute(codeParticlesPos, 3));
-      codeParticlesGeo.setAttribute('color', new THREE.BufferAttribute(codeParticlesColors, 3));
-      const codeParticlesMat = new THREE.PointsMaterial({ size: 0.01, vertexColors: true, transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending });
-      const codeParticles = new THREE.Points(codeParticlesGeo, codeParticlesMat);
-      scene.add(codeParticles);
       
-      // --- STARFIELD BACKGROUND ---
-      const starCount = 1200;
-      const starPositions = new Float32Array(starCount * 3);
-      for (let i = 0; i < starCount; i++) {
-        starPositions[i * 3] = (Math.random() - 0.5) * 35;
-        starPositions[i * 3 + 1] = (Math.random() - 0.5) * 22;
-        starPositions[i * 3 + 2] = (Math.random() - 0.5) * 25 - 12;
-      }
-      const starGeo = new THREE.BufferGeometry();
-      starGeo.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
-      const starMat2 = new THREE.PointsMaterial({ color: 0x88aaff, size: 0.018, transparent: true, opacity: 0.35 });
-      const stars = new THREE.Points(starGeo, starMat2);
-      scene.add(stars);
+      const particleGeo = new THREE.BufferGeometry();
+      particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+      particleGeo.setAttribute('color', new THREE.BufferAttribute(particleColors, 3));
+      const particleMat = new THREE.PointsMaterial({ size: 0.008, vertexColors: true, transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending });
+      const particles = new THREE.Points(particleGeo, particleMat);
+      scene.add(particles);
       
-      // --- FLOATING TECH CUBES ---
+      // --- FLOATING TECH ICONS ---
       const techCubes = [];
-      const cubeColors = [0xff4444, 0x44ff44, 0x4444ff, 0xffaa44, 0xff44ff, 0x44ffaa];
-      for (let i = 0; i < 50; i++) {
+      const cubeColors = [0xff4444, 0x44ff44, 0x4444ff, 0xffaa44, 0xff44ff];
+      for (let i = 0; i < 60; i++) {
         const cube = new THREE.Mesh(
-          new THREE.BoxGeometry(0.07, 0.07, 0.07),
-          new THREE.MeshStandardMaterial({ color: cubeColors[Math.floor(Math.random() * cubeColors.length)], emissiveIntensity: 0.25 })
+          new THREE.BoxGeometry(0.05, 0.05, 0.05),
+          new THREE.MeshStandardMaterial({ color: cubeColors[Math.floor(Math.random() * cubeColors.length)], emissiveIntensity: 0.2 })
         );
         cube.position.set(
-          (Math.random() - 0.5) * 4.5,
-          Math.random() * 2.8,
-          (Math.random() - 0.5) * 4 - 1.5
+          (Math.random() - 0.5) * 4,
+          Math.random() * 2.2,
+          (Math.random() - 0.5) * 3.5 - 1
         );
-        cube.userData = { speedX: (Math.random() - 0.5) * 0.008, speedY: (Math.random() - 0.5) * 0.008, rotSpeed: Math.random() * 0.025 };
+        cube.userData = { rotSpeed: Math.random() * 0.02 };
         cube.castShadow = true;
         scene.add(cube);
         techCubes.push(cube);
       }
+      
+      // --- STARFIELD BACKGROUND ---
+      const starCount = 800;
+      const starPositions = new Float32Array(starCount * 3);
+      for (let i = 0; i < starCount; i++) {
+        starPositions[i * 3] = (Math.random() - 0.5) * 30;
+        starPositions[i * 3 + 1] = (Math.random() - 0.5) * 20;
+        starPositions[i * 3 + 2] = (Math.random() - 0.5) * 20 - 10;
+      }
+      const starGeo = new THREE.BufferGeometry();
+      starGeo.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+      const starMat = new THREE.PointsMaterial({ color: 0x88aaff, size: 0.015, transparent: true, opacity: 0.3 });
+      const stars = new THREE.Points(starGeo, starMat);
+      scene.add(stars);
       
       // --- ANIMATION LOOP ---
       let time = 0;
@@ -323,8 +324,8 @@ function RealPersonWorkspaceScene({ personImageUrl = '/wit.png' }) {
         const rect = renderer.domElement.getBoundingClientRect();
         mouseX = ((event.clientX - rect.left) / rect.width) * 2 - 1;
         mouseY = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-        targetRotY = mouseX * 0.25;
-        targetRotX = mouseY * 0.12;
+        targetRotY = mouseX * 0.2;
+        targetRotX = mouseY * 0.1;
       };
       
       renderer.domElement.addEventListener('mousemove', onMouseMove);
@@ -336,27 +337,26 @@ function RealPersonWorkspaceScene({ personImageUrl = '/wit.png' }) {
         // Smooth camera rotation
         camera.position.x += (targetRotY * 0.4 - camera.position.x) * 0.06;
         camera.position.y += (targetRotX * 0.3 - camera.position.y) * 0.06;
-        camera.lookAt(0, 1.1, 0);
+        camera.lookAt(0, 1.0, 0);
         
         // Screen glow pulse
-        screenGlow.intensity = 0.7 + Math.sin(time * 2.8) * 0.25;
+        screenGlow.intensity = 0.8 + Math.sin(time * 2.5) * 0.3;
         
-        // Floating particles animation
-        codeParticles.rotation.y += 0.002;
-        codeParticles.rotation.x += 0.001;
+        // Power LED blink
+        powerLED.material.emissiveIntensity = 0.4 + Math.sin(time * 5) * 0.2;
         
-        // Tech cubes animation
+        // Floating particles
+        particles.rotation.y += 0.001;
+        particles.rotation.x += 0.0005;
+        
+        // Tech cubes rotation
         techCubes.forEach(cube => {
           cube.rotation.x += cube.userData.rotSpeed;
           cube.rotation.y += cube.userData.rotSpeed;
-          cube.rotation.z += cube.userData.rotSpeed;
-          cube.position.x += Math.sin(time * 0.6) * 0.0008;
-          cube.position.y += Math.cos(time * 0.8) * 0.0008;
         });
         
-        // Stars rotation
+        // Stars drift
         stars.rotation.y += 0.0002;
-        stars.rotation.x += 0.0001;
         
         renderer.render(scene, camera);
       }
@@ -420,8 +420,8 @@ function RealPersonWorkspaceScene({ personImageUrl = '/wit.png' }) {
       {!textureLoaded && isReady && (
         <div className="absolute inset-0 flex items-center justify-center bg-[#080c14]/80 backdrop-blur-sm z-10">
           <div className="text-center">
-            <div className="w-12 h-12 rounded-full border-2 border-orange-500 border-t-transparent animate-spin mx-auto mb-3" />
-            <p className="text-[10px] text-orange-500">Loading your portrait...</p>
+            <div className="w-10 h-10 rounded-full border-2 border-orange-500 border-t-transparent animate-spin mx-auto mb-2" />
+            <p className="text-[9px] text-orange-500">Loading workspace...</p>
           </div>
         </div>
       )}
@@ -429,7 +429,7 @@ function RealPersonWorkspaceScene({ personImageUrl = '/wit.png' }) {
   );
 }
 
-// ─── Tab content (same as before) ───────────────────────────────
+// ─── Tab content ───────────────────────────────────────────────
 const TABS = [
   { id: 'story',      label: 'Story',      icon: BookOpen },
   { id: 'philosophy', label: 'Philosophy', icon: Lightbulb },
@@ -534,8 +534,8 @@ const STATS = [
 // ─── Main component ────────────────────────────────────────────
 export default function About() {
   const [activeTab, setActiveTab] = useState('story');
-  // Use your actual photo path - replace with your image URL
-  const personPhotoUrl = '/wit.png'; // Update this to your real photo path
+  // Replace with your actual photo path
+  const personPhotoUrl = '/wit.png';
 
   return (
     <section
@@ -589,7 +589,7 @@ export default function About() {
               className="relative aspect-square rounded-3xl overflow-hidden
                          border border-stone-800/60 bg-[#080c14]"
             >
-              <RealPersonWorkspaceScene personImageUrl={personPhotoUrl} />
+              <CompletePCWorkspace personImageUrl={personPhotoUrl} />
 
               <div
                 className="absolute inset-0 pointer-events-none rounded-3xl"
@@ -602,7 +602,7 @@ export default function About() {
                   <span className="relative rounded-full h-1.5 w-1.5 bg-green-500" />
                 </span>
                 <span className="text-[9px] font-bold uppercase tracking-widest text-white/70">
-                  Live Workspace
+                  PC Workspace
                 </span>
               </div>
 
@@ -614,16 +614,16 @@ export default function About() {
                            shadow-xl z-10 pointer-events-none"
               >
                 <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shrink-0">
-                  <Cpu size={15} className="text-white" />
+                  <Monitor size={15} className="text-white" />
                 </div>
                 <div>
-                  <p className="text-[9px] font-bold uppercase tracking-widest text-white/60">Coding in Progress</p>
+                  <p className="text-[9px] font-bold uppercase tracking-widest text-white/60">Ready to Code</p>
                   <p className="text-[11px] font-bold text-white leading-tight">Full-Stack Developer</p>
                 </div>
               </motion.div>
 
               <p className="absolute bottom-5 left-5 text-[9px] font-mono text-white/25 z-10 pointer-events-none">
-                drag to explore 3D workspace
+                drag to explore 3D setup
               </p>
             </motion.div>
 
