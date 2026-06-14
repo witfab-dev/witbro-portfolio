@@ -1,6 +1,6 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import emailjs from '@emailjs/browser'; // ✅ Import EmailJS
+import emailjs from '@emailjs/browser';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 
@@ -174,10 +174,10 @@ const LoadingScreen = ({ onFinished }) => {
 const SectionLoader = () => {
   const { t } = useLanguage();
   return (
-    <div className="h-screen flex items-center justify-center bg-stone-100 dark:bg-[#0c0b0a]">
+    <div className="h-screen flex items-center justify-center bg-[#0c0b0a]">
       <div className="flex flex-col items-center gap-3">
-        <div className="w-10 h-10 rounded-full border-2 border-stone-200 dark:border-stone-800 border-t-orange-500 animate-spin" />
-        <span className="text-[10px] font-mono tracking-[0.2em] uppercase text-stone-400 dark:text-stone-600">
+        <div className="w-10 h-10 rounded-full border-2 border-stone-800 border-t-orange-500 animate-spin" />
+        <span className="text-[10px] font-mono tracking-[0.2em] uppercase text-stone-600">
           {t('loadingCoreModule', 'Loading…')}
         </span>
       </div>
@@ -220,7 +220,7 @@ function App() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.8 }}
-              className="relative min-h-screen bg-stone-100 dark:bg-[#0c0b0a] transition-colors duration-500"
+              className="relative min-h-screen bg-[#0c0b0a] transition-colors duration-500"
             >
               <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
                 <div className="absolute top-0 left-[15%] w-[55vw] h-[55vw] max-w-[700px] max-h-[700px] rounded-full bg-orange-500/[0.04] blur-3xl" />
@@ -264,7 +264,7 @@ function App() {
                   aria-label="Open AI Assistant"
                   className="fixed bottom-8 right-8 z-50 w-14 h-14 flex items-center justify-center bg-orange-500 hover:bg-orange-600 text-white rounded-2xl shadow-xl shadow-orange-500/30 border border-orange-400/30 transition-colors"
                 >
-                  <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-green-400 rounded-full border-2 border-stone-100 dark:border-[#0c0b0a]" />
+                  <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-green-400 rounded-full border-2 border-[#0c0b0a]" />
                   <Bot size={22} />
                 </motion.button>
               )}
