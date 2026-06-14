@@ -1,198 +1,309 @@
 // components/sections/About.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import * as THREE from 'three';
-import { useThreeJS } from '../../hooks/useThreeJS';
-import LazyThreeJS from '../shared/LazyThreeJS';
-import ThreeJSErrorBoundary from '../shared/ThreeJSErrorBoundary';
 import {
   Layers, Globe, Zap, ShieldCheck, Terminal,
   ArrowUpRight, Sparkles, Coffee, Code2,
-  BookOpen, Eye, Lightbulb,
+  BookOpen, Eye, Lightbulb, User,
 } from 'lucide-react';
 
-// ─── 3D Architecture Scene (inner) ────────────────────────────
-function ArchSceneInner() {
-  const { mountRef, isReady, error, startAnimationLoop, handleResize } = useThreeJS(
-    'about-arch-scene',
-    {
-      cameraPosition: [0, 0, 7],
-      fov: 50,
-      enableShadows: false,
-      onInit: ({ scene, camera, renderer }) => {
-        // Lights
-        scene.add(new THREE.AmbientLight(0xffffff, 0.3));
-        const dOrange = new THREE.DirectionalLight(0xf97316, 2.8);
-        dOrange.position.set(4, 6, 4);
-        scene.add(dOrange);
-        const dBlue = new THREE.DirectionalLight(0x3b82f6, 1.8);
-        dBlue.position.set(-4, -2, 3);
-        scene.add(dBlue);
-        const pLight = new THREE.PointLight(0xf97316, 3, 12);
-        pLight.position.set(0, 0, 3);
-        scene.add(pLight);
-
-        // Materials
-        const mOrange = new THREE.MeshStandardMaterial({
-          color: 0xf97316, metalness: 0.8, roughness: 0.2,
-          emissive: 0xf97316, emissiveIntensity: 0.15,
-        });
-        const mBlue = new THREE.MeshStandardMaterial({
-          color: 0x3b82f6, metalness: 0.9, roughness: 0.1,
-          emissive: 0x3b82f6, emissiveIntensity: 0.12,
-        });
-        const mViolet = new THREE.MeshStandardMaterial({
-          color: 0x8b5cf6, metalness: 0.85, roughness: 0.15,
-          emissive: 0x8b5cf6, emissiveIntensity: 0.1,
-        });
-        const mWireO = new THREE.MeshBasicMaterial({ color: 0xf97316, wireframe: true, opacity: 0.12, transparent: true });
-        const mWireB = new THREE.MeshBasicMaterial({ color: 0x3b82f6, wireframe: true, opacity: 0.10, transparent: true });
-        const mGlass = new THREE.MeshStandardMaterial({
-          color: 0xffffff, metalness: 0.1, roughness: 0,
-          transparent: true, opacity: 0.07, side: THREE.DoubleSide,
-        });
-
-        const group = new THREE.Group();
-
-        // Hex base
-        const hexGeo = new THREE.CylinderGeometry(1.2, 1.4, 0.12, 6);
-        const hex = new THREE.Mesh(hexGeo, mBlue);
-        hex.position.y = -1.8;
-        group.add(hex);
-        const hexW = new THREE.Mesh(hexGeo, mWireB);
-        hexW.position.y = -1.8;
-        group.add(hexW);
-
-        // Tower
-        const towerGeo = new THREE.BoxGeometry(0.7, 2.8, 0.7);
-        group.add(new THREE.Mesh(towerGeo, mOrange));
-        group.add(new THREE.Mesh(towerGeo, mWireO));
-
-        // Crystal
-        const crystalGeo = new THREE.OctahedronGeometry(0.7, 0);
-        const crystal = new THREE.Mesh(crystalGeo, mOrange);
-        crystal.position.y = 1.85;
-        group.add(crystal);
-        const crystalWire = new THREE.Mesh(crystalGeo, mWireO);
-        crystalWire.position.y = 1.85;
-        group.add(crystalWire);
-
-        // Floating modules
-        const moduleData = [
-          { x: -1.8, y:  0.6, z:  0,   s: 0.38, m: mViolet, geo: 'tetra' },
-          { x:  1.8, y:  0.3, z:  0.2, s: 0.32, m: mBlue,   geo: 'ico'   },
-          { x: -1.4, y: -0.8, z:  0.4, s: 0.28, m: mOrange, geo: 'tetra' },
-          { x:  1.5, y: -0.6, z: -0.3, s: 0.35, m: mViolet, geo: 'ico'   },
-          { x:  0.2, y:  1.5, z: -1.2, s: 0.25, m: mBlue,   geo: 'tetra' },
-          { x: -0.4, y: -1.4, z: -0.8, s: 0.22, m: mOrange, geo: 'ico'   },
-        ];
-        const floaters = [];
-        moduleData.forEach(({ x, y, z, s, m, geo }) => {
-          const g = geo === 'tetra'
-            ? new THREE.TetrahedronGeometry(s, 0)
-            : new THREE.IcosahedronGeometry(s, 0);
-          const mesh = new THREE.Mesh(g, m);
-          mesh.position.set(x, y, z);
-          mesh.userData = { oy: y, sp: 0.4 + Math.random() * 0.8, ph: Math.random() * Math.PI * 2 };
-          group.add(mesh);
-          floaters.push(mesh);
-        });
-
-        // Orbital rings
-        const rings = [];
-        [
-          { r: 2.2, tube: 0.012, color: 0xf97316, tilt:  0.4, speed:  0.6  },
-          { r: 2.8, tube: 0.009, color: 0x3b82f6, tilt: -0.6, speed: -0.4  },
-          { r: 3.4, tube: 0.007, color: 0x8b5cf6, tilt:  1.1, speed:  0.25 },
-        ].forEach(({ r, tube, color, tilt, speed }) => {
-          const mesh = new THREE.Mesh(
-            new THREE.TorusGeometry(r, tube, 8, 80),
-            new THREE.MeshBasicMaterial({ color, opacity: 0.55, transparent: true })
-          );
-          mesh.rotation.x = tilt;
-          mesh.userData.speed = speed;
-          group.add(mesh);
-          rings.push(mesh);
-        });
-
-        // Particles
-        const pCount = 200;
-        const pPos   = new Float32Array(pCount * 3);
-        for (let i = 0; i < pCount; i++) {
-          const th = Math.random() * Math.PI * 2;
-          const ph = Math.acos(2 * Math.random() - 1);
-          const rr = 2.5 + Math.random() * 3;
-          pPos[i*3]   = rr * Math.sin(ph) * Math.cos(th);
-          pPos[i*3+1] = rr * Math.sin(ph) * Math.sin(th);
-          pPos[i*3+2] = rr * Math.cos(ph);
-        }
-        const pGeo = new THREE.BufferGeometry();
-        pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
-        const particles = new THREE.Points(pGeo,
-          new THREE.PointsMaterial({ color: 0xf97316, size: 0.028, transparent: true, opacity: 0.45 })
-        );
-        group.add(particles);
-
-        // Node graph lines
-        const lMat = new THREE.LineBasicMaterial({ color: 0xf97316, opacity: 0.12, transparent: true });
-        const lPts = [];
-        for (let i = 0; i < 4; i++)
-          for (let j = i + 1; j < 4; j++) {
-            lPts.push(new THREE.Vector3(moduleData[i].x, moduleData[i].y, moduleData[i].z));
-            lPts.push(new THREE.Vector3(moduleData[j].x, moduleData[j].y, moduleData[j].z));
-          }
-        group.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(lPts), lMat));
-
-        // Glass dome
-        const dome = new THREE.Mesh(
-          new THREE.SphereGeometry(3.8, 32, 32, 0, Math.PI * 2, 0, Math.PI / 2),
-          mGlass
-        );
-        dome.position.y = -1.8;
-        group.add(dome);
-
-        scene.add(group);
-
-        // Mouse tilt
-        let mx = 0, my = 0;
-        const onMouse = (e) => {
-          const el = renderer.domElement;
-          const rect = el.getBoundingClientRect();
-          mx = ((e.clientX - rect.left) / rect.width  - 0.5) * 2;
-          my = ((e.clientY - rect.top)  / rect.height - 0.5) * 2;
-        };
-        renderer.domElement.addEventListener('mousemove', onMouse);
-
-        let t = 0;
-        startAnimationLoop(() => {
-          t += 0.012;
-          group.rotation.y += 0.004;
-          group.rotation.x += (my * 0.25 - group.rotation.x) * 0.05;
-          group.rotation.y += (mx * 0.25 - group.rotation.y) * 0.02;
-
-          const pulse = 1 + 0.06 * Math.sin(t * 2);
-          crystal.scale.setScalar(pulse);
-          crystalWire.scale.setScalar(pulse * 1.05);
-
-          floaters.forEach(m => {
-            m.position.y = m.userData.oy + Math.sin(t * m.userData.sp + m.userData.ph) * 0.18;
-            m.rotation.y += 0.008;
-            m.rotation.x += 0.005;
-          });
-
-          rings.forEach(r => { r.rotation.z += r.userData.speed * 0.01; });
-          particles.rotation.y += 0.0015;
-          particles.rotation.x += 0.0008;
-          pLight.intensity = 2.5 + 1.5 * Math.sin(t * 1.5);
-        });
-      },
-    }
-  );
+// ─── 3D Spider-Dot Portrait Component ────────────────────────────
+function SpiderDotPortrait() {
+  const mountRef = useRef(null);
+  const [isReady, setIsReady] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [handleResize]);
+    if (!mountRef.current) return;
+
+    try {
+      // --- 1. SETUP SCENE, CAMERA, & RENDERER ---
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x050a12); // Deep dark blue-black background
+      scene.fog = new THREE.FogExp2(0x050a12, 0.008);
+
+      const camera = new THREE.PerspectiveCamera(60, mountRef.current.clientWidth / mountRef.current.clientHeight, 0.1, 1000);
+      camera.position.set(0, 0.8, 4.5);
+      camera.lookAt(0, 0.6, 0);
+
+      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+      renderer.setSize(mountRef.current.clientWidth, mountRef.current.clientHeight);
+      renderer.setPixelRatio(window.devicePixelRatio);
+      renderer.setClearColor(0x050a12, 1);
+      mountRef.current.appendChild(renderer.domElement);
+
+      // --- 2. GENERATE ENHANCED PORTRAIT SHAPE (More realistic bust) ---
+      const portraitGeometry = new THREE.BufferGeometry();
+      const particleCount = 2400; // More particles for better detail
+      const positions = new Float32Array(particleCount * 3);
+      const colorsArray = new Float32Array(particleCount * 3);
+
+      for (let i = 0; i < particleCount; i++) {
+        let x, y, z;
+        const randZone = Math.random();
+
+        if (randZone < 0.45) {
+          // HEAD: More realistic ellipsoid with facial features
+          const theta = Math.random() * Math.PI * 2;
+          const phi = Math.acos((Math.random() * 2) - 1);
+          
+          // Asymmetric radii for more natural head shape
+          let rx = 0.68;
+          let ry = 0.92;
+          let rz = 0.75;
+          
+          // Jaw shaping
+          const jawEffect = Math.sin(phi * Math.PI) * 0.06;
+          rx += jawEffect * 0.08;
+          
+          x = rx * Math.sin(phi) * Math.cos(theta);
+          y = ry * Math.sin(phi) * Math.sin(theta) + 1.15;
+          z = rz * Math.cos(phi);
+          
+          // Nose bridge protrusion
+          const noseRegion = Math.abs(theta) < 0.5 && phi > 0.7 && phi < 1.15;
+          if (noseRegion) {
+            z += 0.07 * (1 - Math.abs(theta) / 0.8);
+            x *= 0.97;
+          }
+          
+          // Cheek emphasis
+          if (phi > 0.75 && phi < 1.05 && Math.abs(theta) > 0.85 && Math.abs(theta) < 1.6) {
+            x += 0.022 * Math.sin(theta * 2);
+          }
+        } else if (randZone < 0.58) {
+          // NECK: Tapered cylinder with forward tilt
+          const theta = Math.random() * Math.PI * 2;
+          const rNeck = 0.3 * (0.8 + Math.random() * 0.35);
+          x = rNeck * Math.cos(theta);
+          y = Math.random() * 0.65 + 0.58;
+          z = rNeck * Math.sin(theta) * 0.88 - 0.04;
+          
+          // Forward tilt
+          const t = (y - 0.58) / 0.65;
+          z -= t * 0.06;
+        } else {
+          // SHOULDERS / SUIT: Sculpted suit shape
+          let rawX = (Math.random() - 0.5) * 3.0;
+          let rawY = Math.random() * 1.4 - 0.4;
+          
+          // Taper effect for suit silhouette
+          const taperFactor = Math.max(0, (rawY + 0.4) / 1.4);
+          let widthFactor = 1.0;
+          if (taperFactor < 0.45) {
+            widthFactor = 0.68 + taperFactor * 0.45;
+          } else {
+            widthFactor = 0.88 + (taperFactor - 0.45) * 0.75;
+          }
+          
+          let xFinal = rawX * widthFactor;
+          
+          // Clavicle definition
+          if (rawY > 0.6 && Math.abs(rawX) > 0.85) {
+            xFinal += 0.07 * Math.sin(rawX * 3.5);
+          }
+          
+          x = xFinal;
+          y = rawY + 0.45;
+          
+          // Chest depth
+          let zDepth = (Math.random() - 0.5) * 0.72;
+          if (y > 0.68 && y < 1.02 && Math.abs(x) < 0.82) {
+            zDepth += 0.1;
+          }
+          z = zDepth * 0.88;
+        }
+        
+        // Add subtle organic noise
+        positions[i * 3] = x + (Math.random() - 0.5) * 0.01;
+        positions[i * 3 + 1] = y + (Math.random() - 0.5) * 0.01;
+        positions[i * 3 + 2] = z + (Math.random() - 0.5) * 0.01;
+        
+        // Vertex colors based on position (warm head, cool suit)
+        if (y > 1.05) {
+          // Head area - warm skin tones
+          colorsArray[i * 3] = 0.85 + Math.random() * 0.12;
+          colorsArray[i * 3 + 1] = 0.58 + Math.random() * 0.12;
+          colorsArray[i * 3 + 2] = 0.48 + Math.random() * 0.1;
+        } else if (y > 0.7) {
+          // Neck transition
+          colorsArray[i * 3] = 0.68 + Math.random() * 0.1;
+          colorsArray[i * 3 + 1] = 0.52 + Math.random() * 0.1;
+          colorsArray[i * 3 + 2] = 0.48 + Math.random() * 0.08;
+        } else {
+          // Suit - deep indigo/charcoal
+          colorsArray[i * 3] = 0.28 + Math.random() * 0.12;
+          colorsArray[i * 3 + 1] = 0.32 + Math.random() * 0.1;
+          colorsArray[i * 3 + 2] = 0.52 + Math.random() * 0.1;
+        }
+      }
+
+      portraitGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      portraitGeometry.setAttribute('color', new THREE.BufferAttribute(colorsArray, 3));
+
+      // --- 3. CREATE GLOWING PARTICLES ---
+      const particleMaterial = new THREE.PointsMaterial({
+        size: 0.022,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.92,
+        blending: THREE.AdditiveBlending
+      });
+
+      const particleSystem = new THREE.Points(portraitGeometry, particleMaterial);
+      scene.add(particleSystem);
+
+      // --- 4. CREATE SPIDER-WEB CONNECTIONS ---
+      const lineMaterial = new THREE.LineBasicMaterial({
+        color: 0x4a6fa5,
+        transparent: true,
+        opacity: 0.18,
+        blending: THREE.AdditiveBlending
+      });
+
+      let lineSegmentsMesh = new THREE.LineSegments(new THREE.BufferGeometry(), lineMaterial);
+      scene.add(lineSegmentsMesh);
+
+      // Calculate connections
+      function updateSpiderWeb() {
+        const posArray = portraitGeometry.attributes.position.array;
+        const connections = [];
+        const maxDist = 0.27;
+
+        for (let i = 0; i < particleCount; i++) {
+          const ix = i * 3;
+          const ix1 = posArray[ix];
+          const iy1 = posArray[ix + 1];
+          const iz1 = posArray[ix + 2];
+          
+          for (let j = i + 1; j < particleCount; j++) {
+            const jx = j * 3;
+            const dx = ix1 - posArray[jx];
+            const dy = iy1 - posArray[jx + 1];
+            const dz = iz1 - posArray[jx + 2];
+            const distSq = dx * dx + dy * dy + dz * dz;
+            
+            if (distSq < maxDist * maxDist) {
+              connections.push(
+                ix1, iy1, iz1,
+                posArray[jx], posArray[jx + 1], posArray[jx + 2]
+              );
+            }
+          }
+        }
+
+        const newGeo = new THREE.BufferGeometry();
+        newGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(connections), 3));
+        scene.remove(lineSegmentsMesh);
+        if (lineSegmentsMesh.geometry) lineSegmentsMesh.geometry.dispose();
+        lineSegmentsMesh = new THREE.LineSegments(newGeo, lineMaterial);
+        scene.add(lineSegmentsMesh);
+      }
+
+      // --- 5. BACKGROUND PARTICLES ---
+      const bgParticleCount = 600;
+      const bgGeo = new THREE.BufferGeometry();
+      const bgPositions = new Float32Array(bgParticleCount * 3);
+      for (let i = 0; i < bgParticleCount; i++) {
+        bgPositions[i * 3] = (Math.random() - 0.5) * 12;
+        bgPositions[i * 3 + 1] = (Math.random() - 0.5) * 6;
+        bgPositions[i * 3 + 2] = (Math.random() - 0.5) * 12 - 6;
+      }
+      bgGeo.setAttribute('position', new THREE.BufferAttribute(bgPositions, 3));
+      const bgParticleMat = new THREE.PointsMaterial({
+        color: 0x88aaff,
+        size: 0.008,
+        transparent: true,
+        opacity: 0.25,
+        blending: THREE.AdditiveBlending
+      });
+      const bgStars = new THREE.Points(bgGeo, bgParticleMat);
+      scene.add(bgStars);
+
+      // --- 6. LIGHTING FOR AMBIENCE ---
+      const ambientLight = new THREE.AmbientLight(0x22223b, 0.4);
+      scene.add(ambientLight);
+      
+      const fillLight = new THREE.PointLight(0xffaa66, 0.5);
+      fillLight.position.set(2, 2, 2);
+      scene.add(fillLight);
+
+      // --- 7. INTERACTION & ANIMATION ---
+      const mouse = { x: 0, y: 0 };
+      let targetRotationX = 0;
+      let targetRotationY = 0;
+      let time = 0;
+
+      const onMouseMove = (event) => {
+        const rect = renderer.domElement.getBoundingClientRect();
+        mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+        targetRotationY = mouse.x * 0.4;
+        targetRotationX = mouse.y * 0.25;
+      };
+      
+      renderer.domElement.addEventListener('mousemove', onMouseMove);
+
+      // Initial web generation
+      setTimeout(() => updateSpiderWeb(), 200);
+
+      // Animation loop
+      let animationId;
+      function animate() {
+        animationId = requestAnimationFrame(animate);
+        time += 0.016;
+
+        // Smooth camera follow
+        particleSystem.rotation.y += (targetRotationY - particleSystem.rotation.y) * 0.06;
+        particleSystem.rotation.x += (targetRotationX - particleSystem.rotation.x) * 0.06;
+        
+        if (lineSegmentsMesh) {
+          lineSegmentsMesh.rotation.copy(particleSystem.rotation);
+        }
+
+        // Subtle background particle drift
+        bgStars.rotation.y += 0.0005;
+        bgStars.rotation.x += 0.0003;
+
+        // Pulse particle size slightly
+        const pulse = 0.022 + Math.sin(time * 3) * 0.002;
+        particleMaterial.size = pulse;
+
+        renderer.render(scene, camera);
+      }
+
+      animate();
+
+      // Handle resize
+      const handleResize = () => {
+        if (!mountRef.current) return;
+        const width = mountRef.current.clientWidth;
+        const height = mountRef.current.clientHeight;
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+        renderer.setSize(width, height);
+      };
+      
+      window.addEventListener('resize', handleResize);
+      setIsReady(true);
+
+      // Cleanup
+      return () => {
+        window.removeEventListener('resize', handleResize);
+        renderer.domElement.removeEventListener('mousemove', onMouseMove);
+        cancelAnimationFrame(animationId);
+        if (mountRef.current && renderer.domElement) {
+          mountRef.current.removeChild(renderer.domElement);
+        }
+        if (lineSegmentsMesh && lineSegmentsMesh.geometry) lineSegmentsMesh.geometry.dispose();
+        portraitGeometry.dispose();
+      };
+    } catch (err) {
+      console.error('3D Portrait Error:', err);
+      setError(err);
+    }
+  }, []);
 
   if (error) {
     return (
@@ -201,7 +312,7 @@ function ArchSceneInner() {
           <div className="w-16 h-16 mx-auto mb-3 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center">
             <Code2 size={24} className="text-orange-500 opacity-60" />
           </div>
-          <p className="text-[10px] font-mono text-stone-600">3D preview unavailable</p>
+          <p className="text-[10px] font-mono text-stone-600">3D portrait preview unavailable</p>
         </div>
       </div>
     );
@@ -236,10 +347,10 @@ const TABS = [
 
 const TAB_CONTENT = {
   story: (
-    <div className="space-y-4 text-sm leading-relaxed text-stone-500 dark:text-stone-400">
+    <div className="space-y-4 text-sm leading-relaxed text-stone-400">
       <p>
         I&apos;m a{' '}
-        <span className="font-bold text-stone-900 dark:text-stone-100">Full-Stack Developer</span>
+        <span className="font-bold text-stone-100">Full-Stack Developer</span>
         {' '}and Level 5 Software Student, bridging the gap between complex logic and fluid user
         interfaces. My journey started with a deep curiosity for systems — how things connect,
         communicate, and scale.
@@ -251,7 +362,7 @@ const TAB_CONTENT = {
         </span>{' '}
         stack and have since expanded into cloud infrastructure, 3D web experiences, and AI
         integrations. Based in{' '}
-        <span className="font-semibold text-stone-900 dark:text-stone-100">Kigali, Rwanda</span>,
+        <span className="font-semibold text-stone-100">Kigali, Rwanda</span>,
         building products used across six countries.
       </p>
       <p>
@@ -262,7 +373,7 @@ const TAB_CONTENT = {
     </div>
   ),
   philosophy: (
-    <div className="space-y-4 text-sm leading-relaxed text-stone-500 dark:text-stone-400">
+    <div className="space-y-4 text-sm leading-relaxed text-stone-400">
       <p>
         Great software is invisible. It solves problems so naturally that users never have to
         think about the tool — only the outcome. That philosophy drives every decision I make,
@@ -270,7 +381,7 @@ const TAB_CONTENT = {
       </p>
       <p>
         I build with{' '}
-        <span className="font-bold text-stone-900 dark:text-stone-100">performance as a constraint</span>,
+        <span className="font-bold text-stone-100">performance as a constraint</span>,
         not an afterthought. Sub-2.5s LCP, accessible markup, and offline-ready architectures
         are non-negotiable starting points, not bonus features.
       </p>
@@ -282,7 +393,7 @@ const TAB_CONTENT = {
     </div>
   ),
   vision: (
-    <div className="space-y-4 text-sm leading-relaxed text-stone-500 dark:text-stone-400">
+    <div className="space-y-4 text-sm leading-relaxed text-stone-400">
       <p>
         My vision is to help East Africa produce world-class software talent and products.
         Rwanda&apos;s tech ecosystem is growing rapidly — I want to be part of the generation
@@ -290,7 +401,7 @@ const TAB_CONTENT = {
       </p>
       <p>
         In the next three years I&apos;m focused on{' '}
-        <span className="font-bold text-stone-900 dark:text-stone-100">AI-native product development</span>,
+        <span className="font-bold text-stone-100">AI-native product development</span>,
         building tools that lower the barrier to entrepreneurship for local founders, and
         mentoring the next generation of developers in my community.
       </p>
@@ -337,7 +448,7 @@ export default function About() {
     <section
       id="about"
       className="relative py-24 px-4 sm:px-6 overflow-hidden
-                 bg-stone-100 dark:bg-[#0c0b0a] transition-colors duration-500"
+                 bg-[#0c0b0a] transition-colors duration-500"
     >
       {/* Ambient blobs */}
       <div className="pointer-events-none absolute -top-40 -right-32 w-[420px] h-[420px] rounded-full bg-orange-500/[0.06] blur-3xl" />
@@ -357,7 +468,7 @@ export default function About() {
               <span className="block w-5 h-px bg-orange-500" />
               Identity 2026
             </p>
-            <h2 className="text-[clamp(38px,5.5vw,64px)] font-black leading-[0.93] tracking-tight text-stone-900 dark:text-stone-100">
+            <h2 className="text-[clamp(38px,5.5vw,64px)] font-black leading-[0.93] tracking-tight text-stone-100">
               Crafting the{' '}
               <span className="text-orange-500 italic">Next-Gen</span>
               <br />Web.
@@ -369,7 +480,7 @@ export default function About() {
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.15 }}
-            className="hidden md:block text-sm leading-relaxed text-stone-500 dark:text-stone-500 max-w-xs text-right"
+            className="hidden md:block text-sm leading-relaxed text-stone-500 max-w-xs text-right"
           >
             Based in Rwanda, building worldwide. Specialising in robust backend logic
             and immersive frontend motion.
@@ -379,7 +490,7 @@ export default function About() {
         {/* ── Main grid ──────────────────────────────────────── */}
         <div className="grid lg:grid-cols-12 gap-8 items-start">
 
-          {/* ── LEFT — 3D scene ───────────────────────────────── */}
+          {/* ── LEFT — 3D Spider-Dot Portrait ─────────────────── */}
           <div className="lg:col-span-5 flex flex-col gap-5">
 
             {/* 3D card */}
@@ -391,23 +502,7 @@ export default function About() {
               className="relative aspect-square rounded-3xl overflow-hidden
                          border border-stone-800/60 bg-[#080c14]"
             >
-              {/* Lazy + Error boundary wrapped scene */}
-              <ThreeJSErrorBoundary
-                fallback={
-                  <div className="absolute inset-0 flex items-center justify-center bg-[#080c14]">
-                    <div className="text-center space-y-2">
-                      <div className="w-16 h-16 mx-auto rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center">
-                        <Code2 size={24} className="text-orange-500 opacity-60" />
-                      </div>
-                      <p className="text-[10px] font-mono text-stone-600">3D preview unavailable</p>
-                    </div>
-                  </div>
-                }
-              >
-                <LazyThreeJS componentId="about-arch-scene" rootMargin="300px">
-                  <ArchSceneInner />
-                </LazyThreeJS>
-              </ThreeJSErrorBoundary>
+              <SpiderDotPortrait />
 
               {/* Vignette */}
               <div
@@ -422,7 +517,7 @@ export default function About() {
                   <span className="relative rounded-full h-1.5 w-1.5 bg-orange-500" />
                 </span>
                 <span className="text-[9px] font-bold uppercase tracking-widest text-white/70">
-                  3D Architecture
+                  Spider-Dot Portrait
                 </span>
               </div>
 
@@ -435,11 +530,11 @@ export default function About() {
                            shadow-xl z-10 pointer-events-none"
               >
                 <div className="w-8 h-8 rounded-xl bg-orange-500 flex items-center justify-center shrink-0">
-                  <Terminal size={15} className="text-white" />
+                  <User size={15} className="text-white" />
                 </div>
                 <div>
-                  <p className="text-[9px] font-bold uppercase tracking-widest text-white/60">Building now</p>
-                  <p className="text-[11px] font-bold text-white leading-tight">Student Manager v2</p>
+                  <p className="text-[9px] font-bold uppercase tracking-widest text-white/60">Interactive</p>
+                  <p className="text-[11px] font-bold text-white leading-tight">3D Portrait</p>
                 </div>
               </motion.div>
 
@@ -458,13 +553,13 @@ export default function About() {
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.07 }}
                   className="group flex flex-col items-center gap-1.5 p-4 rounded-2xl text-center
-                             bg-white dark:bg-[#161513]
-                             border border-stone-200 dark:border-stone-800/60
+                             bg-[#161513]
+                             border border-stone-800/60
                              hover:border-orange-400 transition-all duration-300"
                 >
-                  <Ic size={15} className="text-stone-400 group-hover:text-orange-500 transition-colors" />
-                  <p className="text-[9px] font-bold uppercase tracking-widest text-stone-400 dark:text-stone-600">{label}</p>
-                  <p className="text-[11px] font-black text-stone-900 dark:text-stone-100">{value}</p>
+                  <Ic size={15} className="text-stone-500 group-hover:text-orange-500 transition-colors" />
+                  <p className="text-[9px] font-bold uppercase tracking-widest text-stone-600">{label}</p>
+                  <p className="text-[11px] font-black text-stone-100">{value}</p>
                 </motion.div>
               ))}
             </div>
@@ -475,7 +570,7 @@ export default function About() {
 
             {/* Tabs */}
             <div>
-              <div className="flex gap-1 p-1 rounded-xl bg-stone-200/60 dark:bg-stone-800/40 w-fit mb-6">
+              <div className="flex gap-1 p-1 rounded-xl bg-stone-800/40 w-fit mb-6">
                 {TABS.map(({ id, label, icon: Ic }) => (
                   <button
                     key={id}
@@ -484,7 +579,7 @@ export default function About() {
                                 font-bold uppercase tracking-widest transition-all duration-250
                       ${activeTab === id
                         ? 'text-white'
-                        : 'text-stone-500 dark:text-stone-500 hover:text-stone-800 dark:hover:text-stone-300'
+                        : 'text-stone-500 hover:text-stone-300'
                       }`}
                   >
                     {activeTab === id && (
@@ -526,8 +621,8 @@ export default function About() {
                   transition={{ delay: i * 0.08 }}
                   whileHover={{ y: -4 }}
                   className="group relative p-5 rounded-2xl
-                             bg-white dark:bg-[#161513]
-                             border border-stone-200 dark:border-stone-800/60
+                             bg-[#161513]
+                             border border-stone-800/60
                              hover:border-orange-400
                              hover:shadow-[0_0_0_1px_rgba(249,115,22,0.25)]
                              transition-all duration-300"
@@ -538,11 +633,11 @@ export default function About() {
                   >
                     <Ic size={16} style={{ color }} />
                   </div>
-                  <h4 className="text-xs font-black uppercase tracking-wider text-stone-900 dark:text-stone-100 mb-2">
+                  <h4 className="text-xs font-black uppercase tracking-wider text-stone-100 mb-2">
                     {title}
                   </h4>
-                  <p className="text-[11px] leading-relaxed text-stone-500 dark:text-stone-500
-                                group-hover:text-stone-600 dark:group-hover:text-stone-400 transition-colors">
+                  <p className="text-[11px] leading-relaxed text-stone-500
+                                group-hover:text-stone-400 transition-colors">
                     {desc}
                   </p>
                 </motion.div>
@@ -556,8 +651,8 @@ export default function About() {
               viewport={{ once: true }}
               transition={{ duration: 0.45 }}
               className="flex flex-col sm:flex-row items-center gap-5 p-4 rounded-2xl
-                         bg-white dark:bg-[#161513]
-                         border border-stone-200 dark:border-stone-800/60
+                         bg-[#161513]
+                         border border-stone-800/60
                          hover:border-orange-400 transition-all duration-300"
             >
               {/* Avatars */}
@@ -565,16 +660,16 @@ export default function About() {
                 {[Coffee, Coffee, Sparkles].map((Ic, i) => (
                   <div
                     key={i}
-                    className="w-9 h-9 rounded-full border-2 border-white dark:border-[#161513]
-                               bg-stone-100 dark:bg-stone-800 flex items-center justify-center"
+                    className="w-9 h-9 rounded-full border-2 border-[#161513]
+                               bg-stone-800 flex items-center justify-center"
                   >
-                    <Ic size={13} className={i === 2 ? 'text-orange-500' : 'text-stone-400'} />
+                    <Ic size={13} className={i === 2 ? 'text-orange-500' : 'text-stone-500'} />
                   </div>
                 ))}
               </div>
 
-              <p className="flex-1 text-xs text-stone-500 dark:text-stone-500 text-center sm:text-left">
-                <span className="font-bold text-stone-900 dark:text-stone-100">Available for hire</span>
+              <p className="flex-1 text-xs text-stone-500 text-center sm:text-left">
+                <span className="font-bold text-stone-100">Available for hire</span>
                 {' '}— open to freelance, collaborations, and exciting full-time roles.
               </p>
 
