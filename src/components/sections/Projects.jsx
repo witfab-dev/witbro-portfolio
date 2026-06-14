@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import {
   Github, ExternalLink, X, ArrowUpRight,
@@ -12,13 +11,11 @@ import {
 } from 'lucide-react';
 
 const Projects = () => {
-  const { theme } = useTheme();
   const { t } = useLanguage();
-  const dark = theme === 'dark';
   
   const [selectedProject, setSelectedProject] = useState(null);
   const [activeCategory, setActiveCategory] = useState('all');
-  const [viewMode, setViewMode] = useState('grid'); // grid | list (removed bento)
+  const [viewMode, setViewMode] = useState('grid');
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('featured');
   const [showFilters, setShowFilters] = useState(false);
@@ -59,7 +56,7 @@ const Projects = () => {
       title: 'Portfolio 2025',
       description: 'Modern interactive portfolio with 3D elements and smooth animations.',
       longDescription:
-        'This very portfolio! Built with React, Framer Motion, and Tailwind CSS, featuring 3D card flips, smooth page transitions, dark/light mode, multilingual support, and an interactive 3D globe background. Optimized for performance with lazy loading and code splitting.',
+        'This very portfolio! Built with React, Framer Motion, and Tailwind CSS, featuring 3D card flips, smooth page transitions, multilingual support, and an interactive 3D globe background. Optimized for performance with lazy loading and code splitting.',
       category: 'web',
       image: 'https://images.unsplash.com/photo-1547658719-da2b51169166?w=800&auto=format&fit=crop',
       technologies: ['React', 'Tailwind', 'Framer Motion', 'Three.js'],
@@ -153,9 +150,7 @@ const Projects = () => {
   return (
     <section
       id="projects"
-      className={`relative py-24 px-4 sm:px-6 lg:px-8 overflow-hidden transition-colors duration-500 ${
-        dark ? 'bg-[#0c0b0a]' : 'bg-stone-50'
-      }`}
+      className="relative py-24 px-4 sm:px-6 lg:px-8 overflow-hidden bg-[#0c0b0a]"
     >
       {/* Ambient Background */}
       <div className="pointer-events-none absolute inset-0">
@@ -165,9 +160,9 @@ const Projects = () => {
 
       {/* Grid Pattern */}
       <div 
-        className="pointer-events-none absolute inset-0 opacity-[0.015] dark:opacity-[0.03]"
+        className="pointer-events-none absolute inset-0 opacity-[0.03]"
         style={{
-          backgroundImage: `linear-gradient(rgba(0,0,0,1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,1) 1px, transparent 1px)`,
+          backgroundImage: `linear-gradient(rgba(255,255,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,1) 1px, transparent 1px)`,
           backgroundSize: '80px 80px',
         }}
       />
@@ -190,7 +185,7 @@ const Projects = () => {
               </div>
               <div>
                 <p className="text-2xl font-black text-orange-500">{projects.length}+</p>
-                <p className="text-[10px] uppercase tracking-wider opacity-50">{t('projects', 'Projects')}</p>
+                <p className="text-[10px] uppercase tracking-wider text-stone-500">{t('projects', 'Projects')}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -199,7 +194,7 @@ const Projects = () => {
               </div>
               <div>
                 <p className="text-2xl font-black text-green-500">{projects.filter(p => p.featured).length}</p>
-                <p className="text-[10px] uppercase tracking-wider opacity-50">{t('featured', 'Featured')}</p>
+                <p className="text-[10px] uppercase tracking-wider text-stone-500">{t('featured', 'Featured')}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -208,7 +203,7 @@ const Projects = () => {
               </div>
               <div>
                 <p className="text-2xl font-black text-blue-500">{new Set(projects.flatMap(p => p.technologies)).size}</p>
-                <p className="text-[10px] uppercase tracking-wider opacity-50">{t('technologies', 'Technologies')}</p>
+                <p className="text-[10px] uppercase tracking-wider text-stone-500">{t('technologies', 'Technologies')}</p>
               </div>
             </div>
           </div>
@@ -220,14 +215,12 @@ const Projects = () => {
                 <span className="block w-5 h-px bg-orange-500" />
                 {t('selectedWorks', 'Selected Works')}
               </p>
-              <h2 className={`text-[clamp(38px,5.5vw,72px)] font-black leading-[0.93] tracking-tight ${
-                dark ? 'text-stone-100' : 'text-stone-900'
-              }`}>
+              <h2 className="text-[clamp(38px,5.5vw,72px)] font-black leading-[0.93] tracking-tight text-stone-100">
                 {t('my', 'My')}{' '}
                 <span className="italic text-orange-500">{t('creative', 'Creative')}</span>
                 <br className="sm:hidden" /> {t('projects', 'Projects')}
               </h2>
-              <p className="mt-4 text-sm leading-relaxed opacity-60 max-w-md">
+              <p className="mt-4 text-sm leading-relaxed text-stone-500 max-w-md">
                 {t('A curated collection of digital experiences — from mobile apps to high-performance web platforms.')}
               </p>
             </div>
@@ -235,30 +228,24 @@ const Projects = () => {
             {/* Controls */}
             <div className="flex flex-col sm:flex-row gap-3">
               {/* Search */}
-              <div className={`relative flex items-center gap-2 px-4 py-2.5 rounded-xl border ${
-                dark ? 'bg-stone-900/50 border-stone-800' : 'bg-white border-stone-200'
-              }`}>
-                <Search size={14} className="opacity-40" />
+              <div className="relative flex items-center gap-2 px-4 py-2.5 rounded-xl border bg-stone-900/50 border-stone-800">
+                <Search size={14} className="text-stone-500" />
                 <input
                   type="text"
                   placeholder={t('searchProjects', 'Search projects...')}
                   value={searchTerm}
                   onChange={e => setSearchTerm(e.target.value)}
-                  className={`w-full sm:w-48 bg-transparent text-sm focus:outline-none ${
-                    dark ? 'text-white placeholder:text-stone-600' : 'text-stone-900 placeholder:text-stone-400'
-                  }`}
+                  className="w-full sm:w-48 bg-transparent text-sm focus:outline-none text-white placeholder:text-stone-600"
                 />
                 {searchTerm && (
-                  <button onClick={() => setSearchTerm('')} className="hover:text-orange-500">
+                  <button onClick={() => setSearchTerm('')} className="text-stone-400 hover:text-orange-500">
                     <X size={14} />
                   </button>
                 )}
               </div>
 
               {/* View Toggle - Only Grid and List */}
-              <div className={`flex rounded-xl border overflow-hidden ${
-                dark ? 'border-stone-800' : 'border-stone-200'
-              }`}>
+              <div className="flex rounded-xl border overflow-hidden border-stone-800">
                 {[
                   { mode: 'grid', icon: LayoutGrid, label: t('grid', 'Grid') },
                   { mode: 'list', icon: List, label: t('list', 'List') },
@@ -269,7 +256,7 @@ const Projects = () => {
                     className={`p-2.5 transition-all ${
                       viewMode === mode
                         ? 'bg-orange-500 text-white'
-                        : 'hover:bg-stone-100 dark:hover:bg-stone-800 opacity-60'
+                        : 'bg-stone-900/50 text-stone-500 hover:bg-stone-800'
                     }`}
                     title={label}
                   >
@@ -282,15 +269,13 @@ const Projects = () => {
               <div className="relative">
                 <button
                   onClick={() => setShowFilters(!showFilters)}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border transition-all ${
-                    dark ? 'bg-stone-900/50 border-stone-800 hover:border-stone-700' : 'bg-white border-stone-200 hover:border-stone-300'
-                  }`}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl border transition-all bg-stone-900/50 border-stone-800 hover:border-stone-700"
                 >
-                  <SlidersHorizontal size={14} className="opacity-60" />
-                  <span className="text-[11px] font-bold uppercase tracking-wider opacity-60">
+                  <SlidersHorizontal size={14} className="text-stone-500" />
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-stone-500">
                     {t('sort', 'Sort')}: {sortOptions.find(s => s.id === sortBy)?.label}
                   </span>
-                  <ChevronDown size={14} className="opacity-40" />
+                  <ChevronDown size={14} className="text-stone-500" />
                 </button>
                 
                 <AnimatePresence>
@@ -299,9 +284,7 @@ const Projects = () => {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 10 }}
-                      className={`absolute right-0 top-full mt-2 p-2 rounded-xl border shadow-2xl z-50 min-w-[200px] ${
-                        dark ? 'bg-stone-900 border-stone-800' : 'bg-white border-stone-200'
-                      }`}
+                      className="absolute right-0 top-full mt-2 p-2 rounded-xl border shadow-2xl z-50 min-w-[200px] bg-stone-900 border-stone-800"
                     >
                       {sortOptions.map(option => (
                         <button
@@ -310,7 +293,7 @@ const Projects = () => {
                           className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold transition-all ${
                             sortBy === option.id
                               ? 'bg-orange-500/10 text-orange-500'
-                              : 'hover:bg-stone-100 dark:hover:bg-stone-800 opacity-70 hover:opacity-100'
+                              : 'text-stone-400 hover:bg-stone-800 hover:text-stone-200'
                           }`}
                         >
                           <option.icon size={14} />
@@ -340,14 +323,12 @@ const Projects = () => {
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-widest border transition-all duration-300 ${
                 activeCategory === cat.id
                   ? 'bg-orange-500 text-white border-orange-500 shadow-lg shadow-orange-500/25'
-                  : `border-stone-200 dark:border-stone-800 opacity-60 hover:opacity-100 hover:border-stone-400 dark:hover:border-stone-600 ${
-                      dark ? 'text-stone-400' : 'text-stone-600'
-                    }`
+                  : 'border-stone-800 text-stone-500 hover:border-stone-600 hover:text-stone-300'
               }`}
             >
               <cat.icon size={13} />
               {cat.label}
-              <span className={`text-[9px] ${activeCategory === cat.id ? 'text-white/70' : 'opacity-40'}`}>
+              <span className={`text-[9px] ${activeCategory === cat.id ? 'text-white/70' : 'text-stone-600'}`}>
                 {cat.count}
               </span>
             </button>
@@ -373,11 +354,7 @@ const Projects = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.08 }}
                   onClick={() => setSelectedProject(project)}
-                  className={`group rounded-2xl border overflow-hidden cursor-pointer transition-all duration-300 ${
-                    dark 
-                      ? 'bg-stone-900/50 border-stone-800 hover:border-orange-500/50' 
-                      : 'bg-white border-stone-200 hover:shadow-xl hover:border-orange-300'
-                  }`}
+                  className="group rounded-2xl border overflow-hidden cursor-pointer transition-all duration-300 bg-stone-900/50 border-stone-800 hover:border-orange-500/50"
                 >
                   <div className="relative h-48 overflow-hidden">
                     <img
@@ -398,23 +375,21 @@ const Projects = () => {
                     </div>
                   </div>
                   <div className="p-4 sm:p-5">
-                    <h3 className={`font-black text-sm mb-2 group-hover:text-orange-500 transition-colors ${
-                      dark ? 'text-stone-100' : 'text-stone-900'
-                    }`}>{project.title}</h3>
-                    <p className="text-xs opacity-60 line-clamp-2 mb-3">{project.description}</p>
+                    <h3 className="font-black text-sm mb-2 text-stone-100 group-hover:text-orange-500 transition-colors">
+                      {project.title}
+                    </h3>
+                    <p className="text-xs text-stone-500 line-clamp-2 mb-3">{project.description}</p>
                     <div className="flex flex-wrap gap-1.5 mb-3">
                       {project.technologies.slice(0, 4).map(tech => (
-                        <span key={tech} className={`px-2 py-0.5 rounded text-[10px] font-semibold ${
-                          dark ? 'bg-stone-800 text-stone-400' : 'bg-stone-100 text-stone-600'
-                        }`}>{tech}</span>
+                        <span key={tech} className="px-2 py-0.5 rounded text-[10px] font-semibold bg-stone-800 text-stone-400">
+                          {tech}
+                        </span>
                       ))}
                     </div>
                     <div className="flex items-center justify-between">
                       <div className="flex gap-2">
                         <a href={project.links.github} target="_blank" rel="noreferrer" onClick={e => e.stopPropagation()}
-                          className={`p-2 rounded-lg border transition-all ${
-                            dark ? 'border-stone-700 text-stone-400 hover:bg-stone-800' : 'border-stone-200 text-stone-500 hover:bg-stone-100'
-                          }`}>
+                          className="p-2 rounded-lg border border-stone-700 text-stone-400 hover:bg-stone-800 transition-all">
                           <Github size={13} />
                         </a>
                         <a href={project.links.demo} target="_blank" rel="noreferrer" onClick={e => e.stopPropagation()}
@@ -446,11 +421,7 @@ const Projects = () => {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: i * 0.05 }}
                   onClick={() => setSelectedProject(project)}
-                  className={`group flex gap-4 sm:gap-6 p-4 sm:p-5 rounded-2xl border cursor-pointer transition-all duration-300 ${
-                    dark 
-                      ? 'bg-stone-900/50 border-stone-800 hover:border-orange-500/50' 
-                      : 'bg-white border-stone-200 hover:border-orange-300 hover:shadow-lg'
-                  }`}
+                  className="group flex gap-4 sm:gap-6 p-4 sm:p-5 rounded-2xl border cursor-pointer transition-all duration-300 bg-stone-900/50 border-stone-800 hover:border-orange-500/50"
                 >
                   <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-xl overflow-hidden shrink-0">
                     <img
@@ -470,25 +441,23 @@ const Projects = () => {
                           <Star size={9} fill="currentColor" /> {t('featured', 'Featured')}
                         </span>
                       )}
-                      <span className="text-[10px] opacity-40 ml-auto">{project.year}</span>
+                      <span className="text-[10px] text-stone-600 ml-auto">{project.year}</span>
                     </div>
-                    <h3 className={`font-black text-sm sm:text-lg group-hover:text-orange-500 transition-colors mb-1 ${
-                      dark ? 'text-stone-100' : 'text-stone-900'
-                    }`}>{project.title}</h3>
-                    <p className="text-xs opacity-60 line-clamp-2 hidden sm:block mb-2">{project.description}</p>
+                    <h3 className="font-black text-sm sm:text-lg text-stone-100 group-hover:text-orange-500 transition-colors mb-1">
+                      {project.title}
+                    </h3>
+                    <p className="text-xs text-stone-500 line-clamp-2 hidden sm:block mb-2">{project.description}</p>
                     <div className="flex items-center gap-4">
                       <div className="flex flex-wrap gap-1">
                         {project.technologies.slice(0, 4).map(tech => (
-                          <span key={tech} className={`px-2 py-0.5 rounded text-[10px] font-semibold ${
-                            dark ? 'bg-stone-800 text-stone-400' : 'bg-stone-100 text-stone-600'
-                          }`}>{tech}</span>
+                          <span key={tech} className="px-2 py-0.5 rounded text-[10px] font-semibold bg-stone-800 text-stone-400">
+                            {tech}
+                          </span>
                         ))}
                       </div>
                       <div className="flex gap-2 ml-auto">
                         <a href={project.links.github} target="_blank" rel="noreferrer" onClick={e => e.stopPropagation()}
-                          className={`p-2 rounded-lg border transition-all ${
-                            dark ? 'border-stone-700 text-stone-400 hover:bg-stone-800' : 'border-stone-200 text-stone-500 hover:bg-stone-100'
-                          }`}>
+                          className="p-2 rounded-lg border border-stone-700 text-stone-400 hover:bg-stone-800 transition-all">
                           <Github size={13} />
                         </a>
                         <a href={project.links.demo} target="_blank" rel="noreferrer" onClick={e => e.stopPropagation()}
@@ -511,8 +480,8 @@ const Projects = () => {
             animate={{ opacity: 1 }}
             className="text-center py-24"
           >
-            <Search size={40} className="mx-auto mb-4 opacity-20" />
-            <p className={`text-lg font-bold opacity-40 ${dark ? 'text-stone-400' : 'text-stone-600'}`}>
+            <Search size={40} className="mx-auto mb-4 text-stone-600" />
+            <p className="text-lg font-bold text-stone-500">
               {t('noProjects', 'No projects found')}
             </p>
             <button
@@ -541,9 +510,7 @@ const Projects = () => {
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9, y: 40 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                className={`relative w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-3xl shadow-2xl ${
-                  dark ? 'bg-stone-900 border border-stone-800' : 'bg-white'
-                }`}
+                className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-3xl shadow-2xl bg-stone-900 border border-stone-800"
               >
                 {/* Hero Image */}
                 <div className="relative h-56 sm:h-72 md:h-80 overflow-hidden rounded-t-3xl">
@@ -582,49 +549,41 @@ const Projects = () => {
                 {/* Content */}
                 <div className="p-6 sm:p-8">
                   {/* Description */}
-                  <p className={`text-base leading-relaxed mb-8 ${
-                    dark ? 'text-stone-300' : 'text-stone-600'
-                  }`}>
+                  <p className="text-base leading-relaxed mb-8 text-stone-300">
                     {selectedProject.longDescription}
                   </p>
 
                   {/* Meta Information */}
-                  <div className={`grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8 p-5 rounded-2xl ${
-                    dark ? 'bg-stone-800/50' : 'bg-stone-50'
-                  }`}>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8 p-5 rounded-2xl bg-stone-800/50">
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-widest opacity-50 mb-1">{t('year', 'Year')}</p>
-                      <p className={`font-black text-lg ${dark ? 'text-stone-100' : 'text-stone-900'}`}>{selectedProject.year}</p>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500 mb-1">{t('year', 'Year')}</p>
+                      <p className="font-black text-lg text-stone-100">{selectedProject.year}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-widest opacity-50 mb-1">{t('category', 'Category')}</p>
-                      <p className={`font-black text-lg capitalize ${dark ? 'text-stone-100' : 'text-stone-900'}`}>{selectedProject.category}</p>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500 mb-1">{t('category', 'Category')}</p>
+                      <p className="font-black text-lg text-stone-100 capitalize">{selectedProject.category}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-widest opacity-50 mb-1">{t('views', 'Views')}</p>
-                      <p className={`font-black text-lg ${dark ? 'text-stone-100' : 'text-stone-900'}`}>{selectedProject.stats.views}</p>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500 mb-1">{t('views', 'Views')}</p>
+                      <p className="font-black text-lg text-stone-100">{selectedProject.stats.views}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-widest opacity-50 mb-1">{t('likes', 'Likes')}</p>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500 mb-1">{t('likes', 'Likes')}</p>
                       <div className="flex items-center gap-1">
                         <Heart size={16} className="text-red-500 fill-red-500" />
-                        <p className={`font-black text-lg ${dark ? 'text-stone-100' : 'text-stone-900'}`}>{selectedProject.stats.likes}</p>
+                        <p className="font-black text-lg text-stone-100">{selectedProject.stats.likes}</p>
                       </div>
                     </div>
                   </div>
 
                   {/* Technologies */}
                   <div className="mb-8">
-                    <p className="text-[10px] font-bold uppercase tracking-widest opacity-50 mb-3">{t('technologiesUsed', 'Technologies Used')}</p>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500 mb-3">{t('technologiesUsed', 'Technologies Used')}</p>
                     <div className="flex flex-wrap gap-2">
                       {selectedProject.technologies.map((tech) => (
                         <span
                           key={tech}
-                          className={`px-3 py-1.5 rounded-lg text-sm font-semibold border ${
-                            dark 
-                              ? 'bg-stone-800 text-stone-400 border-stone-700' 
-                              : 'bg-white text-stone-600 border-stone-200 shadow-sm'
-                          }`}
+                          className="px-3 py-1.5 rounded-lg text-sm font-semibold border bg-stone-800 text-stone-300 border-stone-700"
                         >
                           {tech}
                         </span>
@@ -647,19 +606,13 @@ const Projects = () => {
                       href={selectedProject.links.github}
                       target="_blank"
                       rel="noreferrer"
-                      className={`flex-1 flex items-center justify-center gap-2 font-bold py-4 rounded-2xl text-sm transition-all ${
-                        dark 
-                          ? 'bg-stone-100 text-stone-900 hover:bg-white' 
-                          : 'bg-stone-900 text-white hover:bg-black'
-                      }`}
+                      className="flex-1 flex items-center justify-center gap-2 font-bold py-4 rounded-2xl text-sm transition-all bg-stone-100 text-stone-900 hover:bg-white"
                     >
                       <Github size={16} /> {t('viewSource', 'View Source Code')}
                     </a>
                     <button
                       onClick={() => setSelectedProject(null)}
-                      className={`sm:flex-none flex items-center justify-center gap-2 font-bold py-4 px-6 rounded-2xl text-sm transition-all border ${
-                        dark ? 'border-stone-700 text-stone-400 hover:bg-stone-800' : 'border-stone-200 text-stone-600 hover:bg-stone-100'
-                      }`}
+                      className="sm:flex-none flex items-center justify-center gap-2 font-bold py-4 px-6 rounded-2xl text-sm transition-all border border-stone-700 text-stone-400 hover:bg-stone-800"
                     >
                       {t('close', 'Close')}
                     </button>
