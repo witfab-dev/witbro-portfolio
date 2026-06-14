@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform, useMotionValueEvent } from 'framer-motion';
 import {
-  Menu, X, Sun, Moon, Globe, ChevronDown,
+  Menu, X, Globe, ChevronDown,
   User, Briefcase, Cpu, Calendar, Mail, Home,
 } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -24,7 +24,6 @@ const LANGUAGES = [
 ];
 
 export default function Header() {
-  const { theme } = useTheme(); // Only get theme, not toggleTheme
   const { t, changeLanguage, language } = useLanguage();
 
   const [activeSection,   setActiveSection]   = useState('home');
@@ -32,8 +31,6 @@ export default function Header() {
   const [mobileOpen,      setMobileOpen]      = useState(false);
   const [langOpen,        setLangOpen]        = useState(false);
   const langRef = useRef(null);
-
-  const dark = theme === 'dark';
 
   /* ── scroll tracking ─────────────────────────────────────── */
   const { scrollY } = useScroll();
@@ -84,12 +81,12 @@ export default function Header() {
 
   const currentLang = LANGUAGES.find(l => l.code === language) || LANGUAGES[0];
 
-  /* ── shared tokens ───────────────────────────────────────── */
-  const surface  = dark ? 'bg-[#161513]'        : 'bg-white';
-  const border   = dark ? 'border-stone-800/70'  : 'border-stone-200';
-  const ink      = dark ? 'text-stone-100'       : 'text-stone-900';
-  const muted    = dark ? 'text-stone-500'       : 'text-stone-400';
-  const pillBg   = dark ? 'bg-stone-800/60'      : 'bg-stone-100';
+  /* ── shared tokens (DARK MODE ONLY) ───────────────────────── */
+  const surface  = scrolled ? 'bg-[#161513]' : 'bg-transparent';
+  const border   = 'border-stone-800/70';
+  const ink      = 'text-stone-100';
+  const muted    = 'text-stone-500';
+  const pillBg   = 'bg-stone-800/60';
 
   return (
     <>
@@ -102,17 +99,12 @@ export default function Header() {
             animate={{
               backdropFilter: scrolled ? 'blur(20px)' : 'blur(0px)',
               boxShadow: scrolled
-                ? dark
-                  ? '0 0 0 1px rgba(255,255,255,0.06), 0 8px 32px rgba(0,0,0,0.4)'
-                  : '0 0 0 1px rgba(0,0,0,0.07), 0 8px 32px rgba(0,0,0,0.08)'
+                ? '0 0 0 1px rgba(255,255,255,0.06), 0 8px 32px rgba(0,0,0,0.4)'
                 : 'none',
             }}
             transition={{ duration: 0.3 }}
             className={`flex items-center justify-between h-14 px-3 rounded-2xl border transition-colors duration-300
-              ${scrolled
-                ? `${surface} ${border}`
-                : 'bg-transparent border-transparent'
-              }`}
+              ${scrolled ? `${surface} ${border}` : 'bg-transparent border-transparent'}`}
           >
 
             {/* ── Logo ───────────────────────────────────────── */}
@@ -122,8 +114,7 @@ export default function Header() {
               onClick={() => scrollTo('home')}
               className="flex items-center gap-2.5 group"
             >
-              <div className={`relative w-8 h-8 rounded-xl overflow-hidden ring-1 transition-all
-                ${dark ? 'ring-stone-700 group-hover:ring-orange-500/50' : 'ring-stone-200 group-hover:ring-orange-400/60'}`}>
+              <div className={`relative w-8 h-8 rounded-xl overflow-hidden ring-1 transition-all ring-stone-700 group-hover:ring-orange-500/50`}>
                 <img src={logoImg} alt="Logo" className="w-full h-full object-cover" />
               </div>
               <span className={`hidden sm:block text-sm font-black tracking-tight ${ink}`}>
@@ -155,7 +146,7 @@ export default function Header() {
               })}
             </nav>
 
-            {/* ── Actions (Theme toggle REMOVED) ────────────────── */}
+            {/* ── Actions (Dark mode only) ──────────────────────── */}
             <div className="flex items-center gap-1.5">
 
               {/* Language switcher */}
@@ -163,10 +154,7 @@ export default function Header() {
                 <button
                   onClick={() => setLangOpen(v => !v)}
                   className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border text-[10px] font-bold uppercase tracking-widest transition-all
-                    ${dark
-                      ? 'bg-stone-800/60 border-stone-700/60 text-stone-300 hover:border-orange-500/40'
-                      : 'bg-stone-100 border-stone-200 text-stone-600 hover:border-orange-400/50'
-                    }`}
+                    bg-stone-800/60 border-stone-700/60 text-stone-300 hover:border-orange-500/40`}
                 >
                   <Globe size={12} className="text-orange-500" />
                   {currentLang.label}
@@ -182,8 +170,7 @@ export default function Header() {
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 8, scale: 0.95 }}
                       transition={{ duration: 0.18 }}
-                      className={`absolute top-full right-0 mt-2 w-44 rounded-2xl border shadow-xl overflow-hidden
-                        ${dark ? 'bg-[#161513] border-stone-800' : 'bg-white border-stone-200'}`}
+                      className={`absolute top-full right-0 mt-2 w-44 rounded-2xl border shadow-xl overflow-hidden bg-[#161513] border-stone-800`}
                     >
                       <div className="p-1.5">
                         {LANGUAGES.map(lang => (
@@ -193,9 +180,7 @@ export default function Header() {
                             className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all
                               ${language === lang.code
                                 ? 'bg-orange-500 text-white'
-                                : dark
-                                  ? 'text-stone-400 hover:bg-stone-800 hover:text-stone-100'
-                                  : 'text-stone-600 hover:bg-stone-100 hover:text-stone-900'
+                                : 'text-stone-400 hover:bg-stone-800 hover:text-stone-100'
                               }`}
                           >
                             <span className="text-base">{lang.flag}</span>
@@ -211,15 +196,12 @@ export default function Header() {
                 </AnimatePresence>
               </div>
 
-              {/* Mobile hamburger - Theme toggle completely removed */}
+              {/* Mobile hamburger */}
               <motion.button
                 whileTap={{ scale: 0.88 }}
                 onClick={() => setMobileOpen(v => !v)}
                 className={`md:hidden w-9 h-9 flex items-center justify-center rounded-xl border transition-all
-                  ${dark
-                    ? 'bg-stone-800/60 border-stone-700/60 text-stone-300'
-                    : 'bg-stone-100 border-stone-200 text-stone-700'
-                  }`}
+                  bg-stone-800/60 border-stone-700/60 text-stone-300`}
               >
                 <AnimatePresence mode="wait" initial={false}>
                   <motion.div
@@ -237,7 +219,7 @@ export default function Header() {
           </motion.div>
         </div>
 
-        {/* ── Mobile drawer ──────────────────────────────────── */}
+        {/* ── Mobile drawer (Dark mode only) ──────────────────── */}
         <AnimatePresence>
           {mobileOpen && (
             <>
@@ -256,8 +238,7 @@ export default function Header() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -12 }}
                 transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-                className={`md:hidden mx-4 mt-2 rounded-2xl border shadow-2xl overflow-hidden
-                  ${dark ? 'bg-[#161513] border-stone-800' : 'bg-white border-stone-200'}`}
+                className="md:hidden mx-4 mt-2 rounded-2xl border shadow-2xl overflow-hidden bg-[#161513] border-stone-800"
               >
                 <div className="p-3 grid grid-cols-2 gap-2">
                   {NAV_ITEMS.map(({ id, label, icon: Icon }) => {
@@ -269,9 +250,7 @@ export default function Header() {
                         className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-wide transition-all
                           ${active
                             ? 'bg-orange-500 text-white shadow-md shadow-orange-500/20'
-                            : dark
-                              ? 'bg-stone-800/60 text-stone-400 hover:text-stone-100 hover:bg-stone-800'
-                              : 'bg-stone-100 text-stone-500 hover:text-stone-900 hover:bg-stone-200'
+                            : 'bg-stone-800/60 text-stone-400 hover:text-stone-100 hover:bg-stone-800'
                           }`}
                       >
                         <Icon size={15} />
@@ -282,8 +261,8 @@ export default function Header() {
                 </div>
 
                 {/* Divider + footer */}
-                <div className={`px-4 py-3 border-t flex items-center justify-between ${dark ? 'border-stone-800' : 'border-stone-100'}`}>
-                  <span className={`text-[10px] font-mono uppercase tracking-widest ${dark ? 'text-stone-700' : 'text-stone-300'}`}>
+                <div className="px-4 py-3 border-t flex items-center justify-between border-stone-800">
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-stone-700">
                     Witness<span className="text-orange-500">.</span>Dev
                   </span>
                   <div className="flex items-center gap-1.5">
@@ -291,7 +270,7 @@ export default function Header() {
                       <span className="animate-ping absolute h-full w-full rounded-full bg-green-400 opacity-70" />
                       <span className="relative rounded-full h-1.5 w-1.5 bg-green-500" />
                     </span>
-                    <span className={`text-[10px] font-semibold ${dark ? 'text-stone-600' : 'text-stone-400'}`}>Available</span>
+                    <span className="text-[10px] font-semibold text-stone-600">Available</span>
                   </div>
                 </div>
               </motion.div>
