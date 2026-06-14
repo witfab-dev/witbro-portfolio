@@ -24,7 +24,7 @@ const LANGUAGES = [
 ];
 
 export default function Header() {
-  const { theme, toggleTheme }          = useTheme();
+  const { theme } = useTheme(); // Only get theme, not toggleTheme
   const { t, changeLanguage, language } = useLanguage();
 
   const [activeSection,   setActiveSection]   = useState('home');
@@ -155,7 +155,7 @@ export default function Header() {
               })}
             </nav>
 
-            {/* ── Actions ────────────────────────────────────── */}
+            {/* ── Actions (Theme toggle REMOVED) ────────────────── */}
             <div className="flex items-center gap-1.5">
 
               {/* Language switcher */}
@@ -211,30 +211,7 @@ export default function Header() {
                 </AnimatePresence>
               </div>
 
-              {/* Theme toggle */}
-              <motion.button
-                whileTap={{ scale: 0.88 }}
-                onClick={toggleTheme}
-                className={`w-9 h-9 flex items-center justify-center rounded-xl border transition-all
-                  ${dark
-                    ? 'bg-stone-800/60 border-stone-700/60 text-yellow-400 hover:border-yellow-400/40'
-                    : 'bg-stone-100 border-stone-200 text-indigo-500 hover:border-indigo-400/50'
-                  }`}
-              >
-                <AnimatePresence mode="wait" initial={false}>
-                  <motion.div
-                    key={theme}
-                    initial={{ rotate: -90, opacity: 0 }}
-                    animate={{ rotate: 0, opacity: 1 }}
-                    exit={{ rotate: 90, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    {dark ? <Sun size={16} /> : <Moon size={16} />}
-                  </motion.div>
-                </AnimatePresence>
-              </motion.button>
-
-              {/* Mobile hamburger */}
+              {/* Mobile hamburger - Theme toggle completely removed */}
               <motion.button
                 whileTap={{ scale: 0.88 }}
                 onClick={() => setMobileOpen(v => !v)}
