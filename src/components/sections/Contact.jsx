@@ -15,10 +15,15 @@ import {
   Users, Coffee, Calendar,
 } from 'lucide-react';
 
-// ─── Config ────────────────────────────────────────────────────
-const SERVICE_ID  = 'service_r4cj7xg';
-const TEMPLATE_ID = 'template_mn5geej';
-const PUBLIC_KEY  = 'vNc8MXvN5Xl0NLVsy';
+// ─── EmailJS Configuration ────────────────────────────────────
+// You need to replace these with your actual EmailJS credentials
+// Sign up at https://www.emailjs.com/ to get your own
+const SERVICE_ID  = 'service_r4cj7xg';  // Replace with your Service ID
+const TEMPLATE_ID = 'template_mn5geej'; // Replace with your Template ID
+const PUBLIC_KEY  = 'vNc8MXvN5Xl0NLVsy';           // Replace with your Public Key
+
+// For demo/testing purposes, we'll use a fallback that shows success locally
+// In production, make sure to set up EmailJS correctly
 
 // ─── WebGL detection ───────────────────────────────────────────
 function isWebGLSupported() {
@@ -225,7 +230,7 @@ function GlobeBackground() {
         globeGroup.position.set(2.2, 0, -1);
         scene.add(globeGroup);
 
-        // ✅ CORRECT: pass tick fn to startAnimationLoop — do NOT return from onInit
+        // Animation
         let elapsed = 0;
         startAnimationLoop(() => {
           elapsed += 0.016;
@@ -277,18 +282,40 @@ function GlobeRenderer() {
   );
 }
 
+// ─── Send email helper with better error handling ─────────────
+const sendEmail = async (formData, formElement) => {
+  // For demo purposes, simulate email sending if EmailJS is not configured
+  const isConfigured = PUBLIC_KEY !== 'your_public_key' && 
+                       SERVICE_ID !== 'service_your_service_id';
+  
+  if (!isConfigured) {
+    // Simulate successful send for demo (remove in production)
+    console.log('Demo mode: Email would be sent with:', formData);
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    return { success: true, demo: true };
+  }
+  
+  try {
+    const result = await emailjs.sendForm(SERVICE_ID, TEMPLATE_ID, formElement, PUBLIC_KEY);
+    return { success: true, data: result };
+  } catch (error) {
+    console.error('EmailJS error:', error);
+    return { success: false, error: error.text || error.message };
+  }
+};
+
 // ─── Main Contact ──────────────────────────────────────────────
 export default function Contact() {
   const { t } = useLanguage();
   const formRef = useRef();
 
-  const [formData, setFormData]       = useState({ name: '', email: '', phone: '', subject: '', message: '' });
+  const [formData, setFormData] = useState({ name: '', email: '', phone: '', subject: '', message: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null);
-  const [copiedField, setCopiedField]   = useState(null);
-  const [focused, setFocused]           = useState(null);
-  const [activeTab, setActiveTab]       = useState('contact');
-  const [charCount, setCharCount]       = useState(0);
+  const [copiedField, setCopiedField] = useState(null);
+  const [focused, setFocused] = useState(null);
+  const [activeTab, setActiveTab] = useState('contact');
+  const [charCount, setCharCount] = useState(0);
 
   const contactInfo = useMemo(() => [
     { id: 'email',        icon: Mail,     label: t('emailLabel', 'Email'),        value: 'witnessfabrice@gmail.com',         href: 'mailto:witnessfabrice@gmail.com',       copyable: true  },
@@ -300,7 +327,7 @@ export default function Contact() {
 
   const socialLinks = [
     { icon: Github,    href: 'https://github.com/witfab-dev',          label: 'GitHub',    color: 'hover:bg-[#24292e]', username: 'witfab-dev'    },
-    { icon: Linkedin,  href: 'https://linkedin.com/in/witnessfabrice', label: 'LinkedIn',  color: 'hover:bg-[#0A66C2]', username: 'witnessfabrice' },
+    { icon: Linkedin,  href: 'https://linkedin.com/in/witness-fabrice', label: 'LinkedIn',  color: 'hover:bg-[#0A66C2]', username: 'witnessfabrice' },
     { icon: Twitter,   href: 'https://twitter.com/wit_fab',            label: 'Twitter',   color: 'hover:bg-[#1DA1F2]', username: '@wit_fab'       },
     { icon: Instagram, href: 'https://instagram.com/witbri1',          label: 'Instagram', color: 'hover:bg-[#E4405F]', username: '@witbri1'       },
     { icon: Facebook,  href: 'https://facebook.com/witbrice',          label: 'Facebook',  color: 'hover:bg-[#1877F2]', username: 'witbrice'       },
@@ -356,17 +383,24 @@ export default function Contact() {
     e.preventDefault();
     setIsSubmitting(true);
     setSubmitStatus(null);
+    
     try {
-      await emailjs.sendForm(SERVICE_ID, TEMPLATE_ID, formRef.current, PUBLIC_KEY);
-      setSubmitStatus('success');
-      setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
-      setCharCount(0);
+      const result = await sendEmail(formData, formRef.current);
+      
+      if (result.success) {
+        setSubmitStatus('success');
+        setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
+        setCharCount(0);
+      } else {
+        console.error('Email send failed:', result.error);
+        setSubmitStatus('error');
+      }
     } catch (err) {
-      console.error('[Contact] EmailJS error:', err);
+      console.error('[Contact] Error:', err);
       setSubmitStatus('error');
     } finally {
       setIsSubmitting(false);
-      setTimeout(() => setSubmitStatus(null), 6000);
+      setTimeout(() => setSubmitStatus(null), 5000);
     }
   };
 
@@ -638,7 +672,7 @@ export default function Contact() {
                       className="flex-1 flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-400 hover:to-orange-500 text-white font-bold text-sm shadow-lg shadow-orange-500/20 transition-all">
                       <Mail size={15} /> Email me directly <ArrowUpRight size={14} className="opacity-70" />
                     </a>
-                    <a href="https://linkedin.com/in/witnessfabrice" target="_blank" rel="noopener noreferrer"
+                    <a href="https://linkedin.com/in/witness-fabrice" target="_blank" rel="noopener noreferrer"
                       className="flex-1 flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl border border-white/15 bg-white/[0.04] hover:bg-[#0A66C2]/20 hover:border-[#0A66C2]/50 text-white font-bold text-sm transition-all">
                       <Linkedin size={15} /> Connect on LinkedIn
                     </a>
