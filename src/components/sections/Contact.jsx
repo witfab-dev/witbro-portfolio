@@ -15,29 +15,19 @@ import {
   Users, Coffee, Calendar, Briefcase, Code2,
   Smartphone, Palette, Server, Database, Cloud,
   Award, Target, Heart, Sparkles, Compass,
-  Headphones, Video, FileText, ThumbsUp,
+  Headphones, Video, FileText, ThumbsUp, User,
 } from 'lucide-react';
 
-// ─── EmailJS Configuration (IMPORTANT: Replace with your actual credentials) ───
-// Sign up at https://www.emailjs.com/ to get your own credentials
+// ─── EmailJS Configuration (Your Actual Credentials) ────────────
+// These match your EmailJS template shown in the image
 const EMAILJS_CONFIG = {
   SERVICE_ID: 'service_r4cj7xg',
-  TEMPLATE_ID: 'template_mn5geej',
+  TEMPLATE_ID: 'template_mn5geej', 
   PUBLIC_KEY: 'vNc8MXvN5Xl0NLVsy'
 };
 
-// Check if EmailJS credentials are valid
-const isEmailJSValid = () => {
-  return EMAILJS_CONFIG.SERVICE_ID && 
-         EMAILJS_CONFIG.TEMPLATE_ID && 
-         EMAILJS_CONFIG.PUBLIC_KEY &&
-         EMAILJS_CONFIG.SERVICE_ID !== 'service_r4cj7xg' ? true : false;
-};
-
-// Initialize EmailJS if credentials are valid
-if (isEmailJSValid()) {
-  emailjs.init(EMAILJS_CONFIG.PUBLIC_KEY);
-}
+// Initialize EmailJS with your public key
+emailjs.init(EMAILJS_CONFIG.PUBLIC_KEY);
 
 // ─── WebGL detection ───────────────────────────────────────────
 function isWebGLSupported() {
@@ -158,7 +148,7 @@ function GlobeBackground() {
           { lat: -33.87, lon: 151.2, color: 0x10b981, r: 0.022, name: 'Sydney' },
           { lat: 1.35, lon: 103.8, color: 0x10b981, r: 0.022, name: 'Singapore' },
         ];
-        cities.forEach(({ lat, lon, color, r, name }) => {
+        cities.forEach(({ lat, lon, color, r }) => {
           const pos = toSphere(lat, lon, 1.53);
           const dot = new THREE.Mesh(new THREE.SphereGeometry(r, 8, 8), new THREE.MeshBasicMaterial({ color }));
           dot.position.copy(pos);
@@ -279,22 +269,26 @@ function GlobeRenderer() {
   );
 }
 
-// ─── Send email helper ─────────────────────────────────────────
+// ─── Send email helper - Works with your EmailJS template ──────
 const sendEmailMessage = async (formData, formElement) => {
-  if (!isEmailJSValid()) {
-    // Demo mode - simulate email sending
-    console.log('📧 Demo Mode: Message would be sent:', formData);
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    return { success: true, demo: true };
-  }
-  
   try {
-    const result = await emailjs.sendForm(
+    // Your EmailJS template uses: {{from_name}}, {{reply_to}}, {{message}}, {{subject}}, {{phone}}
+    const templateParams = {
+      from_name: formData.name,
+      reply_to: formData.email,
+      message: formData.message,
+      subject: formData.subject || 'New Inquiry',
+      phone: formData.phone || 'Not provided',
+    };
+    
+    const result = await emailjs.send(
       EMAILJS_CONFIG.SERVICE_ID, 
       EMAILJS_CONFIG.TEMPLATE_ID, 
-      formElement, 
+      templateParams, 
       EMAILJS_CONFIG.PUBLIC_KEY
     );
+    
+    console.log('Email sent successfully:', result);
     return { success: true, data: result };
   } catch (error) {
     console.error('EmailJS error:', error);
@@ -321,7 +315,6 @@ export default function Contact() {
     { id: 'location', icon: MapPin, label: t('locationLabel', 'Location'), value: 'Kigali, Rwanda', href: 'https://maps.google.com/?q=Kigali+Rwanda', copyable: false, badge: 'East Africa' },
     { id: 'availability', icon: Calendar, label: 'Availability', value: 'Mon – Fri · 08:00 – 18:00 CAT', href: null, copyable: false, badge: 'UTC+2' },
     { id: 'response', icon: Clock, label: 'Response time', value: 'Usually within 24 hours', href: null, copyable: false, badge: 'Fast' },
-    { id: 'video', icon: Video, label: 'Video Call', value: 'Available on request', href: null, copyable: false, badge: 'Zoom/Google Meet' },
   ], [t]);
 
   const socialLinks = [
@@ -341,11 +334,11 @@ export default function Contact() {
   ];
 
   const quickReplies = [
-    { emoji: '💡', text: 'I have a project idea', icon: Lightbulb },
-    { emoji: '🤝', text: "Let's collaborate", icon: Handshake },
-    { emoji: '📋', text: 'Need a consultation', icon: FileText },
-    { emoji: '💼', text: 'Job opportunity', icon: Briefcase },
-    { emoji: '☕', text: 'Just saying hi!', icon: Coffee },
+    { emoji: '💡', text: 'I have a project idea' },
+    { emoji: '🤝', text: "Let's collaborate" },
+    { emoji: '📋', text: 'Need a consultation' },
+    { emoji: '💼', text: 'Job opportunity' },
+    { emoji: '☕', text: 'Just saying hi!' },
   ];
 
   const stats = [
@@ -353,8 +346,6 @@ export default function Contact() {
     { icon: Award, value: '5+', label: 'Projects shipped', color: '#3b82f6' },
     { icon: Zap, value: '24h', label: 'Avg. response', color: '#8b5cf6' },
     { icon: Users, value: '3+', label: 'Happy clients', color: '#10b981' },
-    { icon: Star, value: '100%', label: 'Satisfaction', color: '#ec4899' },
-    { icon: ThumbsUp, value: '50+', label: 'Code reviews', color: '#06b6d4' },
   ];
 
   const collaborationItems = [
@@ -362,8 +353,6 @@ export default function Contact() {
     { icon: MessageSquare, title: 'Project Scoping', desc: 'Detailed breakdown of requirements, timeline & budget estimate.', duration: '2-3 hours', price: 'Fixed' },
     { icon: Users, title: 'Team Augmentation', desc: 'Need an extra pair of skilled hands on your existing team?', duration: 'Ongoing', price: 'Hourly' },
     { icon: Zap, title: 'Rapid Prototype', desc: 'From idea to clickable prototype in 72 hours.', duration: '3 days', price: 'Fixed' },
-    { icon: Headphones, title: 'Tech Consulting', desc: 'Expert advice on architecture, scaling, and best practices.', duration: '1 hour', price: 'Hourly' },
-    { icon: Compass, title: 'Mentorship', desc: 'Guide junior developers through real-world challenges.', duration: 'Weekly', price: 'Monthly' },
   ];
 
   const subjectOptions = [
@@ -373,7 +362,6 @@ export default function Contact() {
     'Team Collaboration',
     'Job Opportunity',
     'Open Source Contribution',
-    'Speaking Event',
     'Other',
   ];
 
@@ -385,10 +373,8 @@ export default function Contact() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    const keyMap = { from_name: 'name', reply_to: 'email', phone: 'phone', subject: 'subject', message: 'message' };
-    const key = keyMap[name] || name;
-    setFormData(prev => ({ ...prev, [key]: value }));
-    if (key === 'message') setCharCount(value.length);
+    setFormData(prev => ({ ...prev, [name]: value }));
+    if (name === 'message') setCharCount(value.length);
   };
 
   const handleQuickReply = (text) => {
@@ -408,6 +394,8 @@ export default function Contact() {
         setSubmitStatus('success');
         setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
         setCharCount(0);
+        // Reset form
+        if (formRef.current) formRef.current.reset();
       } else {
         setSubmitStatus('error');
       }
@@ -459,7 +447,7 @@ export default function Contact() {
           <h2 className="text-[clamp(34px,5vw,72px)] font-black leading-[0.93] tracking-tight text-white mb-4">
             {t('contactHeading', "Let's create something")}
             <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 via-orange-400 to-yellow-400 animate-gradient">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 via-orange-400 to-yellow-400">
               great together.
             </span>
           </h2>
@@ -510,7 +498,6 @@ export default function Contact() {
 
           {/* LEFT COLUMN - Contact Info */}
           <div className="lg:col-span-4 space-y-4">
-            {/* Contact Cards */}
             {contactInfo.map((info, i) => {
               const Tag = info.href ? motion.a : motion.div;
               const extra = info.href
@@ -642,7 +629,7 @@ export default function Contact() {
                         <User size={10} /> {t('nameLabel', 'Your name')} <span className="text-orange-500">*</span>
                       </label>
                       <input 
-                        name="from_name" 
+                        name="name" 
                         type="text" 
                         required 
                         value={formData.name} 
@@ -658,7 +645,7 @@ export default function Contact() {
                         <Mail size={10} /> {t('emailLabel', 'Email')} <span className="text-orange-500">*</span>
                       </label>
                       <input 
-                        name="reply_to" 
+                        name="email" 
                         type="email" 
                         required 
                         value={formData.email} 
@@ -722,7 +709,7 @@ export default function Contact() {
                     />
                     <div className="flex flex-wrap items-center justify-between gap-2 mt-1">
                       <div className="flex flex-wrap gap-1.5">
-                        {quickReplies.map(({ emoji, text, icon: Icon }, i) => (
+                        {quickReplies.map(({ emoji, text }, i) => (
                           <button 
                             key={i} 
                             type="button" 
@@ -795,7 +782,7 @@ export default function Contact() {
                     <p className="text-white/50 text-sm">Flexible collaboration models tailored to your needs</p>
                   </div>
 
-                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="grid sm:grid-cols-2 gap-4">
                     {collaborationItems.map(({ icon: Icon, title, desc, duration, price }, i) => (
                       <motion.div 
                         key={i} 
@@ -847,17 +834,6 @@ export default function Contact() {
           </motion.div>
         </div>
       </div>
-
-      <style jsx>{`
-        @keyframes gradient {
-          0%, 100% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-        }
-        .animate-gradient {
-          background-size: 200% auto;
-          animation: gradient 3s ease infinite;
-        }
-      `}</style>
     </section>
   );
 }
