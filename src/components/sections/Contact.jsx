@@ -2,7 +2,6 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import * as THREE from 'three';
-import emailjs from '@emailjs/browser';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useThreeJS } from '../../hooks/useThreeJS';
 import LazyThreeJS from '../shared/LazyThreeJS';
@@ -18,16 +17,9 @@ import {
   Headphones, Video, FileText, ThumbsUp, User,
 } from 'lucide-react';
 
-// ─── EmailJS Configuration (Your Actual Credentials) ────────────
-// These match your EmailJS template shown in the image
-const EMAILJS_CONFIG = {
-  SERVICE_ID: 'service_r4cj7xg',
-  TEMPLATE_ID: 'template_mn5geej', 
-  PUBLIC_KEY: 'vNc8MXvN5Xl0NLVsy'
-};
-
-// Initialize EmailJS with your public key
-emailjs.init(EMAILJS_CONFIG.PUBLIC_KEY);
+// ─── Web3Forms Configuration ────────────────────────────────────
+// Get your access key from https://web3forms.com/
+const WEB3FORMS_ACCESS_KEY = '46173eb0-d5ff-41b1-ae8e-81adb5d5b012';
 
 // ─── WebGL detection ───────────────────────────────────────────
 function isWebGLSupported() {
@@ -269,41 +261,20 @@ function GlobeRenderer() {
   );
 }
 
-// ─── Send email helper - Works with your EmailJS template ──────
-const sendEmailMessage = async (formData, formElement) => {
-  try {
-    // Your EmailJS template uses: {{from_name}}, {{reply_to}}, {{message}}, {{subject}}, {{phone}}
-    const templateParams = {
-      from_name: formData.name,
-      reply_to: formData.email,
-      message: formData.message,
-      subject: formData.subject || 'New Inquiry',
-      phone: formData.phone || 'Not provided',
-    };
-    
-    const result = await emailjs.send(
-      EMAILJS_CONFIG.SERVICE_ID, 
-      EMAILJS_CONFIG.TEMPLATE_ID, 
-      templateParams, 
-      EMAILJS_CONFIG.PUBLIC_KEY
-    );
-    
-    console.log('Email sent successfully:', result);
-    return { success: true, data: result };
-  } catch (error) {
-    console.error('EmailJS error:', error);
-    return { success: false, error: error.text || error.message };
-  }
-};
-
 // ─── Main Contact Component ────────────────────────────────────
 export default function Contact() {
   const { t } = useLanguage();
-  const formRef = useRef();
 
-  const [formData, setFormData] = useState({ name: '', email: '', phone: '', subject: '', message: '' });
+  const [formData, setFormData] = useState({ 
+    name: '', 
+    email: '', 
+    phone: '', 
+    subject: '', 
+    message: '' 
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null);
+  const [submitMessage, setSubmitMessage] = useState('');
   const [copiedField, setCopiedField] = useState(null);
   const [focused, setFocused] = useState(null);
   const [activeTab, setActiveTab] = useState('contact');
@@ -386,24 +357,47 @@ export default function Contact() {
     e.preventDefault();
     setIsSubmitting(true);
     setSubmitStatus(null);
+    setSubmitMessage('');
     
     try {
-      const result = await sendEmailMessage(formData, formRef.current);
+      // Prepare form data for Web3Forms
+      const formPayload = new FormData();
+      formPayload.append('access_key', WEB3FORMS_ACCESS_KEY);
+      formPayload.append('name', formData.name);
+      formPayload.append('email', formData.email);
+      formPayload.append('phone', formData.phone || 'Not provided');
+      formPayload.append('subject', formData.subject || 'New Contact Form Submission');
+      formPayload.append('message', formData.message);
       
-      if (result.success) {
+      // Optional: Add redirect URL (optional)
+      // formPayload.append('redirect', 'https://your-site.com/thank-you');
+      
+      const response = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        body: formPayload
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
         setSubmitStatus('success');
+        setSubmitMessage('Message sent successfully! I will get back to you soon.');
         setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
         setCharCount(0);
-        // Reset form
-        if (formRef.current) formRef.current.reset();
       } else {
         setSubmitStatus('error');
+        setSubmitMessage(data.message || 'Failed to send message. Please try again.');
       }
     } catch (err) {
+      console.error('Submit error:', err);
       setSubmitStatus('error');
+      setSubmitMessage('An unexpected error occurred. Please try again or contact me directly via email.');
     } finally {
       setIsSubmitting(false);
-      setTimeout(() => setSubmitStatus(null), 5000);
+      setTimeout(() => {
+        setSubmitStatus(null);
+        setSubmitMessage('');
+      }, 6000);
     }
   };
 
@@ -615,7 +609,6 @@ export default function Contact() {
               {activeTab === 'contact' && (
                 <motion.form 
                   key="contact-form" 
-                  ref={formRef} 
                   onSubmit={handleSubmit}
                   initial={{ opacity: 0, y: 10 }} 
                   animate={{ opacity: 1, y: 0 }} 
@@ -725,6 +718,24 @@ export default function Contact() {
                       </p>
                     </div>
                   </div>
+
+                  {/* Status Message */}
+                  <AnimatePresence>
+                    {submitMessage && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className={`p-3 rounded-xl text-sm ${
+                          submitStatus === 'success' 
+                            ? 'bg-green-500/20 border border-green-500/30 text-green-400' 
+                            : 'bg-red-500/20 border border-red-500/30 text-red-400'
+                        }`}
+                      >
+                        {submitMessage}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
                   <button 
                     type="submit" 
