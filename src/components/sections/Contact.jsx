@@ -15,10 +15,10 @@ import {
   Smartphone, Palette, Server, Database, Cloud,
   Award, Target, Heart, Sparkles, Compass,
   Headphones, Video, FileText, ThumbsUp, User,
+  Lightbulb, Handshake, Clipboard, Briefcase as BriefcaseIcon,
 } from 'lucide-react';
 
 // ─── Web3Forms Configuration ────────────────────────────────────
-// Get your access key from https://web3forms.com/
 const WEB3FORMS_ACCESS_KEY = '46173eb0-d5ff-41b1-ae8e-81adb5d5b012';
 
 // ─── WebGL detection ───────────────────────────────────────────
@@ -304,12 +304,13 @@ export default function Contact() {
     { icon: Cloud, title: 'Cloud', desc: 'Vercel, Netlify, Cloudflare', color: '#06b6d4' },
   ];
 
+  // Quick replies with built-in icons instead of emojis
   const quickReplies = [
-    { emoji: '💡', text: 'I have a project idea' },
-    { emoji: '🤝', text: "Let's collaborate" },
-    { emoji: '📋', text: 'Need a consultation' },
-    { emoji: '💼', text: 'Job opportunity' },
-    { emoji: '☕', text: 'Just saying hi!' },
+    { icon: Lightbulb, text: 'I have a project idea', color: '#f97316' },
+    { icon: Handshake, text: "Let's collaborate", color: '#3b82f6' },
+    { icon: Clipboard, text: 'Need a consultation', color: '#8b5cf6' },
+    { icon: BriefcaseIcon, text: 'Job opportunity', color: '#10b981' },
+    { icon: CoffeeIcon, text: 'Just saying hi!', color: '#ec4899' },
   ];
 
   const stats = [
@@ -360,7 +361,6 @@ export default function Contact() {
     setSubmitMessage('');
     
     try {
-      // Prepare form data for Web3Forms
       const formPayload = new FormData();
       formPayload.append('access_key', WEB3FORMS_ACCESS_KEY);
       formPayload.append('name', formData.name);
@@ -368,9 +368,6 @@ export default function Contact() {
       formPayload.append('phone', formData.phone || 'Not provided');
       formPayload.append('subject', formData.subject || 'New Contact Form Submission');
       formPayload.append('message', formData.message);
-      
-      // Optional: Add redirect URL (optional)
-      // formPayload.append('redirect', 'https://your-site.com/thank-you');
       
       const response = await fetch('https://api.web3forms.com/submit', {
         method: 'POST',
@@ -381,23 +378,23 @@ export default function Contact() {
       
       if (data.success) {
         setSubmitStatus('success');
-        setSubmitMessage('Message sent successfully! I will get back to you soon.');
+        setSubmitMessage('✓ Message sent successfully! I will get back to you soon.');
         setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
         setCharCount(0);
       } else {
         setSubmitStatus('error');
-        setSubmitMessage(data.message || 'Failed to send message. Please try again.');
+        setSubmitMessage('✗ Failed to send message. Please try again.');
       }
     } catch (err) {
       console.error('Submit error:', err);
       setSubmitStatus('error');
-      setSubmitMessage('An unexpected error occurred. Please try again or contact me directly via email.');
+      setSubmitMessage('✗ An unexpected error occurred. Please try again or contact me directly via email.');
     } finally {
       setIsSubmitting(false);
       setTimeout(() => {
         setSubmitStatus(null);
         setSubmitMessage('');
-      }, 6000);
+      }, 5000);
     }
   };
 
@@ -433,9 +430,8 @@ export default function Contact() {
             whileInView={{ scale: 1 }}
             className="inline-flex items-center gap-2 text-[11px] font-semibold tracking-[0.22em] uppercase text-orange-500 mb-5 px-5 py-2.5 rounded-full bg-orange-500/10 backdrop-blur-sm border border-orange-500/20"
           >
-            <Sparkles size={12} className="animate-pulse" />
+            <Globe size={12} className="animate-pulse" />
             {t('contact', 'Get in touch')}
-            <Globe size={12} />
           </motion.div>
 
           <h2 className="text-[clamp(34px,5vw,72px)] font-black leading-[0.93] tracking-tight text-white mb-4">
@@ -702,14 +698,15 @@ export default function Contact() {
                     />
                     <div className="flex flex-wrap items-center justify-between gap-2 mt-1">
                       <div className="flex flex-wrap gap-1.5">
-                        {quickReplies.map(({ emoji, text }, i) => (
+                        {quickReplies.map(({ icon: Icon, text, color }, i) => (
                           <button 
                             key={i} 
                             type="button" 
                             onClick={() => handleQuickReply(text)}
-                            className="text-[10px] px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-white/45 hover:text-white hover:border-orange-400/60 hover:bg-orange-500/10 transition-all flex items-center gap-1"
+                            className="text-[10px] px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-white/45 hover:text-white hover:border-orange-400/60 hover:bg-orange-500/10 transition-all flex items-center gap-1.5"
                           >
-                            <span>{emoji}</span> {text}
+                            <Icon size={10} style={{ color }} />
+                            <span>{text}</span>
                           </button>
                         ))}
                       </div>
@@ -719,7 +716,7 @@ export default function Contact() {
                     </div>
                   </div>
 
-                  {/* Status Message */}
+                  {/* Status Message - No Sparkles */}
                   <AnimatePresence>
                     {submitMessage && (
                       <motion.div
@@ -754,7 +751,7 @@ export default function Contact() {
                         </motion.span>
                       ) : submitStatus === 'success' ? (
                         <motion.span key="ok" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="flex items-center justify-center gap-2">
-                          <Check size={16} /> {t('sendSuccess', 'Message sent!')} ✨
+                          <Check size={16} /> {t('sendSuccess', 'Message sent!')}
                         </motion.span>
                       ) : submitStatus === 'error' ? (
                         <motion.span key="err" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="flex items-center justify-center gap-2">
