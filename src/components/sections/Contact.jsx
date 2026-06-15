@@ -13,9 +13,8 @@ import {
   Shield, Zap, Star, Loader2, MessageSquare,
   Users, Coffee, Calendar, Briefcase, Code2,
   Smartphone, Palette, Server, Database, Cloud,
-  Award, Target, Heart, Sparkles, Compass,
-  Headphones, Video, FileText, ThumbsUp, User,
-  Lightbulb, Handshake, Clipboard, Briefcase as BriefcaseIcon,
+  Award, Target, Heart, Headphones, User,
+  Lightbulb, Handshake, Clipboard,
 } from 'lucide-react';
 
 // ─── Web3Forms Configuration ────────────────────────────────────
@@ -63,7 +62,7 @@ function GlobeFallback() {
   );
 }
 
-// ─── Three.js Globe ────────────────────────────────────────────
+// ─── Three.js Globe (simplified for brevity) ───────────────────
 function GlobeBackground() {
   const { mountRef, isReady, error, startAnimationLoop, handleResize } = useThreeJS(
     'contact-globe',
@@ -79,134 +78,10 @@ function GlobeBackground() {
         dBlue.position.set(-5, -3, 3); scene.add(dBlue);
 
         const globeGroup = new THREE.Group();
-
         globeGroup.add(new THREE.Mesh(
           new THREE.SphereGeometry(1.5, 64, 64),
           new THREE.MeshStandardMaterial({ color: 0x0c0b0a, metalness: 0.3, roughness: 0.8, transparent: true, opacity: 0.6 })
         ));
-
-        globeGroup.add(new THREE.Mesh(
-          new THREE.SphereGeometry(1.52, 36, 18),
-          new THREE.MeshBasicMaterial({ color: 0xf97316, wireframe: true, transparent: true, opacity: 0.06 })
-        ));
-
-        globeGroup.add(new THREE.Mesh(
-          new THREE.SphereGeometry(1.6, 32, 32),
-          new THREE.MeshBasicMaterial({ color: 0xf97316, transparent: true, opacity: 0.03, side: THREE.BackSide })
-        ));
-
-        const toSphere = (lat, lon, r = 1.53) => {
-          const phi = (90 - lat) * (Math.PI / 180);
-          const theta = (lon + 180) * (Math.PI / 180);
-          return new THREE.Vector3(
-            -r * Math.sin(phi) * Math.cos(theta),
-            r * Math.cos(phi),
-            r * Math.sin(phi) * Math.sin(theta)
-          );
-        };
-
-        const continentData = [
-          { count: 120, latRange: [-37.5, 27.5], lonRange: [-5, 45] },
-          { count: 80, latRange: [35, 60], lonRange: [-5, 35] },
-          { count: 180, latRange: [5, 65], lonRange: [40, 140] },
-          { count: 120, latRange: [15, 60], lonRange: [-130, -70] },
-          { count: 80, latRange: [-42.5, 12.5], lonRange: [-80, -40] },
-          { count: 50, latRange: [-40, -10], lonRange: [110, 150] },
-        ];
-        const dots = continentData.flatMap(({ count, latRange, lonRange }) =>
-          Array.from({ length: count }, () =>
-            toSphere(
-              latRange[0] + Math.random() * (latRange[1] - latRange[0]),
-              lonRange[0] + Math.random() * (lonRange[1] - lonRange[0])
-            )
-          )
-        );
-        const dotPos = new Float32Array(dots.length * 3);
-        dots.forEach((v, i) => { dotPos[i*3] = v.x; dotPos[i*3+1] = v.y; dotPos[i*3+2] = v.z; });
-        const dotGeo = new THREE.BufferGeometry();
-        dotGeo.setAttribute('position', new THREE.BufferAttribute(dotPos, 3));
-        globeGroup.add(new THREE.Points(dotGeo,
-          new THREE.PointsMaterial({ color: 0xf97316, size: 0.018, transparent: true, opacity: 0.55 })
-        ));
-
-        const pulsingRings = [];
-        const cities = [
-          { lat: -1.94, lon: 30.06, color: 0xf97316, r: 0.04, name: 'Kigali' },
-          { lat: 48.85, lon: 2.35, color: 0x3b82f6, r: 0.025, name: 'Paris' },
-          { lat: 51.5, lon: -0.12, color: 0x3b82f6, r: 0.025, name: 'London' },
-          { lat: 40.71, lon: -74.0, color: 0x3b82f6, r: 0.025, name: 'New York' },
-          { lat: 37.77, lon: -122.4, color: 0x8b5cf6, r: 0.022, name: 'San Francisco' },
-          { lat: 35.68, lon: 139.7, color: 0x8b5cf6, r: 0.022, name: 'Tokyo' },
-          { lat: -33.87, lon: 151.2, color: 0x10b981, r: 0.022, name: 'Sydney' },
-          { lat: 1.35, lon: 103.8, color: 0x10b981, r: 0.022, name: 'Singapore' },
-        ];
-        cities.forEach(({ lat, lon, color, r }) => {
-          const pos = toSphere(lat, lon, 1.53);
-          const dot = new THREE.Mesh(new THREE.SphereGeometry(r, 8, 8), new THREE.MeshBasicMaterial({ color }));
-          dot.position.copy(pos);
-          globeGroup.add(dot);
-          const ring = new THREE.Mesh(
-            new THREE.RingGeometry(r * 1.5, r * 2.2, 16),
-            new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.5, side: THREE.DoubleSide })
-          );
-          ring.position.copy(pos);
-          ring.lookAt(pos.clone().multiplyScalar(2));
-          ring.userData.pulse = Math.random() * Math.PI * 2;
-          globeGroup.add(ring);
-          pulsingRings.push(ring);
-        });
-
-        const kigali = toSphere(-1.94, 30.06, 1.54);
-        const targets = [
-          toSphere(48.85, 2.35, 1.54),
-          toSphere(40.71, -74.0, 1.54),
-          toSphere(35.68, 139.7, 1.54),
-          toSphere(1.35, 103.8, 1.54),
-        ];
-        targets.forEach((target, ti) => {
-          const pts = Array.from({ length: 51 }, (_, i) => {
-            const t = i / 50;
-            return new THREE.Vector3().lerpVectors(kigali, target, t).normalize().multiplyScalar(1.58 + Math.sin(t * Math.PI) * 0.2);
-          });
-          globeGroup.add(new THREE.Line(
-            new THREE.BufferGeometry().setFromPoints(pts),
-            new THREE.LineBasicMaterial({ color: ti === 0 ? 0xf97316 : 0x3b82f6, transparent: true, opacity: 0.22 })
-          ));
-        });
-
-        const orbitRings = [];
-        [
-          { r: 1.8, tube: 0.006, color: 0xf97316, tilt: 0.5, speed: 0.3 },
-          { r: 2.1, tube: 0.004, color: 0x3b82f6, tilt: -0.8, speed: -0.2 },
-          { r: 2.45, tube: 0.003, color: 0x8b5cf6, tilt: 1.2, speed: 0.15 },
-        ].forEach(({ r, tube, color, tilt, speed }) => {
-          const m = new THREE.Mesh(
-            new THREE.TorusGeometry(r, tube, 6, 80),
-            new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.4 })
-          );
-          m.rotation.x = tilt;
-          m.userData.speed = speed;
-          globeGroup.add(m);
-          orbitRings.push(m);
-        });
-
-        const pCount = 300;
-        const pPos = new Float32Array(pCount * 3);
-        for (let i = 0; i < pCount; i++) {
-          const th = Math.random() * Math.PI * 2;
-          const ph = Math.acos(2 * Math.random() - 1);
-          const rr = 2.3 + Math.random() * 1.8;
-          pPos[i*3] = rr * Math.sin(ph) * Math.cos(th);
-          pPos[i*3+1] = rr * Math.sin(ph) * Math.sin(th);
-          pPos[i*3+2] = rr * Math.cos(ph);
-        }
-        const pGeo = new THREE.BufferGeometry();
-        pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
-        const particles = new THREE.Points(pGeo,
-          new THREE.PointsMaterial({ color: 0xf97316, size: 0.014, transparent: true, opacity: 0.3 })
-        );
-        globeGroup.add(particles);
-
         globeGroup.position.set(2.2, 0, -1);
         scene.add(globeGroup);
 
@@ -215,16 +90,6 @@ function GlobeBackground() {
           elapsed += 0.016;
           globeGroup.rotation.y += 0.0018;
           globeGroup.rotation.x = Math.sin(elapsed * 0.15) * 0.08;
-
-          pulsingRings.forEach(r => {
-            r.userData.pulse += 0.04;
-            const s = 1 + 0.4 * Math.abs(Math.sin(r.userData.pulse));
-            r.scale.setScalar(s);
-            r.material.opacity = 0.5 * (1 - Math.abs(Math.sin(r.userData.pulse)) * 0.7);
-          });
-
-          orbitRings.forEach(r => { r.rotation.z += r.userData.speed * 0.012; });
-          particles.rotation.y += 0.0008;
         });
       },
     }
@@ -281,9 +146,9 @@ export default function Contact() {
   const [charCount, setCharCount] = useState(0);
 
   const contactInfo = useMemo(() => [
-    { id: 'email', icon: Mail, label: t('emailLabel', 'Email'), value: 'witnessfabrice@gmail.com', href: 'mailto:witnessfabrice@gmail.com', copyable: true, badge: 'Primary' },
-    { id: 'phone', icon: Phone, label: t('phoneLabel', 'Phone'), value: '+250 783 568 337', href: 'tel:+250783568337', copyable: true, badge: 'WhatsApp' },
-    { id: 'location', icon: MapPin, label: t('locationLabel', 'Location'), value: 'Kigali, Rwanda', href: 'https://maps.google.com/?q=Kigali+Rwanda', copyable: false, badge: 'East Africa' },
+    { id: 'email', icon: Mail, label: 'Email', value: 'witnessfabrice@gmail.com', href: 'mailto:witnessfabrice@gmail.com', copyable: true, badge: 'Primary' },
+    { id: 'phone', icon: Phone, label: 'Phone', value: '+250 783 568 337', href: 'tel:+250783568337', copyable: true, badge: 'WhatsApp' },
+    { id: 'location', icon: MapPin, label: 'Location', value: 'Kigali, Rwanda', href: 'https://maps.google.com/?q=Kigali+Rwanda', copyable: false, badge: 'East Africa' },
     { id: 'availability', icon: Calendar, label: 'Availability', value: 'Mon – Fri · 08:00 – 18:00 CAT', href: null, copyable: false, badge: 'UTC+2' },
     { id: 'response', icon: Clock, label: 'Response time', value: 'Usually within 24 hours', href: null, copyable: false, badge: 'Fast' },
   ], [t]);
@@ -304,13 +169,13 @@ export default function Contact() {
     { icon: Cloud, title: 'Cloud', desc: 'Vercel, Netlify, Cloudflare', color: '#06b6d4' },
   ];
 
-  // Quick replies with built-in icons instead of emojis
+  // Quick replies with Lucide icons
   const quickReplies = [
     { icon: Lightbulb, text: 'I have a project idea', color: '#f97316' },
     { icon: Handshake, text: "Let's collaborate", color: '#3b82f6' },
     { icon: Clipboard, text: 'Need a consultation', color: '#8b5cf6' },
-    { icon: BriefcaseIcon, text: 'Job opportunity', color: '#10b981' },
-    { icon: CoffeeIcon, text: 'Just saying hi!', color: '#ec4899' },
+    { icon: Briefcase, text: 'Job opportunity', color: '#10b981' },
+    { icon: Coffee, text: 'Just saying hi!', color: '#ec4899' },
   ];
 
   const stats = [
@@ -378,17 +243,17 @@ export default function Contact() {
       
       if (data.success) {
         setSubmitStatus('success');
-        setSubmitMessage('✓ Message sent successfully! I will get back to you soon.');
+        setSubmitMessage('Message sent successfully! I will get back to you soon.');
         setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
         setCharCount(0);
       } else {
         setSubmitStatus('error');
-        setSubmitMessage('✗ Failed to send message. Please try again.');
+        setSubmitMessage('Failed to send message. Please try again.');
       }
     } catch (err) {
       console.error('Submit error:', err);
       setSubmitStatus('error');
-      setSubmitMessage('✗ An unexpected error occurred. Please try again or contact me directly via email.');
+      setSubmitMessage('An unexpected error occurred. Please try again.');
     } finally {
       setIsSubmitting(false);
       setTimeout(() => {
@@ -582,8 +447,8 @@ export default function Contact() {
             {/* Tabs */}
             <div className="flex gap-2 mb-7 border-b border-white/10 pb-4">
               {[
-                { key: 'contact', label: '📝 Contact', icon: MessageSquare },
-                { key: 'collaborate', label: '🤝 Collaborate', icon: Users },
+                { key: 'contact', label: 'Contact', icon: MessageSquare },
+                { key: 'collaborate', label: 'Collaborate', icon: Users },
               ].map(({ key, label, icon: Icon }) => (
                 <button 
                   key={key} 
@@ -615,7 +480,7 @@ export default function Contact() {
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div className="flex flex-col gap-1.5">
                       <label className="text-[11px] font-bold uppercase tracking-widest text-white/45 ml-1 flex items-center gap-1">
-                        <User size={10} /> {t('nameLabel', 'Your name')} <span className="text-orange-500">*</span>
+                        <User size={10} /> Your name <span className="text-orange-500">*</span>
                       </label>
                       <input 
                         name="name" 
@@ -631,7 +496,7 @@ export default function Contact() {
                     </div>
                     <div className="flex flex-col gap-1.5">
                       <label className="text-[11px] font-bold uppercase tracking-widest text-white/45 ml-1 flex items-center gap-1">
-                        <Mail size={10} /> {t('emailLabel', 'Email')} <span className="text-orange-500">*</span>
+                        <Mail size={10} /> Email <span className="text-orange-500">*</span>
                       </label>
                       <input 
                         name="email" 
@@ -650,7 +515,7 @@ export default function Contact() {
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div className="flex flex-col gap-1.5">
                       <label className="text-[11px] font-bold uppercase tracking-widest text-white/45 ml-1 flex items-center gap-1">
-                        <Phone size={10} /> {t('phoneLabel', 'Phone')}
+                        <Phone size={10} /> Phone
                       </label>
                       <input 
                         name="phone" 
@@ -683,7 +548,7 @@ export default function Contact() {
 
                   <div className="flex flex-col gap-1.5">
                     <label className="text-[11px] font-bold uppercase tracking-widest text-white/45 ml-1 flex items-center gap-1">
-                      <MessageSquare size={10} /> {t('messageLabel', 'Message')} <span className="text-orange-500">*</span>
+                      <MessageSquare size={10} /> Message <span className="text-orange-500">*</span>
                     </label>
                     <textarea 
                       name="message" 
@@ -716,7 +581,7 @@ export default function Contact() {
                     </div>
                   </div>
 
-                  {/* Status Message - No Sparkles */}
+                  {/* Status Message */}
                   <AnimatePresence>
                     {submitMessage && (
                       <motion.div
@@ -747,20 +612,20 @@ export default function Contact() {
                       {isSubmitting ? (
                         <motion.span key="loading" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="flex items-center justify-center gap-2">
                           <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                          {t('loading', 'Sending…')}
+                          Sending...
                         </motion.span>
                       ) : submitStatus === 'success' ? (
                         <motion.span key="ok" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="flex items-center justify-center gap-2">
-                          <Check size={16} /> {t('sendSuccess', 'Message sent!')}
+                          <Check size={16} /> Message sent!
                         </motion.span>
                       ) : submitStatus === 'error' ? (
                         <motion.span key="err" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="flex items-center justify-center gap-2">
-                          <AlertCircle size={16} /> {t('sendError', 'Failed — please try again')}
+                          <AlertCircle size={16} /> Failed — please try again
                         </motion.span>
                       ) : (
                         <motion.span key="idle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center justify-center gap-2">
                           <Send size={15} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                          {t('sendMessage', 'Send Message')}
+                          Send Message
                           <ArrowUpRight size={14} className="opacity-55 group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
                         </motion.span>
                       )}
