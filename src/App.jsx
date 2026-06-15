@@ -1,6 +1,5 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import emailjs from '@emailjs/browser';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 
@@ -11,9 +10,6 @@ import ThreeJSErrorBoundary from './components/shared/ThreeJSErrorBoundary';
 import { webGLManager } from './hooks/WebGLManager';
 
 import { Loader2, Bot } from 'lucide-react';
-
-// ✅ Initialize EmailJS ONCE at app level
-emailjs.init('vNc8MXvN5Xl0NLVsy');
 
 // Lazy loaded sections with prefetch hints
 const Hero        = lazy(() => import('./components/sections/Hero'));
