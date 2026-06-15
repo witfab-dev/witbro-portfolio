@@ -15,7 +15,7 @@ import { Loader2, Bot } from 'lucide-react';
 // ✅ Initialize EmailJS ONCE at app level
 emailjs.init('vNc8MXvN5Xl0NLVsy');
 
-// Lazy loaded sections
+// Lazy loaded sections with prefetch hints
 const Hero        = lazy(() => import('./components/sections/Hero'));
 const About       = lazy(() => import('./components/sections/About'));
 const Projects    = lazy(() => import('./components/sections/Projects'));
@@ -35,10 +35,10 @@ const WELCOME_TEXT = "Hello, I'm Witness Fabrice. Welcome to my Digital Workspac
 
 // ─── Loading Screen ───────────────────────────────────────────
 const LoadingScreen = ({ onFinished }) => {
-  const [progress,     setProgress]     = useState(0);
-  const [phase,        setPhase]        = useState('manifesto');
-  const [welcomeText,  setWelcomeText]  = useState('');
-  const [done,         setDone]         = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [phase, setPhase] = useState('manifesto');
+  const [welcomeText, setWelcomeText] = useState('');
+  const [done, setDone] = useState(false);
 
   useEffect(() => {
     const id = setInterval(() => {
@@ -70,16 +70,18 @@ const LoadingScreen = ({ onFinished }) => {
   return (
     <motion.div
       exit={{ opacity: 0, scale: 1.04, filter: 'blur(16px)' }}
-      transition={{ duration: 0.7 }}
+      transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
       className="fixed inset-0 z-[999] bg-[#0c0b0a] flex items-center justify-center overflow-hidden"
     >
-      <div className="pointer-events-none absolute -top-40 left-1/4 w-[500px] h-[500px] rounded-full bg-orange-500/[0.07] blur-3xl" />
-      <div className="pointer-events-none absolute bottom-0 right-1/4 w-[400px] h-[400px] rounded-full bg-blue-500/[0.05] blur-3xl" />
+      {/* Ambient Background Effects */}
+      <div className="pointer-events-none absolute -top-40 left-1/4 w-[500px] h-[500px] rounded-full bg-orange-500/[0.07] blur-3xl animate-pulse" />
+      <div className="pointer-events-none absolute bottom-0 right-1/4 w-[400px] h-[400px] rounded-full bg-blue-500/[0.05] blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
 
+      {/* Grid Pattern */}
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.03]"
         style={{
-          backgroundImage: 'linear-gradient(rgba(255,255,255,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,1) 1px,transparent 1px)',
+          backgroundImage: 'linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)',
           backgroundSize: '60px 60px',
         }}
       />
@@ -88,32 +90,33 @@ const LoadingScreen = ({ onFinished }) => {
         {phase === 'manifesto' && (
           <motion.div
             key="manifesto"
-            initial={{ opacity: 0, y: 24 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -24 }}
-            transition={{ duration: 0.5 }}
+            exit={{ opacity: 0, y: -30 }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
             className="relative z-10 w-full max-w-lg px-4"
           >
-            <div className="bg-[#161513] border border-stone-800/70 rounded-3xl overflow-hidden shadow-2xl">
+            <div className="bg-gradient-to-br from-[#161513] to-[#1a1815] border border-stone-800/70 rounded-3xl overflow-hidden shadow-2xl shadow-orange-500/5">
               <div className="flex items-center gap-5 p-6 border-b border-stone-800/60">
-                <div className="w-16 h-16 shrink-0 rounded-2xl overflow-hidden border border-stone-700">
+                <div className="w-16 h-16 shrink-0 rounded-2xl overflow-hidden border-2 border-orange-500/30 shadow-lg">
                   <img src={PROFILE_IMG} alt="Witness" className="w-full h-full object-cover" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <h2 className="font-black text-xl text-stone-100 tracking-tight">WITNESS Fabrice</h2>
+                  <p className="text-[10px] text-orange-500/60 mt-0.5">Full-Stack Developer</p>
                 </div>
               </div>
               <div className="p-6">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="block w-3 h-px bg-orange-500" />
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="block w-6 h-px bg-orange-500" />
                   <p className="text-[9px] font-bold tracking-[0.2em] uppercase text-orange-500">Manifesto</p>
                 </div>
                 <blockquote className="text-sm text-stone-400 leading-relaxed italic border-l-2 border-orange-500/30 pl-4">
                   "{MANIFESTO}"
                 </blockquote>
-                <p className="mt-3 text-[10px] font-mono text-stone-600 text-right">— Witness Fabrice</p>
+                <p className="mt-4 text-[10px] font-mono text-stone-600 text-right">— Witness Fabrice</p>
               </div>
-              <div className="flex items-center gap-1.5 px-6 pb-5">
+              <div className="flex items-center justify-center gap-1.5 px-6 pb-5">
                 {[0, 0.15, 0.3].map((d, i) => (
                   <motion.span
                     key={i}
@@ -133,35 +136,46 @@ const LoadingScreen = ({ onFinished }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.6 }}
             className="relative z-20 text-center px-6 max-w-3xl mx-auto"
           >
             <motion.div
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ type: 'spring', stiffness: 260, damping: 20 }}
-              className="w-16 h-16 mx-auto mb-6 rounded-2xl overflow-hidden border-2 border-orange-500/40 shadow-lg shadow-orange-500/10"
+              initial={{ scale: 0, opacity: 0, rotate: -180 }}
+              animate={{ scale: 1, opacity: 1, rotate: 0 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 25, delay: 0.2 }}
+              className="w-20 h-20 mx-auto mb-6 rounded-2xl overflow-hidden border-2 border-orange-500/40 shadow-xl shadow-orange-500/20"
             >
               <img src={PROFILE_IMG} alt="Witness" className="w-full h-full object-cover" />
             </motion.div>
 
-            <h1 className="text-2xl sm:text-4xl md:text-5xl font-black text-stone-100 tracking-tight leading-tight">
+            <motion.h1 
+              className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-stone-100 tracking-tight leading-tight"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+            >
               {welcomeText}
               <motion.span
                 animate={{ opacity: [1, 0] }}
-                transition={{ repeat: Infinity, duration: 0.55 }}
-                className="inline-block w-[3px] h-8 sm:h-10 md:h-12 bg-orange-500 ml-2 align-middle rounded-sm"
+                transition={{ repeat: Infinity, duration: 0.8 }}
+                className="inline-block w-[3px] h-8 sm:h-10 md:h-12 bg-gradient-to-t from-orange-500 to-orange-400 ml-2 align-middle rounded-sm"
               />
-            </h1>
+            </motion.h1>
 
             {done && (
-              <motion.p
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mt-4 text-[11px] font-mono tracking-widest uppercase text-stone-600"
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.2 }}
+                className="mt-6 flex items-center justify-center gap-2"
               >
-                ✓ Ready
-              </motion.p>
+                <div className="w-6 h-6 rounded-full bg-green-500/20 flex items-center justify-center">
+                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                </div>
+                <p className="text-[11px] font-mono tracking-widest uppercase text-green-500/80">
+                  Ready to explore
+                </p>
+              </motion.div>
             )}
           </motion.div>
         )}
@@ -174,16 +188,37 @@ const LoadingScreen = ({ onFinished }) => {
 const SectionLoader = () => {
   const { t } = useLanguage();
   return (
-    <div className="h-screen flex items-center justify-center bg-[#0c0b0a]">
+    <div className="min-h-[400px] flex items-center justify-center bg-[#0c0b0a]">
       <div className="flex flex-col items-center gap-3">
-        <div className="w-10 h-10 rounded-full border-2 border-stone-800 border-t-orange-500 animate-spin" />
-        <span className="text-[10px] font-mono tracking-[0.2em] uppercase text-stone-600">
-          {t('loadingCoreModule', 'Loading…')}
+        <div className="relative w-12 h-12">
+          <div className="absolute inset-0 rounded-full border-2 border-stone-800 border-t-orange-500 animate-spin" />
+          <div className="absolute inset-2 rounded-full bg-orange-500/10 animate-pulse" />
+        </div>
+        <span className="text-[10px] font-mono tracking-[0.2em] uppercase text-stone-600 animate-pulse">
+          {t('loadingCoreModule', 'Loading')}...
         </span>
       </div>
     </div>
   );
 };
+
+// ─── Error Fallback ───────────────────────────────────────────
+const ErrorFallback = () => (
+  <div className="min-h-[400px] flex items-center justify-center bg-[#0c0b0a]">
+    <div className="text-center">
+      <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center">
+        <span className="text-3xl">⚠️</span>
+      </div>
+      <p className="text-sm text-stone-500">Something went wrong loading this section.</p>
+      <button 
+        onClick={() => window.location.reload()}
+        className="mt-4 px-4 py-2 rounded-lg bg-orange-500/20 text-orange-400 text-xs font-bold hover:bg-orange-500/30 transition"
+      >
+        Reload Page
+      </button>
+    </div>
+  </div>
+);
 
 // ─── App ──────────────────────────────────────────────────────
 function App() {
@@ -191,6 +226,7 @@ function App() {
   const [showVoiceAssistant, setShowVoiceAssistant] = useState(false);
 
   useEffect(() => {
+    // Cleanup WebGL contexts on unmount
     return () => {
       webGLManager.disposeAll();
     };
@@ -200,10 +236,11 @@ function App() {
     if (!loading) {
       const done = sessionStorage.getItem('welcomeDone');
       if (!done) {
-        setTimeout(() => {
+        const timer = setTimeout(() => {
           setShowVoiceAssistant(true);
           sessionStorage.setItem('welcomeDone', 'true');
         }, 1800);
+        return () => clearTimeout(timer);
       }
     }
   }, [loading]);
@@ -219,53 +256,83 @@ function App() {
               key="main"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.8 }}
-              className="relative min-h-screen bg-[#0c0b0a] transition-colors duration-500"
+              transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+              className="relative min-h-screen bg-[#0c0b0a]"
             >
+              {/* Ambient Background Gradients */}
               <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-                <div className="absolute top-0 left-[15%] w-[55vw] h-[55vw] max-w-[700px] max-h-[700px] rounded-full bg-orange-500/[0.04] blur-3xl" />
-                <div className="absolute bottom-0 right-[5%] w-[45vw] h-[45vw] max-w-[600px] max-h-[600px] rounded-full bg-blue-500/[0.04] blur-3xl" />
+                <div className="absolute top-0 left-[15%] w-[55vw] h-[55vw] max-w-[700px] max-h-[700px] rounded-full bg-orange-500/[0.03] blur-3xl animate-pulse" style={{ animationDuration: '8s' }} />
+                <div className="absolute bottom-0 right-[5%] w-[45vw] h-[45vw] max-w-[600px] max-h-[600px] rounded-full bg-blue-500/[0.02] blur-3xl animate-pulse" style={{ animationDuration: '10s', animationDelay: '2s' }} />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60vw] h-[60vw] max-w-[800px] max-h-[800px] rounded-full bg-purple-500/[0.01] blur-3xl" />
               </div>
 
+              {/* Subtle Grid Overlay */}
+              <div 
+                className="pointer-events-none fixed inset-0 opacity-[0.02] z-0"
+                style={{
+                  backgroundImage: 'linear-gradient(rgba(255,255,255,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.3) 1px, transparent 1px)',
+                  backgroundSize: '80px 80px',
+                }}
+              />
+
+              {/* AI Voice Assistant */}
               <VoiceAssistant
                 autoOpen={showVoiceAssistant}
                 onClose={() => setShowVoiceAssistant(false)}
               />
 
+              {/* Header */}
               <Header />
 
+              {/* Main Content */}
               <main className="relative z-10">
                 <Suspense fallback={<SectionLoader />}>
-                  <ThreeJSErrorBoundary><Hero /></ThreeJSErrorBoundary>
-                  <ThreeJSErrorBoundary><About /></ThreeJSErrorBoundary>
-                  <ThreeJSErrorBoundary><Projects /></ThreeJSErrorBoundary>
-                  <ThreeJSErrorBoundary><SkillsGalaxy /></ThreeJSErrorBoundary>
-                  <ThreeJSErrorBoundary><Experience /></ThreeJSErrorBoundary>
-                  <ThreeJSErrorBoundary><NewsFeed /></ThreeJSErrorBoundary>
-                  <ThreeJSErrorBoundary><Contact /></ThreeJSErrorBoundary>
+                  <ThreeJSErrorBoundary fallback={<ErrorFallback />}>
+                    <Hero />
+                  </ThreeJSErrorBoundary>
+                  <ThreeJSErrorBoundary fallback={<ErrorFallback />}>
+                    <About />
+                  </ThreeJSErrorBoundary>
+                  <ThreeJSErrorBoundary fallback={<ErrorFallback />}>
+                    <Projects />
+                  </ThreeJSErrorBoundary>
+                  <ThreeJSErrorBoundary fallback={<ErrorFallback />}>
+                    <SkillsGalaxy />
+                  </ThreeJSErrorBoundary>
+                  <ThreeJSErrorBoundary fallback={<ErrorFallback />}>
+                    <Experience />
+                  </ThreeJSErrorBoundary>
+                  <ThreeJSErrorBoundary fallback={<ErrorFallback />}>
+                    <NewsFeed />
+                  </ThreeJSErrorBoundary>
+                  <ThreeJSErrorBoundary fallback={<ErrorFallback />}>
+                    <Contact />
+                  </ThreeJSErrorBoundary>
                 </Suspense>
               </main>
 
+              {/* Footer */}
               <Footer />
 
+              {/* Voice Assistant Toggle Button */}
               {!showVoiceAssistant && (
                 <motion.button
                   layoutId="assistant-btn"
                   initial={{ scale: 0, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1, y: [0, -8, 0] }}
                   transition={{
-                    scale: { type: 'spring', stiffness: 260, damping: 20 },
-                    opacity: { duration: 0.3 },
+                    scale: { type: 'spring', stiffness: 300, damping: 25 },
+                    opacity: { duration: 0.4 },
                     y: { duration: 4, repeat: Infinity, ease: 'easeInOut', delay: 0.5 },
                   }}
-                  whileHover={{ scale: 1.1, boxShadow: '0 0 28px rgba(249,115,22,0.4)' }}
+                  whileHover={{ scale: 1.12, boxShadow: '0 0 32px rgba(249,115,22,0.5)' }}
                   whileTap={{ scale: 0.92 }}
                   onClick={() => setShowVoiceAssistant(true)}
                   aria-label="Open AI Assistant"
-                  className="fixed bottom-8 right-8 z-50 w-14 h-14 flex items-center justify-center bg-orange-500 hover:bg-orange-600 text-white rounded-2xl shadow-xl shadow-orange-500/30 border border-orange-400/30 transition-colors"
+                  className="fixed bottom-8 right-8 z-50 w-14 h-14 flex items-center justify-center bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-2xl shadow-2xl shadow-orange-500/40 border border-orange-400/30 transition-all duration-300 group"
                 >
-                  <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-green-400 rounded-full border-2 border-[#0c0b0a]" />
-                  <Bot size={22} />
+                  <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-[#0c0b0a] animate-pulse" />
+                  <Bot size={22} className="group-hover:scale-110 transition-transform duration-300" />
                 </motion.button>
               )}
             </motion.div>
