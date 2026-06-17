@@ -158,15 +158,6 @@ const Projects = () => {
         <div className="absolute bottom-0 left-0 w-[500px] h-[500px] rounded-full bg-blue-500/[0.03] blur-3xl" />
       </div>
 
-      {/* Grid Pattern */}
-      <div 
-        className="pointer-events-none absolute inset-0 opacity-[0.03]"
-        style={{
-          backgroundImage: `linear-gradient(rgba(255,255,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,1) 1px, transparent 1px)`,
-          backgroundSize: '80px 80px',
-        }}
-      />
-
       <div className="relative max-w-[1400px] mx-auto">
 
         {/* ── Header Section ─────────────────────────── */}
