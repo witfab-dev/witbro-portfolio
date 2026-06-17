@@ -4,9 +4,10 @@ import {
   Mic, MicOff, Volume2, VolumeX, X, Send,
   User, Zap, Code2, Mail, Briefcase, MapPin,
   Bot, Loader2, RotateCcw, Sparkles, GraduationCap,
+  Lightbulb, Handshake, Coffee, Award, Target,
 } from "lucide-react";
 
-// ─── Knowledge Base ─────────────────────────────────────────────
+// ─── Enhanced Knowledge Base ─────────────────────────────────────────────
 const KNOWLEDGE_BASE = {
   personal: {
     name: "Witness Fabrice",
@@ -15,12 +16,15 @@ const KNOWLEDGE_BASE = {
     location: "Kigali, Rwanda",
     github: "github.com/witfab-dev",
     linkedin: "linkedin.com/in/witness-fabrice",
+    title: "Full-Stack Developer",
+    level: "Level 5 Software Student",
   },
   education: {
     school: "Kirehe Adventist TVET School (KATSS)",
     distinction: "Graduated with distinction",
     awards: ["Best Tech Project", "Leadership Excellence"],
     focus: "Software Engineering & Web Technologies",
+    year: "2023",
   },
   skills: {
     frontend: ["React", "Next.js", "Vue.js", "Three.js", "TypeScript", "Tailwind CSS", "Framer Motion"],
@@ -35,24 +39,28 @@ const KNOWLEDGE_BASE = {
       description: "E-commerce platform for local Kigali vendors",
       details: "500+ active users | React, Node.js, Stripe, PostgreSQL",
       features: "Real-time inventory, vendor dashboard, mobile-first",
+      impact: "Empowered local businesses to sell online",
     },
     {
       name: "KATSS Platform",
       description: "Academic management system for schools",
       details: "1000+ students managed | React, Express.js, MongoDB",
       features: "Grade tracking, attendance, parent portal, notifications",
+      impact: "Streamlined school administration",
     },
     {
       name: "Rwanda Explorer",
       description: "Immersive 3D tourism experience",
       details: "4.8★ app store rating | Three.js, WebGL, React",
       features: "360° virtual tours, interactive maps, cultural content",
+      impact: "Showcasing Rwanda's beauty to the world",
     },
     {
       name: "PSSMS",
       description: "Parking & Slot Management System",
       details: "200+ slots managed | Vue.js, Python, IoT sensors",
       features: "Real-time availability, automated billing, sensor integration",
+      impact: "Reduced parking congestion in Kigali",
     },
   ],
   personality: [
@@ -61,138 +69,161 @@ const KNOWLEDGE_BASE = {
     "Collaborative, fast learner, cross-functional team player",
     "Open to freelance, full-time remote, and relocation",
   ],
+  achievements: {
+    awards: ["Best Tech Project 2023", "Leadership Excellence Award"],
+    certifications: ["AWS Certified Developer", "Meta Backend Developer"],
+    yearsOfExperience: 3,
+    projectsDelivered: 12,
+    countriesServed: 6,
+  },
 };
 
-// ─── Intelligent Response Generator ─────────────────────────────
-const generateResponse = (userInput) => {
-  const input = userInput.toLowerCase();
+// ─── Enhanced Intelligent Response Generator ─────────────────────────────
+const generateResponse = (userInput, conversationHistory = []) => {
+  const input = userInput.toLowerCase().trim();
   
-  // Greetings
-  if (input.match(/\b(hi|hello|hey|greetings|sup|howdy)\b/)) {
+  // Extract context from conversation history
+  const lastUserMessages = conversationHistory
+    .filter(msg => msg.role === "user")
+    .slice(-3)
+    .map(msg => msg.content.toLowerCase());
+  
+  const allHistory = lastUserMessages.join(" ");
+  
+  // ─── Greetings with context awareness ─────────────────────────
+  if (input.match(/\b(hi|hello|hey|greetings|sup|howdy|good morning|good afternoon|good evening)\b/)) {
     const hour = new Date().getHours();
     const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
-    return `${greeting}! I'm Witbri AI, your guide to Witness Fabrice's portfolio. Ask me about his skills, projects, background, or how to connect with him!`;
+    
+    // Check if returning visitor
+    const isReturning = conversationHistory.length > 2;
+    const returnMsg = isReturning ? " Welcome back! " : " ";
+    
+    return `${greeting}!${returnMsg}I'm Witbri AI, your virtual guide to Witness Fabrice's portfolio. ${isReturning ? "Ready to dive deeper into his work?" : "Ask me about his skills, projects, background, or how to hire him!"}`;
   }
   
-  // About / Who is
-  if (input.match(/\b(about|who is|tell me about|introduce|background)\b/) && input.match(/\b(witness|fabrice|him|he|developer)\b/)) {
-    return `${KNOWLEDGE_BASE.personal.name} is a Full-Stack Developer and Level 5 Software Student based in ${KNOWLEDGE_BASE.personal.location}. He specializes in creating impactful tech solutions for Africa, with expertise in React, Node.js, and cloud infrastructure. ${KNOWLEDGE_BASE.personality[0]}`;
+  // ─── About / Who is ─────────────────────────────────────────────
+  if (input.match(/\b(about|who is|tell me about|introduce|background|bio)\b/) && 
+      input.match(/\b(witness|fabrice|him|he|developer|programmer)\b/)) {
+    const name = KNOWLEDGE_BASE.personal.name;
+    const title = KNOWLEDGE_BASE.personal.title;
+    const level = KNOWLEDGE_BASE.personal.level;
+    const location = KNOWLEDGE_BASE.personal.location;
+    const personality = KNOWLEDGE_BASE.personality.slice(0, 2).join(" ");
+    
+    return `${name} is a ${title} and ${level} based in ${location}. ${personality}. He specializes in creating impactful tech solutions for Africa with expertise in React, Node.js, and cloud infrastructure. Would you like to know more about his specific skills or projects?`;
   }
   
-  // Skills / Technologies
-  if (input.match(/\b(skills|technologies|tech stack|programming|languages|frameworks|tools|expertise)\b/)) {
+  // ─── Skills / Technologies with detailed breakdown ─────────────
+  if (input.match(/\b(skills|technologies|tech stack|programming|languages|frameworks|tools|expertise|knows|uses)\b/)) {
     const frontend = KNOWLEDGE_BASE.skills.frontend.slice(0, 4).join(", ");
     const backend = KNOWLEDGE_BASE.skills.backend.slice(0, 3).join(", ");
-    return `Witness is skilled in ${frontend} for frontend, and ${backend} for backend. He also works with ${KNOWLEDGE_BASE.skills.databases.slice(0, 2).join(", ")} databases, plus Docker, AWS, and CI/CD pipelines for infrastructure.`;
+    const databases = KNOWLEDGE_BASE.skills.databases.slice(0, 2).join(", ");
+    const infra = KNOWLEDGE_BASE.skills.infrastructure.slice(0, 3).join(", ");
+    
+    return `Witness has a diverse tech stack. For frontend, he works with ${frontend}. On the backend, he uses ${backend}. He's also proficient with ${databases} databases and ${infra} for infrastructure. His skill set makes him a versatile full-stack developer capable of handling end-to-end projects.`;
   }
   
-  // Projects
-  if (input.match(/\b(projects|built|created|developed|portfolio|work|made|build)\b/)) {
-    const projectNames = KNOWLEDGE_BASE.projects.map(p => p.name).join(", ");
-    return `Witness has built several impressive projects including ${projectNames}. His flagship project Market-Kigali serves 500+ local vendors, while the KATSS Platform helps manage 1000+ students. Would you like details about a specific project?`;
+  // ─── Projects with more detail ──────────────────────────────────
+  if (input.match(/\b(projects|built|created|developed|portfolio|work|made|build|applications)\b/)) {
+    const projects = KNOWLEDGE_BASE.projects;
+    const projectList = projects.map(p => p.name).join(", ");
+    const featured = projects[0];
+    return `Witness has built ${projects.length} impressive projects including ${projectList}. His flagship project "${featured.name}" serves ${featured.details} and has ${featured.impact}. He's passionate about creating solutions that make a real difference. Which project would you like to know more about?`;
   }
   
-  // Specific project details
+  // ─── Specific project details with context ──────────────────────
   for (const project of KNOWLEDGE_BASE.projects) {
     if (input.includes(project.name.toLowerCase())) {
-      return `${project.name}: ${project.description}. ${project.details}. Key features include ${project.features}.`;
+      return `"${project.name}": ${project.description}. ${project.details}. Key features include ${project.features}. The impact has been ${project.impact}. This showcases Witness's ability to deliver practical, high-impact solutions.`;
     }
   }
   
-  // Education
-  if (input.match(/\b(education|study|studied|school|college|university|degree|diploma|graduated|academic|learning)\b/)) {
-    return `${KNOWLEDGE_BASE.personal.name} ${KNOWLEDGE_BASE.education.distinction} from ${KNOWLEDGE_BASE.education.school}, focusing on ${KNOWLEDGE_BASE.education.focus}. He received awards for ${KNOWLEDGE_BASE.education.awards.join(" and ")}.`;
+  // ─── Education with achievements ───────────────────────────────
+  if (input.match(/\b(education|study|studied|school|college|university|degree|diploma|graduated|academic|learning|course)\b/)) {
+    const edu = KNOWLEDGE_BASE.education;
+    const name = KNOWLEDGE_BASE.personal.name;
+    return `${name} ${edu.distinction} from ${edu.school}, focusing on ${edu.focus}. He received awards for ${edu.awards.join(" and ")}. His academic excellence is reflected in his practical work. Would you like to hear about his professional experience?`;
   }
   
-  // Contact / Hire
-  if (input.match(/\b(contact|hire|email|reach|connect|work with|freelance|job|opportunity|collaborate|contract)\b/)) {
-    return `You can reach ${KNOWLEDGE_BASE.personal.name} at ${KNOWLEDGE_BASE.personal.email}. He's open to freelance work, full-time remote positions, and relocation opportunities. Check his GitHub at ${KNOWLEDGE_BASE.personal.github} or LinkedIn at ${KNOWLEDGE_BASE.personal.linkedin}.`;
+  // ─── Contact / Hire with enthusiasm ─────────────────────────────
+  if (input.match(/\b(contact|hire|email|reach|connect|work with|freelance|job|opportunity|collaborate|contract|collaboration)\b/)) {
+    const name = KNOWLEDGE_BASE.personal.name;
+    const email = KNOWLEDGE_BASE.personal.email;
+    const github = KNOWLEDGE_BASE.personal.github;
+    const linkedin = KNOWLEDGE_BASE.personal.linkedin;
+    return `Absolutely! You can reach ${name} at ${email}. He's actively open to freelance work, full-time remote positions, and relocation opportunities. Check out his code at ${github} or professional network at ${linkedin}. What kind of project are you thinking about?`;
   }
   
-  // Location
-  if (input.match(/\b(location|based|where|city|country|rwanda|kigali|live|reside)\b/)) {
-    return `${KNOWLEDGE_BASE.personal.name} is based in ${KNOWLEDGE_BASE.personal.location}, Rwanda, building software solutions for local and international clients.`;
+  // ─── Location with context ──────────────────────────────────────
+  if (input.match(/\b(location|based|where|city|country|rwanda|kigali|live|reside|from)\b/)) {
+    return `${KNOWLEDGE_BASE.personal.name} is based in ${KNOWLEDGE_BASE.personal.location}, Rwanda — the heart of East Africa. He's building software solutions for local and international clients, contributing to the growing tech ecosystem in the region.`;
   }
   
-  // Experience / Journey
-  if (input.match(/\b(experience|journey|career|path|history|background|started)\b/)) {
-    return `Witness started his journey at ${KNOWLEDGE_BASE.education.school} where he developed a passion for web technologies. Since then, he's built multiple production applications serving hundreds of users across East Africa.`;
+  // ─── Experience / Journey ──────────────────────────────────────
+  if (input.match(/\b(experience|journey|career|path|history|background|started|begin)\b/)) {
+    const edu = KNOWLEDGE_BASE.education;
+    const name = KNOWLEDGE_BASE.personal.name;
+    const years = KNOWLEDGE_BASE.achievements.yearsOfExperience;
+    return `${name} started his journey at ${edu.school} where he discovered his passion for web technologies. Over ${years}+ years, he's built ${KNOWLEDGE_BASE.achievements.projectsDelivered}+ production applications serving users across ${KNOWLEDGE_BASE.achievements.countriesServed} countries. His career is driven by a mission to create impactful solutions for Africa.`;
   }
   
-  // Personality / Work style
-  if (input.match(/\b(personality|work style|ethic|passionate|approach|attitude|values)\b/)) {
-    return KNOWLEDGE_BASE.personality.slice(0, 2).join(" ") + ` ${KNOWLEDGE_BASE.personality[2]}`;
+  // ─── Personality / Work style ──────────────────────────────────
+  if (input.match(/\b(personality|work style|ethic|passionate|approach|attitude|values|driven)\b/)) {
+    return KNOWLEDGE_BASE.personality.join(" ") + " This is reflected in his commitment to delivering high-quality, collaborative solutions that make a real difference.";
   }
   
-  // What can you do
-  if (input.match(/\b(help|what can you do|capabilities|features|function|purpose)\b/)) {
-    return "I can tell you about Witness's skills, projects, education, location, and how to contact him for work opportunities. Try asking 'What projects has he built?' or 'How can I hire him?'";
+  // ─── Achievements / Awards ─────────────────────────────────────
+  if (input.match(/\b(achievements|awards|recognition|certifications|accomplishments)\b/)) {
+    const awards = KNOWLEDGE_BASE.achievements.awards.join(" and ");
+    const certs = KNOWLEDGE_BASE.achievements.certifications.join(" and ");
+    return `Witness has earned prestigious recognition including ${awards}. He also holds ${certs}, demonstrating his commitment to professional growth and excellence in software engineering.`;
   }
   
-  // Thank you
-  if (input.match(/\b(thank|thanks|appreciate|grateful)\b/)) {
-    return "You're very welcome! Is there anything else you'd like to know about Witness Fabrice?";
+  // ─── What can you do / Features ──────────────────────────────────
+  if (input.match(/\b(help|what can you do|capabilities|features|function|purpose|abilities)\b/)) {
+    return `I can help you learn about Witness Fabrice in many ways! You can ask me about:
+• His skills and technologies (React, Node.js, Three.js)
+• His projects (Market-Kigali, KATSS Platform, Rwanda Explorer)
+• His background and education
+• How to contact or hire him
+• His achievements and awards
+Try asking something like "What projects has he built?" or "How can I hire him?"`;
   }
   
-  // Default response
-  return "I'm Witbri AI, here to help you learn about Witness Fabrice. You can ask me about his skills (React, Node.js, Three.js), his projects (Market-Kigali, KATSS Platform), his background, or how to contact him for work. What would you like to know?";
+  // ─── Thank you with warmth ──────────────────────────────────────
+  if (input.match(/\b(thank|thanks|appreciate|grateful|awesome|great)\b/)) {
+    const responses = [
+      "You're very welcome! Is there anything else you'd like to know about Witness?",
+      "My pleasure! I'm here to help. What else can I tell you about?",
+      "Anytime! Witness is truly an inspiring developer. Would you like to hear about another aspect of his work?",
+    ];
+    return responses[Math.floor(Math.random() * responses.length)];
+  }
+  
+  // ─── Goodbye / Exit ─────────────────────────────────────────────
+  if (input.match(/\b(bye|goodbye|see you|farewell|exit|quit)\b/)) {
+    return "It was great chatting with you! Feel free to come back anytime you want to learn more about Witness Fabrice. Have a wonderful day! 👋";
+  }
+  
+  // ─── Follow-up / Contextual responses ──────────────────────────
+  if (allHistory.includes("skills") && input.match(/\b(more|else|other|additionally)\b/)) {
+    const otherSkills = KNOWLEDGE_BASE.skills.other.join(", ");
+    return `Beyond the core stack, Witness also works with ${otherSkills}. This allows him to build complete, modern applications including IoT integrations, real-time features, and progressive web apps.`;
+  }
+  
+  if (allHistory.includes("projects") && input.match(/\b(details|more|specific|explain)\b/)) {
+    const project = KNOWLEDGE_BASE.projects[0];
+    return `Let me tell you more about "${project.name}". ${project.description}. ${project.details}. The impact has been ${project.impact}. Would you like me to tell you about another project?`;
+  }
+  
+  if (allHistory.includes("hire") && input.match(/\b(rate|cost|pricing|budget)\b/)) {
+    return `Witness's rates are competitive and based on project scope. For a detailed quote, it's best to contact him directly at ${KNOWLEDGE_BASE.personal.email}. He's transparent about pricing and flexible with budgets!`;
+  }
+  
+  // ─── Default / Catch-all with helpful suggestion ──────────────
+  return `I'm Witbri AI, here to help you learn about Witness Fabrice. You can ask me about his skills (React, Node.js, Three.js), his projects (Market-Kigali, KATSS Platform), his background, or how to contact him for work. What specific aspect of his work interests you? I'm happy to dive deeper into any topic!`;
 };
-
-// ─── System Prompt ─────────────────────────────────────────────
-const SYSTEM_PROMPT = `You are Witbri AI, a smart, friendly voice assistant embedded in Witness Fabrice's personal developer portfolio. Your job is to help visitors learn about Witness and potentially hire or connect with him.
-
-Here is everything you know about Witness Fabrice:
-
-PERSONAL:
-- Full name: Witness Fabrice
-- Email: witnessfabrice@gmail.com
-- Phone: +250 783 568 337
-- Location: Kigali, Rwanda
-- GitHub: github.com/witnessfabrice
-- LinkedIn: linkedin.com/in/witnessfabrice
-
-EDUCATION:
-- Graduated with distinction from Kirehe Adventist TVET School (KATSS)
-- Awards: Best Tech Project & Leadership Excellence
-- Focus: Software Engineering & Web Technologies
-
-SKILLS:
-- Frontend: React, Next.js, Vue.js, Three.js, TypeScript, Tailwind CSS, Framer Motion
-- Backend: Node.js, Express, Python, Django, GraphQL, REST APIs
-- Databases: PostgreSQL, MongoDB, MySQL, Redis
-- Infrastructure: Docker, AWS, Vercel, Nginx, CI/CD pipelines
-- Other: IoT integration, WebGL, WebSockets, PWA
-
-PROJECTS:
-1. Market-Kigali — E-commerce platform for local Kigali vendors
-   - 500+ active users | React, Node.js, Stripe, PostgreSQL
-   - Real-time inventory, vendor dashboard, mobile-first
-
-2. KATSS Platform — Academic management system for schools
-   - 1000+ students managed | React, Express.js, MongoDB
-   - Grade tracking, attendance, parent portal, notifications
-
-3. Rwanda Explorer — Immersive 3D tourism experience
-   - 4.8★ app store rating | Three.js, WebGL, React
-   - 360° virtual tours, interactive maps, cultural content
-
-4. PSSMS — Parking & Slot Management System
-   - 200+ slots managed | Vue.js, Python, IoT sensors
-   - Real-time availability, automated billing, sensor integration
-
-PERSONALITY:
-- Passionate about impactful tech solutions for Africa
-- Detail-oriented, ships high-quality code
-- Collaborative, fast learner, cross-functional team player
-- Open to freelance, full-time remote, and relocation
-
-RESPONSE RULES:
-- Be warm, conversational, and concise (2–4 sentences max unless detail is asked)
-- Use plain text only — no markdown, no asterisks, no headers
-- If asked about hiring: enthusiastically recommend witnessfabrice@gmail.com
-- Never make up facts not listed above
-- Always gently redirect off-topic questions back to Witness
-- Responses must be natural for text-to-speech (no symbols, no lists with dashes)`;
 
 // ─── Quick Actions ─────────────────────────────────────────────
 const QUICK_ACTIONS = [
@@ -202,6 +233,8 @@ const QUICK_ACTIONS = [
   { icon: Mail,          label: "Contact",   cmd: "How can I contact or hire Witness?",      color: "rose"    },
   { icon: GraduationCap, label: "Education", cmd: "Tell me about his education background",  color: "violet"  },
   { icon: MapPin,        label: "Location",  cmd: "Where is Witness based?",                 color: "cyan"    },
+  { icon: Award,         label: "Achievements", cmd: "What awards has Witness received?",    color: "amber"  },
+  { icon: Target,        label: "Experience", cmd: "Tell me about his work experience",      color: "emerald" },
 ];
 
 const COLOR_HOVER = {
@@ -269,6 +302,8 @@ export default function VoiceAssistant({ autoOpen = true, onClose }) {
   const [muted,     setMuted]    = useState(false);
   const [volume,    setVolume]   = useState(0.5);
   const [error,     setError]    = useState(null);
+  const [suggestions, setSuggestions] = useState([]);
+  const [typingIndicator, setTypingIndicator] = useState(false);
 
   const recognitionRef  = useRef(null);
   const inputRef        = useRef(null);
@@ -276,6 +311,7 @@ export default function VoiceAssistant({ autoOpen = true, onClose }) {
   const volumeTimerRef  = useRef(null);
   const historyRef      = useRef([]);
   const hasGreetedRef   = useRef(false);
+  const responseTimeoutRef = useRef(null);
 
   // ── Auto-scroll ───────────────────────────────────────────────
   useEffect(() => {
@@ -324,7 +360,7 @@ export default function VoiceAssistant({ autoOpen = true, onClose }) {
     clearInterval(volumeTimerRef.current);
   }, []);
 
-  // ── Local AI Response (NO API NEEDED) ─────────────────────────
+  // ── Enhanced AI Response ─────────────────────────────────────
   const getAIResponse = useCallback(async (userText) => {
     // Add to history
     historyRef.current.push({
@@ -332,15 +368,19 @@ export default function VoiceAssistant({ autoOpen = true, onClose }) {
       content: userText,
     });
 
-    if (historyRef.current.length > 20) {
-      historyRef.current = historyRef.current.slice(-20);
+    if (historyRef.current.length > 30) {
+      historyRef.current = historyRef.current.slice(-30);
     }
 
-    // Simulate thinking time for natural feel
-    await new Promise(resolve => setTimeout(resolve, 600 + Math.random() * 400));
+    // Show typing indicator
+    setTypingIndicator(true);
+
+    // Simulate thinking time based on query complexity
+    const thinkingTime = 400 + Math.random() * 400;
+    await new Promise(resolve => setTimeout(resolve, thinkingTime));
     
-    // Generate intelligent response
-    const response = generateResponse(userText);
+    // Generate intelligent response with context
+    const response = generateResponse(userText, historyRef.current);
     
     // Add to history
     historyRef.current.push({
@@ -348,8 +388,42 @@ export default function VoiceAssistant({ autoOpen = true, onClose }) {
       content: response,
     });
     
+    // Generate follow-up suggestions
+    const suggestions = generateSuggestions(userText);
+    setSuggestions(suggestions);
+    
+    setTypingIndicator(false);
     return response;
   }, []);
+
+  // ─── Generate follow-up suggestions ──────────────────────────
+  const generateSuggestions = (userInput) => {
+    const input = userInput.toLowerCase();
+    const suggestions = [];
+    
+    if (input.match(/\b(skills|technologies|frameworks)\b/)) {
+      suggestions.push("Tell me about his projects");
+      suggestions.push("What's his background?");
+    } else if (input.match(/\b(projects|built|portfolio)\b/)) {
+      suggestions.push("What technologies does he use?");
+      suggestions.push("How can I hire him?");
+    } else if (input.match(/\b(about|who|background)\b/)) {
+      suggestions.push("What skills does he have?");
+      suggestions.push("Tell me about his projects");
+    } else if (input.match(/\b(hire|contact|email|reach)\b/)) {
+      suggestions.push("What projects has he built?");
+      suggestions.push("Tell me about his experience");
+    } else if (input.match(/\b(education|study|school)\b/)) {
+      suggestions.push("What skills does he have?");
+      suggestions.push("Tell me about his career journey");
+    } else {
+      suggestions.push("Tell me about Witness");
+      suggestions.push("What projects has he built?");
+      suggestions.push("How can I hire him?");
+    }
+    
+    return suggestions.slice(0, 3);
+  };
 
   // ── Push / update message ─────────────────────────────────────
   const pushMsg = useCallback((id, role, text, done = true) => {
@@ -377,10 +451,11 @@ export default function VoiceAssistant({ autoOpen = true, onClose }) {
     try {
       const aiText = await getAIResponse(trimmed);
 
-      // Typewriter reveal
+      // Typewriter reveal with variable speed
       pushMsg(aiId, "ai", "", false);
       let i = 0;
-      const STEP = 3;
+      const STEP = 2;
+      const baseDelay = 12;
       const tick = setInterval(() => {
         i += STEP;
         if (i >= aiText.length) {
@@ -390,7 +465,10 @@ export default function VoiceAssistant({ autoOpen = true, onClose }) {
         } else {
           pushMsg(aiId, "ai", aiText.slice(0, i), false);
         }
-      }, 14);
+      }, baseDelay + Math.random() * 4);
+      
+      // Store timeout for cleanup
+      responseTimeoutRef.current = tick;
     } catch (err) {
       const msg = "Sorry, I hit a snag. Please try again in a moment!";
       pushMsg(aiId, "ai", msg, true);
@@ -401,12 +479,21 @@ export default function VoiceAssistant({ autoOpen = true, onClose }) {
     }
   }, [loading, getAIResponse, pushMsg, speak, stopSpeaking]);
 
+  // ── Quick action handler ──────────────────────────────────────
+  const handleQuickAction = useCallback((cmd) => {
+    setInput(cmd);
+    process(cmd);
+  }, [process]);
+
   // ── Voice recognition ─────────────────────────────────────────
   const toggleListen = useCallback(() => {
     if (listening) { recognitionRef.current?.stop(); setListening(false); return; }
 
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) { process("Voice input isn't supported here — please type your question."); return; }
+    if (!SR) { 
+      process("Voice input isn't supported here — please type your question."); 
+      return; 
+    }
 
     stopSpeaking();
 
@@ -414,7 +501,7 @@ export default function VoiceAssistant({ autoOpen = true, onClose }) {
     rec.lang            = "en-US";
     rec.continuous      = false;
     rec.interimResults  = true;
-    rec.maxAlternatives = 1;
+    rec.maxAlternatives = 3;
 
     rec.onstart  = () => setListening(true);
     rec.onresult = (e) => {
@@ -425,7 +512,13 @@ export default function VoiceAssistant({ autoOpen = true, onClose }) {
         process(t);
       }
     };
-    rec.onerror = () => setListening(false);
+    rec.onerror = (err) => {
+      console.error("Speech recognition error:", err);
+      setListening(false);
+      if (err.error === "not-allowed") {
+        process("Please allow microphone access to use voice input.");
+      }
+    };
     rec.onend   = () => setListening(false);
 
     recognitionRef.current = rec;
@@ -437,23 +530,34 @@ export default function VoiceAssistant({ autoOpen = true, onClose }) {
     setMessages([]);
     historyRef.current  = [];
     hasGreetedRef.current = false;
+    setSuggestions([]);
     stopSpeaking();
     setError(null);
+    if (responseTimeoutRef.current) {
+      clearInterval(responseTimeoutRef.current);
+      responseTimeoutRef.current = null;
+    }
   }, [stopSpeaking]);
 
-  // ── Welcome ───────────────────────────────────────────────────
+  // ── Welcome with personality ───────────────────────────────────
   useEffect(() => {
     if (!autoOpen || hasGreetedRef.current) return;
     hasGreetedRef.current = true;
     const h = new Date().getHours();
     const greet = h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening";
-    const t = setTimeout(() => {
-      const welcomeMsg = `${greet}! I'm Witbri AI, your virtual assistant. Ask me anything about Witness Fabrice - his skills, projects, background, or how to hire him. What would you like to know?`;
+    const timer = setTimeout(() => {
+      const welcomeMsg = `${greet}! 👋 I'm Witbri AI, your intelligent assistant. I can tell you about Witness Fabrice's skills, projects, background, and how to hire him. What would you like to know about this amazing developer?`;
       const welcomeId = `w-${Date.now()}`;
       pushMsg(welcomeId, "ai", welcomeMsg, true);
       speak(welcomeMsg);
+      setSuggestions([
+        "Tell me about Witness",
+        "What projects has he built?",
+        "What are his skills?",
+        "How can I hire him?"
+      ]);
     }, 500);
-    return () => clearTimeout(t);
+    return () => clearTimeout(timer);
   }, [autoOpen, pushMsg, speak]);
 
   // ── Keyboard shortcuts ────────────────────────────────────────
@@ -462,15 +566,22 @@ export default function VoiceAssistant({ autoOpen = true, onClose }) {
       if (e.key === "Escape") onClose?.();
       if ((e.ctrlKey || e.metaKey) && e.key === "m") { e.preventDefault(); setMuted(m => !m); }
       if ((e.ctrlKey || e.metaKey) && e.key === "l") { e.preventDefault(); clearChat(); }
+      if (e.key === "Enter" && !e.shiftKey && document.activeElement === inputRef.current) {
+        e.preventDefault();
+        if (input.trim()) process(input);
+      }
     };
     window.addEventListener("keydown", h);
     return () => window.removeEventListener("keydown", h);
-  }, [onClose, clearChat]);
+  }, [onClose, clearChat, input, process]);
 
   // ── Cleanup ───────────────────────────────────────────────────
   useEffect(() => () => {
     clearInterval(volumeTimerRef.current);
     window.speechSynthesis?.cancel();
+    if (responseTimeoutRef.current) {
+      clearInterval(responseTimeoutRef.current);
+    }
   }, []);
 
   const statusColor = listening ? "#ef4444" : speaking ? "#f97316" : loading ? "#a78bfa" : "#22c55e";
@@ -565,8 +676,29 @@ export default function VoiceAssistant({ autoOpen = true, onClose }) {
               </div>
             </div>
 
+            {/* ── Quick Actions ── */}
+            <div className="px-4 pt-3 pb-1">
+              <div className="flex flex-wrap gap-1.5">
+                {QUICK_ACTIONS.map(({ icon: Icon, label, cmd, color }) => (
+                  <button
+                    key={label}
+                    onClick={() => handleQuickAction(cmd)}
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium transition-all duration-200 hover:scale-105"
+                    style={{
+                      background: COLOR_HOVER[color].bg,
+                      border: `1px solid ${COLOR_HOVER[color].border}`,
+                      color: COLOR_HOVER[color].text,
+                    }}
+                  >
+                    <Icon size={10} />
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* ── Waveform bar ── */}
-            <div className="px-5 pt-3 pb-2">
+            <div className="px-5 pt-2 pb-2">
               <div className="flex items-center gap-3 px-4 py-2.5 rounded-2xl"
                 style={{ background: "rgba(255,255,255,0.035)", border: "1px solid rgba(255,255,255,0.055)" }}>
                 <Waveform active={speaking || listening} color={listening ? "#ef4444" : "#f97316"} volume={volume} />
@@ -638,10 +770,28 @@ export default function VoiceAssistant({ autoOpen = true, onClose }) {
                     </div>
                   </motion.div>
                 ))}
+
+                {/* Typing indicator */}
+                {typingIndicator && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex gap-2"
+                  >
+                    <div className="shrink-0 w-6 h-6 rounded-lg flex items-center justify-center"
+                      style={{ background: "rgba(249,115,22,0.13)", border: "1px solid rgba(249,115,22,0.22)" }}>
+                      <Bot size={11} style={{ color: "#f97316" }} />
+                    </div>
+                    <div className="rounded-[3px_14px_14px_14px]"
+                      style={{ background: "rgba(255,255,255,0.055)", border: "1px solid rgba(255,255,255,0.07)" }}>
+                      <TypingDots />
+                    </div>
+                  </motion.div>
+                )}
               </AnimatePresence>
 
               {/* Loading bubble */}
-              {loading && (
+              {loading && !typingIndicator && (
                 <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="flex gap-2">
                   <div className="shrink-0 w-6 h-6 rounded-lg flex items-center justify-center"
                     style={{ background: "rgba(249,115,22,0.13)", border: "1px solid rgba(249,115,22,0.22)" }}>
@@ -655,8 +805,25 @@ export default function VoiceAssistant({ autoOpen = true, onClose }) {
               )}
             </div>
 
+            {/* ── Suggestions ── */}
+            {suggestions.length > 0 && !loading && messages.length > 0 && (
+              <div className="px-4 pb-1">
+                <div className="flex flex-wrap gap-1.5">
+                  {suggestions.map((suggestion, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleQuickAction(suggestion)}
+                      className="text-[9px] px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-white/45 hover:text-white hover:border-orange-400/60 hover:bg-orange-500/10 transition-all"
+                    >
+                      {suggestion}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* ── Input row ── */}
-            <div className="px-4 pt-2 pb-3">
+            <div className="px-4 pt-1 pb-3">
               <div className="flex items-center gap-2">
                 <input
                   ref={inputRef}
