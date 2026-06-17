@@ -1,5 +1,6 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Analytics } from '@vercel/analytics/react';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 
@@ -331,6 +332,7 @@ function App() {
                   <Bot size={22} className="group-hover:scale-110 transition-transform duration-300" />
                 </motion.button>
               )}
+              <Analytics />
             </motion.div>
           )}
         </AnimatePresence>
