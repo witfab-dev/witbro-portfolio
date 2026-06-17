@@ -5,10 +5,10 @@ import {
   User, Zap, Code2, Mail, Briefcase, MapPin,
   Bot, Loader2, RotateCcw, Sparkles, GraduationCap,
   Lightbulb, Handshake, Coffee, Award, Target, Compass,
-  BookOpen, Star, Heart, ThumbsUp, Globe, Cpu,
+  BookOpen, Star, Heart, ThumbsUp, Globe, Cpu, Smile,
 } from "lucide-react";
 
-// ─── Enhanced Knowledge Base ─────────────────────────────────────────────
+// ─── Enhanced Friendly Knowledge Base ──────────────────────────────────────
 const KNOWLEDGE_BASE = {
   personal: {
     name: "Witness Fabrice",
@@ -20,6 +20,12 @@ const KNOWLEDGE_BASE = {
     title: "Full-Stack Developer",
     level: "Level 5 Software Student",
     bio: "Passionate about building impactful tech solutions for Africa",
+    funFacts: [
+      "Loves coffee while coding ☕",
+      "Started coding at 16",
+      "Speaks 3 languages (English, French, Kinyarwanda)",
+      "Enjoys teaching and mentoring young developers",
+    ],
   },
   education: {
     school: "Kirehe Adventist TVET School (KATSS)",
@@ -80,22 +86,261 @@ const KNOWLEDGE_BASE = {
   },
 };
 
-// ─── Advanced Response Generator ─────────────────────────────────────────
-class ResponseEngine {
+// ─── Friendly Greeting Generator ──────────────────────────────────────────
+const getFriendlyGreeting = () => {
+  const hour = new Date().getHours();
+  const day = new Date().getDay();
+  const greetings = {
+    morning: [
+      "Good morning! 🌅 What a beautiful day to explore Witness's work!",
+      "Morning! ☀️ Ready to discover some amazing tech?",
+      "Good morning! Hope you're having a great start to your day!",
+    ],
+    afternoon: [
+      "Good afternoon! 👋 How can I help you today?",
+      "Hey there! 🌤️ Great to see you!",
+      "Good afternoon! Ready to dive into some impressive projects?",
+    ],
+    evening: [
+      "Good evening! 🌙 Welcome to Witness's portfolio!",
+      "Hey! 🌆 Hope you had a great day!",
+      "Good evening! 👋 Let me help you explore Witness's work!",
+    ],
+  };
+
+  const isWeekend = day === 0 || day === 6;
+  let timeGreeting;
+  if (hour < 12) timeGreeting = greetings.morning;
+  else if (hour < 18) timeGreeting = greetings.afternoon;
+  else timeGreeting = greetings.evening;
+
+  const greeting = timeGreeting[Math.floor(Math.random() * timeGreeting.length)];
+  const weekendMsg = isWeekend ? " Enjoy your weekend! 🎉" : "";
+  return greeting + weekendMsg;
+};
+
+// ─── Friendly Response Generator ─────────────────────────────────────────
+class FriendlyResponseEngine {
   constructor() {
     this.context = [];
     this.sessionStart = Date.now();
+    this.userName = null;
+    this.conversationCount = 0;
+    this.topicsDiscussed = new Set();
+    this.funFactIndex = 0;
   }
 
   addContext(message, role) {
     this.context.push({ message, role, timestamp: Date.now() });
     if (this.context.length > 20) this.context.shift();
+    this.conversationCount++;
+    
+    // Extract topics mentioned
+    const topics = ['skills', 'projects', 'education', 'experience', 'achievements', 'location', 'contact', 'hire'];
+    topics.forEach(topic => {
+      if (message.toLowerCase().includes(topic)) {
+        this.topicsDiscussed.add(topic);
+      }
+    });
   }
 
   getRecentContext(count = 3) {
     return this.context.slice(-count);
   }
 
+  // ─── Friendly Greetings ──────────────────────────────────────
+  handleGreeting(input, recent) {
+    const hour = new Date().getHours();
+    const isReturning = recent.length > 2;
+    
+    const greetings = {
+      morning: [
+        "Morning! 🌅 So glad you're here! What would you like to know about Witness?",
+        "Good morning! ☀️ I'm excited to help you discover Witness's amazing work!",
+      ],
+      afternoon: [
+        "Hey there! 👋 How can I make your day better with some cool tech info?",
+        "Good afternoon! 🌤️ Ready to explore some awesome projects?",
+      ],
+      evening: [
+        "Evening! 🌙 Great timing — I was just telling someone about Witness's latest project!",
+        "Good evening! 👋 Let's dive into Witness's impressive portfolio!",
+      ],
+    };
+
+    let greeting;
+    if (hour < 12) greeting = greetings.morning[Math.floor(Math.random() * greetings.morning.length)];
+    else if (hour < 18) greeting = greetings.afternoon[Math.floor(Math.random() * greetings.afternoon.length)];
+    else greeting = greetings.evening[Math.floor(Math.random() * greetings.evening.length)];
+
+    if (isReturning) {
+      const returnMessages = [
+        "Welcome back! 😊 It's always great to see you again!",
+        "Hey! You're back! 🙌 What can I help you with today?",
+        "Look who's here! 🎉 Ready for more great info about Witness?",
+      ];
+      return returnMessages[Math.floor(Math.random() * returnMessages.length)] + " " + greeting;
+    }
+
+    return greeting;
+  }
+
+  // ─── Friendly About Response ─────────────────────────────────
+  generateAboutResponse() {
+    const p = KNOWLEDGE_BASE.personal;
+    const funFact = p.funFacts[Math.floor(Math.random() * p.funFacts.length)];
+    const personality = KNOWLEDGE_BASE.personality.slice(0, 2).join(" ");
+    
+    const responses = [
+      `${p.name} is amazing! 🚀 He's a ${p.title} and ${p.level} based in ${p.location}. He ${KNOWLEDGE_BASE.education.distinction} from ${KNOWLEDGE_BASE.education.school}. ${personality}. Did you know? ${funFact} 😊`,
+      `Let me tell you about Witness! 🌟 He's a talented ${p.title} from ${p.location}. He's super passionate about building tech that makes a difference in Africa. ${funFact} Want to know more about his skills?`,
+      `Witness is such an inspiring developer! 💪 He's a ${p.title} with ${KNOWLEDGE_BASE.achievements.yearsOfExperience}+ years of experience. ${personality} He's also ${funFact} 🎯`,
+    ];
+    return responses[Math.floor(Math.random() * responses.length)];
+  }
+
+  // ─── Friendly Skills Response ────────────────────────────────
+  generateSkillsResponse(input) {
+    const skills = KNOWLEDGE_BASE.skills;
+    const frontend = skills.frontend.slice(0, 4).join(", ");
+    const backend = skills.backend.slice(0, 3).join(", ");
+    
+    const responses = [
+      `Witness has an awesome tech stack! 🎯 For frontend, he rocks ${frontend}. For backend, he's all about ${backend}. He's basically a full-stack superhero! 🦸‍♂️`,
+      `His skills are incredible! ✨ He's mastered ${frontend} on the frontend and ${backend} on the backend. Plus, he's great with databases and cloud stuff. Super versatile! 👨‍💻`,
+      `Witness is a tech wizard! 🧙‍♂️ He's got ${frontend} in his frontend toolkit, and ${backend} for backend magic. Seriously, he can build anything! 💻`,
+    ];
+    return responses[Math.floor(Math.random() * responses.length)];
+  }
+
+  // ─── Friendly Projects Response ──────────────────────────────
+  generateProjectsResponse(input) {
+    const projects = KNOWLEDGE_BASE.projects;
+    
+    // Check for specific project
+    for (const project of projects) {
+      if (input.includes(project.name.toLowerCase())) {
+        const excitement = ['This is so cool!', 'How awesome is this?', 'This one is a favorite!', 'Such a great project!'];
+        return `${excitement[Math.floor(Math.random() * excitement.length)} 🎯 "${project.name}" - ${project.description}. ${project.details}. The impact? ${project.impact}! Amazing right? 😊`;
+      }
+    }
+    
+    const projectList = projects.map(p => p.name).join(", ");
+    const featured = projects[0];
+    const responses = [
+      `Witness has built ${projects.length} amazing projects! 🚀 Check these out: ${projectList}. His flagship "${featured.name}" is incredible — ${featured.impact}! Which one interests you? 🤔`,
+      `Let me tell you about his projects! 💫 ${featured.name} is a standout — ${featured.description}. He's also built ${projectList}. The guy is a machine! 💪 Which one should I tell you more about?`,
+      `His portfolio is impressive! 🌟 ${featured.name} serves ${featured.details} and ${featured.impact}. He's also created ${projectList}. So much talent! 🎯`,
+    ];
+    return responses[Math.floor(Math.random() * responses.length)];
+  }
+
+  // ─── Friendly Education Response ─────────────────────────────
+  generateEducationResponse() {
+    const edu = KNOWLEDGE_BASE.education;
+    const name = KNOWLEDGE_BASE.personal.name;
+    const responses = [
+      `${name} is super smart! 🎓 He ${edu.distinction} from ${edu.school} in ${edu.focus}. He even won ${edu.awards.join(" and ")}! Amazing, right? 🌟`,
+      `His educational journey is inspiring! 📚 He studied ${edu.focus} at ${edu.school} and graduated ${edu.distinction}. He also earned ${edu.awards.join(" and ")}! 🏆`,
+      `Witness really crushed it in school! 💪 He ${edu.distinction} in ${edu.focus} from ${edu.school}. Plus, he got ${edu.awards.join(" and ")}! So impressive! 👏`,
+    ];
+    return responses[Math.floor(Math.random() * responses.length)];
+  }
+
+  // ─── Friendly Contact Response ──────────────────────────────
+  generateContactResponse(input) {
+    const p = KNOWLEDGE_BASE.personal;
+    const email = p.email;
+    const github = p.github;
+    
+    const responses = [
+      `You can totally reach out to Witness! 💬 Just email him at ${email}. He's super responsive and would love to hear from you! 📧 Also, check his code at ${github} — it's 🔥!`,
+      `He's definitely open to connecting! 🤝 Send him a message at ${email}. He's friendly and always happy to talk about projects! 💬 His GitHub is ${github} if you want to see his work!`,
+      `Yes! Witness loves new opportunities! 🚀 Reach him at ${email} and he'll get back to you super fast. He's also active on GitHub at ${github}. Can't wait for you to connect! ✨`,
+    ];
+    return responses[Math.floor(Math.random() * responses.length)];
+  }
+
+  // ─── Friendly Location Response ──────────────────────────────
+  generateLocationResponse() {
+    const p = KNOWLEDGE_BASE.personal;
+    const responses = [
+      `${p.name} is based in beautiful ${p.location}, Rwanda! 🇷🇼 The heart of East Africa. He loves building software that helps the local tech ecosystem grow! 🌍`,
+      `Right now, he's coding in ${p.location}, Rwanda! 🏠 It's an amazing place with a growing tech scene. He's open to working with people from anywhere! 🌎`,
+      `${p.location}, Rwanda is where he calls home! 🇷🇼 He's building awesome stuff and helping put the African tech scene on the map. So cool! 🌍`,
+    ];
+    return responses[Math.floor(Math.random() * responses.length)];
+  }
+
+  // ─── Friendly Experience Response ────────────────────────────
+  generateExperienceResponse() {
+    const name = KNOWLEDGE_BASE.personal.name;
+    const years = KNOWLEDGE_BASE.achievements.yearsOfExperience;
+    const projects = KNOWLEDGE_BASE.achievements.projectsDelivered;
+    const countries = KNOWLEDGE_BASE.achievements.countriesServed;
+    
+    const responses = [
+      `${name} has been on an amazing journey! 🚀 Over ${years}+ years, he's built ${projects}+ projects serving ${countries} countries. His experience is diverse and impressive! 💪`,
+      `What a journey! 🌟 ${name} started at ${KNOWLEDGE_BASE.education.school} and now has ${years}+ years of experience. He's delivered ${projects}+ projects across ${countries} countries! 🎯`,
+      `His experience is incredible! ✨ ${years}+ years in tech, ${projects}+ projects delivered, and reaching ${countries} countries. And he's still going strong! 💪`,
+    ];
+    return responses[Math.floor(Math.random() * responses.length)];
+  }
+
+  // ─── Friendly Achievement Response ────────────────────────────
+  generateAchievementResponse() {
+    const awards = KNOWLEDGE_BASE.achievements.awards.join(" and ");
+    const certs = KNOWLEDGE_BASE.achievements.certifications.join(" and ");
+    
+    const responses = [
+      `So many achievements! 🏆 He won ${awards} and holds ${certs}. The guy is unstoppable! 💪`,
+      `His trophy cabinet is full! 🌟 ${awards} — that's impressive! Plus, he's certified in ${certs}. A true professional! 👏`,
+      `Witness is collecting awards like Pokémon! 🎯 He's got ${awards} and certifications in ${certs}. So much dedication! 💫`,
+    ];
+    return responses[Math.floor(Math.random() * responses.length)];
+  }
+
+  // ─── Friendly Help Response ──────────────────────────────────
+  generateHelpResponse() {
+    const topics = [
+      "skills (React, Node.js, Three.js)",
+      "projects (Market-Kigali, KATSS Platform)",
+      "education and background",
+      "how to contact him",
+      "his achievements and awards",
+    ];
+    const randomTopic = topics[Math.floor(Math.random() * topics.length)];
+    const responses = [
+      `I'd love to help! 🌟 You can ask me about ${randomTopic}. What sounds interesting to you? 😊`,
+      `Oh, I know so much about Witness! 💡 Try asking about ${randomTopic}. Or just tell me what you want to know — I'm here for you! 🤝`,
+      `Great question! 🚀 I specialize in talking about ${randomTopic}. What would you like to explore? 🎯`,
+    ];
+    return responses[Math.floor(Math.random() * responses.length)];
+  }
+
+  // ─── Friendly Thank You Response ─────────────────────────────
+  generateThankYouResponse() {
+    const responses = [
+      "Aww, you're welcome! 😊 It's been a pleasure chatting with you! Anything else I can help with?",
+      "You're so kind! 🙏 I'm happy to help. What else would you like to know about Witness?",
+      "Thank you! 🌟 It's always great when people are interested in Witness's work. Let me know if you need anything else!",
+      "My pleasure! 😄 I love talking about Witness — he's amazing. Want to hear about something specific?",
+    ];
+    return responses[Math.floor(Math.random() * responses.length)];
+  }
+
+  // ─── Friendly Goodbye Response ───────────────────────────────
+  generateGoodbyeResponse() {
+    const responses = [
+      "Bye for now! 👋 It was wonderful chatting with you! Come back anytime — I'll be here! 😊",
+      "Take care! 🌟 Thanks for stopping by! If you have more questions later, I'm just a message away. 💬",
+      "See you later! 🎉 Remember, you can always reach Witness at witnessfabrice@gmail.com. Have a great day! 🌈",
+      "Goodbye! 👋 I hope you learned something awesome about Witness. Feel free to come back anytime! 💫",
+    ];
+    return responses[Math.floor(Math.random() * responses.length)];
+  }
+
+  // ─── Main Response Generator ──────────────────────────────────
   generateResponse(userInput) {
     const input = userInput.toLowerCase().trim();
     
@@ -104,297 +349,151 @@ class ResponseEngine {
     
     // Get conversation context
     const recent = this.getRecentContext(3);
-    const contextTopics = recent.map(c => c.message.toLowerCase());
-    const allContext = contextTopics.join(' ');
     
-    // ─── Smart Greeting Detection ─────────────────────────────
-    if (this.isGreeting(input)) {
+    // ─── Greetings ─────────────────────────────────────────────
+    const greetings = ['hi', 'hello', 'hey', 'greetings', 'sup', 'howdy', 'good morning', 'good afternoon', 'good evening', 'yo', "what's up"];
+    if (greetings.some(g => input.includes(g))) {
       return this.handleGreeting(input, recent);
     }
     
-    // ─── About / Who is ──────────────────────────────────────
-    if (this.isAboutQuery(input)) {
+    // ─── About ─────────────────────────────────────────────────
+    const about = ['about', 'who is', 'tell me about', 'introduce', 'background', 'bio', 'who are you', 'explain'];
+    if (about.some(a => input.includes(a)) && input.match(/\b(witness|fabrice|him|he|developer|programmer|this guy)\b/)) {
       return this.generateAboutResponse();
     }
     
-    // ─── Skills ──────────────────────────────────────────────
-    if (this.isSkillsQuery(input)) {
+    // ─── Skills ────────────────────────────────────────────────
+    const skills = ['skill', 'technologies', 'tech stack', 'programming', 'language', 'framework', 'tool', 'expertise', 'knows', 'use', 'proficient', 'stack'];
+    if (skills.some(s => input.includes(s))) {
       return this.generateSkillsResponse(input);
     }
     
-    // ─── Projects ────────────────────────────────────────────
-    if (this.isProjectsQuery(input)) {
+    // ─── Projects ──────────────────────────────────────────────
+    const projects = ['project', 'built', 'created', 'developed', 'portfolio', 'work', 'made', 'build', 'application', 'app', 'site', 'platform'];
+    if (projects.some(p => input.includes(p))) {
       return this.generateProjectsResponse(input);
     }
     
-    // ─── Education ────────────────────────────────────────────
-    if (this.isEducationQuery(input)) {
+    // ─── Education ─────────────────────────────────────────────
+    const edu = ['education', 'study', 'studied', 'school', 'college', 'university', 'degree', 'diploma', 'graduated', 'academic', 'learning', 'course', 'tvet'];
+    if (edu.some(e => input.includes(e))) {
       return this.generateEducationResponse();
     }
     
-    // ─── Contact / Hire ──────────────────────────────────────
-    if (this.isContactQuery(input)) {
+    // ─── Contact ──────────────────────────────────────────────
+    const contact = ['contact', 'hire', 'email', 'reach', 'connect', 'work with', 'freelance', 'job', 'opportunity', 'collaborate', 'contract', 'collaboration', 'get in touch', 'message'];
+    if (contact.some(c => input.includes(c))) {
       return this.generateContactResponse(input);
     }
     
-    // ─── Location ────────────────────────────────────────────
-    if (this.isLocationQuery(input)) {
+    // ─── Location ──────────────────────────────────────────────
+    const loc = ['location', 'based', 'where', 'city', 'country', 'rwanda', 'kigali', 'live', 'reside', 'from', 'origin'];
+    if (loc.some(l => input.includes(l))) {
       return this.generateLocationResponse();
     }
     
-    // ─── Experience ──────────────────────────────────────────
-    if (this.isExperienceQuery(input)) {
+    // ─── Experience ─────────────────────────────────────────────
+    const exp = ['experience', 'journey', 'career', 'path', 'history', 'started', 'begin', 'worked', 'professional'];
+    if (exp.some(e => input.includes(e))) {
       return this.generateExperienceResponse();
     }
     
-    // ─── Achievements ────────────────────────────────────────
-    if (this.isAchievementQuery(input)) {
+    // ─── Achievements ───────────────────────────────────────────
+    const ach = ['achievement', 'award', 'recognition', 'certification', 'accomplishment', 'won', 'earned', 'honor'];
+    if (ach.some(a => input.includes(a))) {
       return this.generateAchievementResponse();
     }
     
-    // ─── Follow-up / Contextual ─────────────────────────────
-    if (recent.length > 1) {
-      const contextual = this.generateContextualResponse(input, allContext);
-      if (contextual) return contextual;
-    }
-    
-    // ─── Help / Capabilities ─────────────────────────────────
-    if (this.isHelpQuery(input)) {
+    // ─── Help ──────────────────────────────────────────────────
+    const help = ['help', 'what can you do', 'capabilities', 'feature', 'function', 'purpose', 'abilities', 'assist'];
+    if (help.some(h => input.includes(h))) {
       return this.generateHelpResponse();
     }
     
-    // ─── Thank you ────────────────────────────────────────────
-    if (this.isThankYou(input)) {
+    // ─── Thank you ─────────────────────────────────────────────
+    const thanks = ['thank', 'thanks', 'appreciate', 'grateful', 'awesome', 'great', 'nice', 'cool', 'amazing'];
+    if (thanks.some(t => input.includes(t))) {
       return this.generateThankYouResponse();
     }
     
-    // ─── Goodbye ──────────────────────────────────────────────
-    if (this.isGoodbye(input)) {
+    // ─── Goodbye ───────────────────────────────────────────────
+    const bye = ['bye', 'goodbye', 'see you', 'farewell', 'exit', 'quit', 'later', 'cya'];
+    if (bye.some(b => input.includes(b))) {
       return this.generateGoodbyeResponse();
     }
     
-    // ─── Default ──────────────────────────────────────────────
-    return this.generateDefaultResponse();
-  }
-
-  // ─── Detection Methods ──────────────────────────────────────
-
-  isGreeting(input) {
-    const greetings = ['hi', 'hello', 'hey', 'greetings', 'sup', 'howdy', 'good morning', 'good afternoon', 'good evening', 'yo', 'what\'s up'];
-    return greetings.some(g => input.includes(g));
-  }
-
-  isAboutQuery(input) {
-    const about = ['about', 'who is', 'tell me about', 'introduce', 'background', 'bio', 'who are you', 'explain'];
-    return about.some(a => input.includes(a)) && input.match(/\b(witness|fabrice|him|he|developer|programmer|this guy)\b/);
-  }
-
-  isSkillsQuery(input) {
-    const skills = ['skill', 'technologies', 'tech stack', 'programming', 'language', 'framework', 'tool', 'expertise', 'knows', 'use', 'proficient', 'stack'];
-    return skills.some(s => input.includes(s));
-  }
-
-  isProjectsQuery(input) {
-    const projects = ['project', 'built', 'created', 'developed', 'portfolio', 'work', 'made', 'build', 'application', 'app', 'site', 'platform'];
-    return projects.some(p => input.includes(p));
-  }
-
-  isEducationQuery(input) {
-    const edu = ['education', 'study', 'studied', 'school', 'college', 'university', 'degree', 'diploma', 'graduated', 'academic', 'learning', 'course', 'tvet'];
-    return edu.some(e => input.includes(e));
-  }
-
-  isContactQuery(input) {
-    const contact = ['contact', 'hire', 'email', 'reach', 'connect', 'work with', 'freelance', 'job', 'opportunity', 'collaborate', 'contract', 'collaboration', 'get in touch', 'message'];
-    return contact.some(c => input.includes(c));
-  }
-
-  isLocationQuery(input) {
-    const loc = ['location', 'based', 'where', 'city', 'country', 'rwanda', 'kigali', 'live', 'reside', 'from', 'origin'];
-    return loc.some(l => input.includes(l));
-  }
-
-  isExperienceQuery(input) {
-    const exp = ['experience', 'journey', 'career', 'path', 'history', 'started', 'begin', 'worked', 'professional'];
-    return exp.some(e => input.includes(e));
-  }
-
-  isAchievementQuery(input) {
-    const ach = ['achievement', 'award', 'recognition', 'certification', 'accomplishment', 'won', 'earned', 'honor'];
-    return ach.some(a => input.includes(a));
-  }
-
-  isHelpQuery(input) {
-    const help = ['help', 'what can you do', 'capabilities', 'feature', 'function', 'purpose', 'abilities', 'assist'];
-    return help.some(h => input.includes(h));
-  }
-
-  isThankYou(input) {
-    const thanks = ['thank', 'thanks', 'appreciate', 'grateful', 'awesome', 'great', 'nice', 'cool', 'amazing'];
-    return thanks.some(t => input.includes(t));
-  }
-
-  isGoodbye(input) {
-    const bye = ['bye', 'goodbye', 'see you', 'farewell', 'exit', 'quit', 'later', 'cya'];
-    return bye.some(b => input.includes(b));
-  }
-
-  // ─── Response Generators ──────────────────────────────────────
-
-  handleGreeting(input, recent) {
-    const hour = new Date().getHours();
-    const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
-    
-    const isReturning = recent.length > 2;
-    const returnMsg = isReturning ? " Welcome back! " : " ";
-    
-    return `${greeting}!${returnMsg}I'm Witbri AI, your intelligent assistant for Witness Fabrice's portfolio. ${isReturning ? "Ready to dive deeper into his work?" : "Ask me about his skills, projects, background, or how to hire him. What would you like to know?"}`;
-  }
-
-  generateAboutResponse() {
-    const p = KNOWLEDGE_BASE.personal;
-    const edu = KNOWLEDGE_BASE.education;
-    const personality = KNOWLEDGE_BASE.personality.slice(0, 2).join(" ");
-    return `${p.name} is a ${p.title} and ${p.level} based in ${p.location}. He ${edu.distinction} from ${edu.school}, focusing on ${edu.focus}. ${personality}. He specializes in creating impactful tech solutions for Africa with expertise in React, Node.js, and cloud infrastructure. Would you like to know more about his specific skills or projects?`;
-  }
-
-  generateSkillsResponse(input) {
-    const skills = KNOWLEDGE_BASE.skills;
-    const frontend = skills.frontend.slice(0, 4).join(", ");
-    const backend = skills.backend.slice(0, 3).join(", ");
-    const databases = skills.databases.slice(0, 2).join(", ");
-    const infra = skills.infrastructure.slice(0, 3).join(", ");
-    const other = skills.other.join(", ");
-    
-    if (input.includes('front') || input.includes('ui') || input.includes('design')) {
-      return `Witness has extensive frontend expertise with ${frontend}. He creates responsive, accessible interfaces with a strong focus on user experience and performance.`;
-    }
-    if (input.includes('back') || input.includes('server') || input.includes('api')) {
-      return `On the backend, Witness works with ${backend}. He builds scalable APIs and handles complex business logic efficiently.`;
-    }
-    if (input.includes('database')) {
-      return `Witness is proficient with ${databases} databases, handling everything from schema design to query optimization and data migration.`;
-    }
-    if (input.includes('devops') || input.includes('deploy') || input.includes('cloud')) {
-      return `Witness manages infrastructure with ${infra}, ensuring smooth deployment, scaling, and monitoring of applications.`;
-    }
-    
-    return `Witness has a diverse tech stack. For frontend, he works with ${frontend}. On the backend, he uses ${backend}. He's also proficient with ${databases} databases, ${infra} for infrastructure, and ${other} for additional capabilities. This makes him a versatile full-stack developer.`;
-  }
-
-  generateProjectsResponse(input) {
-    const projects = KNOWLEDGE_BASE.projects;
-    
-    // Check for specific project
-    for (const project of projects) {
-      if (input.includes(project.name.toLowerCase())) {
-        return `"${project.name}": ${project.description}. ${project.details}. Key features include ${project.features}. The impact has been ${project.impact}. This showcases Witness's ability to deliver practical, high-impact solutions.`;
+    // ─── Follow-up / Contextual ────────────────────────────────
+    const recentContext = this.getRecentContext(3);
+    if (recentContext.length > 1) {
+      const allContext = recentContext.map(c => c.message.toLowerCase()).join(' ');
+      
+      if (allContext.includes("skills") && input.match(/\b(more|else|other|additionally|also|tell)\b/)) {
+        const otherSkills = KNOWLEDGE_BASE.skills.other.join(", ");
+        const responses = [
+          `Beyond his core skills, Witness also works with ${otherSkills}! 🤯 He's super versatile and can handle pretty much anything tech-related.`,
+          `Oh, and he also does ${otherSkills}! 🚀 The guy really knows his stuff. Anything else you want to know? 😊`,
+          `He's also got experience with ${otherSkills}! 💪 So you can see he's not just a one-trick pony — he's the whole circus! 🎪`,
+        ];
+        return responses[Math.floor(Math.random() * responses.length)];
+      }
+      
+      if (allContext.includes("projects") && input.match(/\b(details|more|specific|explain|tell)\b/)) {
+        const project = KNOWLEDGE_BASE.projects[0];
+        const responses = [
+          `Let me tell you more about "${project.name}"! 🎯 ${project.description}. ${project.details}. And get this — ${project.impact}! Pretty cool, right? 😄`,
+          `"${project.name}" is amazing! 🌟 ${project.description}. ${project.details}. The impact has been ${project.impact}. Want to hear about another project? 🚀`,
+          `So "${project.name}" — ${project.description}. ${project.details}. And ${project.impact}! 🤯 Can you believe it? He's so talented! 💫`,
+        ];
+        return responses[Math.floor(Math.random() * responses.length)];
+      }
+      
+      if (allContext.includes("hire") && input.match(/\b(how|process|next|connect)\b/)) {
+        const responses = [
+          `To hire Witness, just email him at ${KNOWLEDGE_BASE.personal.email}! 📧 He's super responsive and would love to discuss your project. He usually replies within 24 hours! ⚡`,
+          `The best way to connect is through email — ${KNOWLEDGE_BASE.personal.email}! 💬 He's friendly and ready to chat about your ideas. Don't hesitate to reach out! 🤝`,
+          `Simple! Drop him a message at ${KNOWLEDGE_BASE.personal.email} and he'll get back to you super fast. 🚀 He's actively looking for new opportunities! 🎯`,
+        ];
+        return responses[Math.floor(Math.random() * responses.length)];
       }
     }
     
-    const projectList = projects.map(p => p.name).join(", ");
-    const featured = projects[0];
-    return `Witness has built ${projects.length} impressive projects including ${projectList}. His flagship project "${featured.name}" serves ${featured.details} and has ${featured.impact}. He's passionate about creating solutions that make a real difference. Which project would you like to know more about?`;
-  }
-
-  generateEducationResponse() {
-    const edu = KNOWLEDGE_BASE.education;
-    const name = KNOWLEDGE_BASE.personal.name;
-    return `${name} ${edu.distinction} from ${edu.school}, focusing on ${edu.focus}. He received awards for ${edu.awards.join(" and ")}. His academic excellence is reflected in his practical work, where he applies cutting-edge technologies to solve real-world problems. Would you like to hear about his professional experience?`;
-  }
-
-  generateContactResponse(input) {
-    const p = KNOWLEDGE_BASE.personal;
-    const email = p.email;
-    const github = p.github;
-    const linkedin = p.linkedin;
-    
-    if (input.includes('rate') || input.includes('cost') || input.includes('pricing') || input.includes('budget')) {
-      return `Witness's rates are competitive and based on project scope. For a detailed quote, it's best to contact him directly at ${email}. He's transparent about pricing and flexible with budgets!`;
+    // ─── Fun / Casual Queries ──────────────────────────────────
+    if (input.includes('fun fact') || input.includes('interesting')) {
+      const fact = KNOWLEDGE_BASE.personal.funFacts[Math.floor(Math.random() * KNOWLEDGE_BASE.personal.funFacts.length)];
+      const responses = [
+        `Fun fact about Witness! 🎯 ${fact} Pretty cool, right? 😊`,
+        `Here's something interesting! ✨ ${fact} Did you know that? 🧠`,
+        `I love this one! 🌟 ${fact} He's full of surprises! 😄`,
+      ];
+      return responses[Math.floor(Math.random() * responses.length)];
     }
     
-    if (input.includes('github')) {
-      return `Witness's code is available at ${github}. You can see his portfolio of work and contributions there.`;
+    if (input.includes('coffee') || input.includes('drink')) {
+      const responses = [
+        "Oh, Witness loves coffee! ☕ It's basically his coding fuel. He'll probably be sipping one right now while building something awesome! 😄",
+        "Coffee is Witness's best friend! ☕ He says it's the secret ingredient to great code. And honestly, I think he's right! 🚀",
+        "Witness + Coffee = Magic! ✨ He's always got a cup nearby when he's coding. It's his creative juice! ☕💻",
+      ];
+      return responses[Math.floor(Math.random() * responses.length)];
     }
     
-    if (input.includes('linkedin')) {
-      return `Connect with Witness professionally at ${linkedin}. He's active and responsive on LinkedIn.`;
+    if (input.includes('rwanda') || input.includes('kigali')) {
+      const responses = [
+        "Rwanda is beautiful! 🇷🇼 And Kigali is such a vibrant city. Witness loves building tech that helps his community grow. 🌍",
+        "Kigali, Rwanda! 🇷🇼 It's an amazing place with a booming tech scene. Witness is proud to be part of it. 🚀",
+        "Beautiful Rwanda! 🇷🇼 Witness is based in Kigali, working hard to put African tech on the map. So inspiring! 🌟",
+      ];
+      return responses[Math.floor(Math.random() * responses.length)];
     }
     
-    return `You can reach ${p.name} at ${email}. He's actively open to freelance work, full-time remote positions, and relocation opportunities. Check out his code at ${github} or his professional network at ${linkedin}. What kind of project are you thinking about?`;
-  }
-
-  generateLocationResponse() {
-    const p = KNOWLEDGE_BASE.personal;
-    return `${p.name} is based in ${p.location}, Rwanda — the heart of East Africa. He's building software solutions for local and international clients, contributing to the growing tech ecosystem in the region. He's also open to relocation for the right opportunity.`;
-  }
-
-  generateExperienceResponse() {
-    const edu = KNOWLEDGE_BASE.education;
-    const name = KNOWLEDGE_BASE.personal.name;
-    const years = KNOWLEDGE_BASE.achievements.yearsOfExperience;
-    const projects = KNOWLEDGE_BASE.achievements.projectsDelivered;
-    const countries = KNOWLEDGE_BASE.achievements.countriesServed;
-    return `${name} started his journey at ${edu.school} where he discovered his passion for web technologies. Over ${years}+ years, he's built ${projects}+ production applications serving users across ${countries} countries. His career is driven by a mission to create impactful solutions for Africa. He's worked on everything from e-commerce platforms to educational systems and IoT solutions.`;
-  }
-
-  generateAchievementResponse() {
-    const awards = KNOWLEDGE_BASE.achievements.awards.join(" and ");
-    const certs = KNOWLEDGE_BASE.achievements.certifications.join(" and ");
-    const projects = KNOWLEDGE_BASE.achievements.projectsDelivered;
-    return `Witness has earned prestigious recognition including ${awards}. He also holds ${certs}, demonstrating his commitment to professional growth. With ${projects}+ projects delivered, he consistently receives positive feedback for his technical excellence and collaborative approach.`;
-  }
-
-  generateContextualResponse(input, context) {
-    if (context.includes("skills") && input.match(/\b(more|else|other|additionally|also)\b/)) {
-      const otherSkills = KNOWLEDGE_BASE.skills.other.join(", ");
-      return `Beyond the core stack, Witness also works with ${otherSkills}. This allows him to build complete, modern applications including IoT integrations, real-time features, and progressive web apps. His versatility is one of his strongest assets.`;
-    }
-    
-    if (context.includes("projects") && input.match(/\b(details|more|specific|explain|tell)\b/)) {
-      const project = KNOWLEDGE_BASE.projects[0];
-      return `Let me tell you more about "${project.name}". ${project.description}. ${project.details}. The impact has been ${project.impact}. Would you like me to tell you about another project?`;
-    }
-    
-    if (context.includes("hire") && input.match(/\b(how|process|next)\b/)) {
-      return `To hire Witness, simply reach out to him at ${KNOWLEDGE_BASE.personal.email}. He's very responsive and would love to discuss your project. He typically replies within 24 hours!`;
-    }
-    
-    return null;
-  }
-
-  generateHelpResponse() {
-    return `I can help you learn about Witness Fabrice in many ways! You can ask me about:
-• His skills and technologies (React, Node.js, Three.js)
-• His projects (Market-Kigali, KATSS Platform, Rwanda Explorer)
-• His background and education
-• How to contact or hire him
-• His achievements and awards
-Try asking something like "What projects has he built?" or "How can I hire him?" I'm here to help!`;
-  }
-
-  generateThankYouResponse() {
-    const responses = [
-      "You're very welcome! Is there anything else you'd like to know about Witness? I'm here to help.",
-      "My pleasure! I'm always happy to chat about Witness's work. What else can I tell you?",
-      "Anytime! Witness is truly an inspiring developer. Would you like to hear about another aspect of his work?",
-      "Thanks for the kind words! Feel free to ask anything else — I've got plenty of info to share about Witness."
+    // ─── Friendly Default ───────────────────────────────────────
+    const defaultResponses = [
+      "That's a great question! 😊 I'm here to help you learn about Witness Fabrice. Want to ask about his skills, projects, or how to reach him? What sparks your interest? 🎯",
+      "Hmm, interesting! 💭 I know a ton about Witness — his projects, skills, education, and more. What would you like to explore? I'm all ears! 👂✨",
+      "I love talking about Witness! 🌟 He's such an inspiring developer. Want to know about his tech stack, his amazing projects, or his journey in tech? Pick your topic! 🚀",
+      "Great to see you curious! 😄 I can tell you about Witness's work, his skills, how to hire him, and more. What's on your mind? 💬",
     ];
-    return responses[Math.floor(Math.random() * responses.length)];
-  }
-
-  generateGoodbyeResponse() {
-    const responses = [
-      "It was great chatting with you! Feel free to come back anytime you want to learn more about Witness Fabrice. Have a wonderful day! 👋",
-      "Thanks for stopping by! If you have more questions about Witness, I'll be right here. Take care!",
-      "Goodbye! Don't hesitate to return if you need more information about Witness's work or how to hire him.",
-      "See you later! Remember, you can always reach Witness at witnessfabrice@gmail.com for any inquiries."
-    ];
-    return responses[Math.floor(Math.random() * responses.length)];
-  }
-
-  generateDefaultResponse() {
-    return `I'm Witbri AI, here to help you learn about Witness Fabrice. You can ask me about his skills (React, Node.js, Three.js), his projects (Market-Kigali, KATSS Platform), his background, or how to contact him for work. What specific aspect of his work interests you? I'm happy to dive deeper into any topic!`;
+    return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
   }
 }
 
@@ -409,15 +508,6 @@ const QUICK_ACTIONS = [
   { icon: Award, label: "Achievements", cmd: "What awards has Witness received?", color: "#f472b6" },
   { icon: Briefcase, label: "Experience", cmd: "What's his work experience?", color: "#34d399" },
 ];
-
-const COLOR_HOVER = {
-  blue: { text: "#60a5fa", border: "rgba(96,165,250,0.35)", bg: "rgba(59,130,246,0.08)" },
-  amber: { text: "#fbbf24", border: "rgba(251,191,36,0.35)", bg: "rgba(245,158,11,0.08)" },
-  emerald: { text: "#34d399", border: "rgba(52,211,153,0.35)", bg: "rgba(16,185,129,0.08)" },
-  rose: { text: "#fb7185", border: "rgba(251,113,133,0.35)", bg: "rgba(239,68,68,0.08)" },
-  violet: { text: "#a78bfa", border: "rgba(167,139,250,0.35)", bg: "rgba(139,92,246,0.08)" },
-  cyan: { text: "#22d3ee", border: "rgba(34,211,238,0.35)", bg: "rgba(6,182,212,0.08)" },
-};
 
 // ─── Waveform ──────────────────────────────────────────────────
 const BAR_PROFILE = Array.from({ length: 28 }, (_, i) => {
@@ -482,7 +572,7 @@ export default function VoiceAssistant({ autoOpen = true, onClose }) {
   const scrollRef = useRef(null);
   const volumeTimerRef = useRef(null);
   const hasGreetedRef = useRef(false);
-  const responseEngine = useRef(new ResponseEngine());
+  const responseEngine = useRef(new FriendlyResponseEngine());
 
   // ── Auto-scroll ───────────────────────────────────────────────
   useEffect(() => {
@@ -509,7 +599,7 @@ export default function VoiceAssistant({ autoOpen = true, onClose }) {
     loadVoice();
     if (!utt.voice) window.speechSynthesis.onvoiceschanged = loadVoice;
 
-    utt.rate = 1.0;
+    utt.rate = 0.97;
     utt.pitch = 1.05;
     utt.volume = 1;
 
@@ -531,22 +621,19 @@ export default function VoiceAssistant({ autoOpen = true, onClose }) {
     clearInterval(volumeTimerRef.current);
   }, []);
 
-  // ── Generate Response ─────────────────────────────────────────
+  // ── Generate Friendly Response ───────────────────────────────
   const getAIResponse = useCallback(async (userText) => {
-    // Simulate thinking time
-    const thinkingTime = 400 + Math.random() * 400;
+    // Simulate thinking for natural feel
+    const thinkingTime = 400 + Math.random() * 500;
     await new Promise(resolve => setTimeout(resolve, thinkingTime));
     
-    // Generate response using the response engine
     const response = responseEngine.current.generateResponse(userText);
-    
-    // Update context
     responseEngine.current.addContext(response, 'assistant');
     
     return response;
   }, []);
 
-  // ── Push / update message ─────────────────────────────────────
+  // ── Push message ──────────────────────────────────────────────
   const pushMsg = useCallback((id, role, text, done = true) => {
     setMessages(m => {
       const exists = m.find(msg => msg.id === id);
@@ -573,7 +660,6 @@ export default function VoiceAssistant({ autoOpen = true, onClose }) {
     try {
       const aiText = await getAIResponse(trimmed);
 
-      // Typewriter reveal
       pushMsg(aiId, "ai", "", false);
       let i = 0;
       const STEP = 3;
@@ -588,7 +674,7 @@ export default function VoiceAssistant({ autoOpen = true, onClose }) {
         }
       }, 14);
     } catch (err) {
-      const msg = "Sorry, I hit a snag. Please try again in a moment!";
+      const msg = "Oops! 😅 Something went wrong. Want to try again? I'm here to help!";
       pushMsg(aiId, "ai", msg, true);
       setError(err.message);
       speak(msg);
@@ -602,7 +688,10 @@ export default function VoiceAssistant({ autoOpen = true, onClose }) {
     if (listening) { recognitionRef.current?.stop(); setListening(false); return; }
 
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) { process("Voice input isn't supported here — please type your question."); return; }
+    if (!SR) {
+      process("Voice input isn't supported here — but you can type your question! 😊");
+      return;
+    }
 
     stopSpeaking();
 
@@ -610,7 +699,6 @@ export default function VoiceAssistant({ autoOpen = true, onClose }) {
     rec.lang = "en-US";
     rec.continuous = false;
     rec.interimResults = true;
-    rec.maxAlternatives = 1;
 
     rec.onstart = () => setListening(true);
     rec.onresult = (e) => {
@@ -621,7 +709,10 @@ export default function VoiceAssistant({ autoOpen = true, onClose }) {
         process(t);
       }
     };
-    rec.onerror = () => setListening(false);
+    rec.onerror = () => {
+      setListening(false);
+      process("I couldn't hear that clearly. Want to type your question? 😊");
+    };
     rec.onend = () => setListening(false);
 
     recognitionRef.current = rec;
@@ -631,21 +722,21 @@ export default function VoiceAssistant({ autoOpen = true, onClose }) {
   // ── Clear chat ────────────────────────────────────────────────
   const clearChat = useCallback(() => {
     setMessages([]);
-    responseEngine.current = new ResponseEngine();
+    responseEngine.current = new FriendlyResponseEngine();
     hasGreetedRef.current = false;
     setShowSuggestions(true);
     stopSpeaking();
     setError(null);
   }, [stopSpeaking]);
 
-  // ── Welcome ───────────────────────────────────────────────────
+  // ─── Friendly Welcome ─────────────────────────────────────────
   useEffect(() => {
     if (!autoOpen || hasGreetedRef.current) return;
     hasGreetedRef.current = true;
-    const h = new Date().getHours();
-    const greet = h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening";
+    
     const timer = setTimeout(() => {
-      const welcomeMsg = `${greet}! 👋 I'm Witbri AI, your intelligent assistant for Witness Fabrice's portfolio. I can tell you about his skills, projects, background, and how to hire him. What would you like to know about this amazing developer?`;
+      const greeting = getFriendlyGreeting();
+      const welcomeMsg = `${greeting} 😊 I'm Witbri AI, and I'm here to help you discover Witness Fabrice's amazing work. Want to hear about his skills, projects, or how to connect with him? Let's chat! 💬`;
       const welcomeId = `w-${Date.now()}`;
       pushMsg(welcomeId, "ai", welcomeMsg, true);
       speak(welcomeMsg);
@@ -729,7 +820,7 @@ export default function VoiceAssistant({ autoOpen = true, onClose }) {
                     </span>
                     <span className="px-1.5 py-[2px] rounded-md text-[8.5px] font-bold uppercase tracking-widest"
                       style={{ background: "rgba(249,115,22,0.13)", color: "#f97316", border: "1px solid rgba(249,115,22,0.22)" }}>
-                      AI
+                      Friend
                     </span>
                   </div>
                   <div className="flex items-center gap-1.5 mt-[2px]">
@@ -765,6 +856,9 @@ export default function VoiceAssistant({ autoOpen = true, onClose }) {
             {/* ── Quick Actions ── */}
             {showSuggestions && messages.length <= 1 && (
               <div className="px-4 pt-3 pb-1">
+                <p className="text-[9px] text-white/30 mb-2 flex items-center gap-1.5">
+                  <Smile size={10} /> Try asking me:
+                </p>
                 <div className="flex flex-wrap gap-1.5">
                   {QUICK_ACTIONS.slice(0, 6).map(({ icon: Icon, label, cmd, color }) => (
                     <button
@@ -816,7 +910,7 @@ export default function VoiceAssistant({ autoOpen = true, onClose }) {
                       <Sparkles size={16} style={{ color: "#f97316" }} />
                     </div>
                     <p className="text-[11px] text-center" style={{ color: "rgba(255,255,255,0.28)", maxWidth: 240 }}>
-                      Ask me anything about Witness — his projects, skills, background, or how to hire him.
+                      Hey! 😊 Ask me anything about Witness — I'm friendly and here to help!
                     </p>
                   </motion.div>
                 )}
@@ -880,7 +974,7 @@ export default function VoiceAssistant({ autoOpen = true, onClose }) {
                   value={input}
                   onChange={e => setInput(e.target.value)}
                   onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey && input.trim()) { e.preventDefault(); process(input); } }}
-                  placeholder={listening ? "Listening…" : "Ask anything about Witness…"}
+                  placeholder={listening ? "Listening… 🎤" : "Type or click the mic! 🎙️"}
                   disabled={loading}
                   className="flex-1 text-[12px] px-4 py-2.5 rounded-xl transition-all duration-200 outline-none"
                   style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "white" }}
