@@ -5,50 +5,36 @@ export default defineConfig({
   plugins: [react()],
 
   optimizeDeps: {
-    include: [
-      'react',
-      'react-dom',
-      'react/jsx-runtime',
-      'three',
-      '@react-three/fiber',
-      '@react-three/drei',
-      'framer-motion',
-      'socket.io-client',
-      'lucide-react'
-    ]
+    include: ['react', 'react-dom', 'react/jsx-runtime', 'framer-motion', 'lucide-react'],
   },
 
   server: {
-    port: 5173,
-    open: true,
-    hmr: {
-      overlay: false
-    }
+    host: '0.0.0.0',
+    port: 3000,
+    strictPort: true,
+    open: false,
   },
 
   build: {
     minify: 'terser',
-
     terserOptions: {
       compress: {
         drop_console: true,
-        drop_debugger: true
-      }
+        drop_debugger: true,
+      },
     },
-
-    chunkSizeWarningLimit: 1000,
-    sourcemap: false
+    chunkSizeWarningLimit: 900,
+    sourcemap: false,
   },
 
   resolve: {
     alias: {
       '@': '/src',
       '@components': '/src/components',
-      '@contexts': '/src/contexts',
       '@hooks': '/src/hooks',
       '@utils': '/src/utils',
       '@assets': '/src/assets',
-      '@styles': '/src/styles'
-    }
-  }
+      '@styles': '/src/styles',
+    },
+  },
 });

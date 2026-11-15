@@ -8,6 +8,7 @@ export function useThreeJS(id = 'threejs', options = {}) {
     cameraPosition = [0, 0, 5],
     fov            = 60,
     enableShadows  = false,
+    fpsLimit       = 60,
     onInit,
   } = options;
 
@@ -27,6 +28,7 @@ export function useThreeJS(id = 'threejs', options = {}) {
   // ── Init (async to handle WebGLManager queue) ───────────────
   useEffect(() => {
     mountedRef.current = true;
+    let cancelled = false;
     const el = mountRef.current;
     if (!el) return;
 
@@ -51,7 +53,7 @@ export function useThreeJS(id = 'threejs', options = {}) {
         return;
       }
 
-      if (!mountedRef.current) {
+      if (cancelled || !mountedRef.current) {
         webGLManager.releaseContext(id);
         return;
       }
@@ -66,13 +68,19 @@ export function useThreeJS(id = 'threejs', options = {}) {
           alpha: true,
           powerPreference: 'high-performance',
         });
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
         renderer.setSize(W, H);
         renderer.setClearColor(0x000000, 0);
 
         if (enableShadows) {
           renderer.shadowMap.enabled = true;
           renderer.shadowMap.type    = THREE.PCFSoftShadowMap;
+        }
+
+        if (cancelled) {
+          renderer.dispose();
+          webGLManager.releaseContext(id);
+          return;
         }
 
         el.appendChild(renderer.domElement);
@@ -121,6 +129,7 @@ export function useThreeJS(id = 'threejs', options = {}) {
     init();
 
     return () => {
+      cancelled = true;
       mountedRef.current = false;
 
       cancelAnimationFrame(frameRef.current);
@@ -162,15 +171,21 @@ export function useThreeJS(id = 'threejs', options = {}) {
   // ── startAnimationLoop ────────────────────────────────────
   const startAnimationLoop = useCallback((tickFn) => {
     animFnRef.current = tickFn;
-    const loop = () => {
+    const frameBudget = 1000 / fpsLimit;
+    let lastFrame = 0;
+
+    const loop = (time = 0) => {
       frameRef.current = requestAnimationFrame(loop);
+      if (time && time - lastFrame < frameBudget - 1) return;
+      lastFrame = time;
+
       animFnRef.current?.();
       if (rendererRef.current && sceneRef.current && cameraRef.current) {
         rendererRef.current.render(sceneRef.current, cameraRef.current);
       }
     };
     loop();
-  }, []);
+  }, [fpsLimit]);
 
   // ── handleResize ──────────────────────────────────────────
   const handleResize = useCallback(() => {

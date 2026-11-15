@@ -2,29 +2,153 @@
 @tailwind components;
 @tailwind utilities;
 
-html {
-  scroll-behavior: smooth;
+/* ── Base ───────────────────────────────────────────────────── */
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-night text-muted font-sans antialiased;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, h5 {
+    @apply font-display text-ink;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    background: rgba(59, 130, 246, 0.35);
+    color: #F8FAFC;
+  }
+
+  :focus-visible {
+    outline: 2px solid #22D3EE;
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #080D19;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #263449;
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #33507a;
+  }
 }
 
-/* Smooth background color transitions for the whole app */
-body {
-  @apply transition-colors duration-500;
+/* ── Shared components ──────────────────────────────────────── */
+@layer components {
+  .container-wide {
+    @apply mx-auto w-full max-w-7xl px-5 sm:px-8 lg:px-10;
+  }
+
+  .section {
+    @apply relative scroll-mt-24 py-24 sm:py-28 lg:py-32;
+  }
+
+  .eyebrow {
+    @apply inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.28em] text-cyan;
+  }
+
+  .eyebrow::before {
+    content: '';
+    @apply block h-px w-6 bg-cyan/70;
+  }
+
+  .section-title {
+    @apply font-display text-[clamp(2rem,4.4vw,3.5rem)] font-semibold leading-[1.06] tracking-[-0.03em] text-ink;
+  }
+
+  .section-lead {
+    @apply mt-5 max-w-2xl text-[15px] leading-relaxed text-muted sm:text-base;
+  }
+
+  .card {
+    @apply rounded-2xl border border-line/80 bg-card/70;
+  }
+
+  .btn {
+    @apply inline-flex select-none items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition-all duration-300;
+  }
+
+  .btn-primary {
+    @apply btn bg-primary text-white shadow-[0_10px_30px_-12px_rgba(59,130,246,0.9)] hover:bg-blue-500 hover:shadow-[0_14px_36px_-10px_rgba(59,130,246,0.8)];
+  }
+
+  .btn-secondary {
+    @apply btn border border-line bg-surface/60 text-ink hover:border-primary/60 hover:bg-card;
+  }
+
+  .btn-ghost {
+    @apply btn text-muted hover:text-ink;
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-line/80 bg-surface/70 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-muted;
+  }
+
+  .field-label {
+    @apply mb-1.5 block font-mono text-[10px] uppercase tracking-[0.18em] text-muted;
+  }
+
+  .field {
+    @apply w-full rounded-xl border border-line bg-surface/70 px-3.5 py-3 text-sm text-ink placeholder:text-muted/50 transition-colors duration-200 focus:border-primary/70 focus:outline-none;
+  }
+
+  .hairline {
+    @apply h-px w-full bg-gradient-to-r from-transparent via-line to-transparent;
+  }
 }
 
-/* Custom scrollbar for Dark Mode */
-.dark ::-webkit-scrollbar {
-  width: 10px;
+/* ── Decorative layers ──────────────────────────────────────── */
+.grid-overlay {
+  background-image:
+    linear-gradient(rgba(148, 163, 184, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.07) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, #000 35%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, #000 35%, transparent 100%);
 }
 
-.dark ::-webkit-scrollbar-track {
-  background: #030712;
+.text-gradient {
+  background: linear-gradient(100deg, #F8FAFC 0%, #BAE6FD 45%, #22D3EE 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
-.dark ::-webkit-scrollbar-thumb {
-  background: #1e293b;
-  border-radius: 5px;
+.noise {
+  background-image: url('/noise.svg');
+  background-size: 180px 180px;
 }
 
-.dark ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+/* Hide the scroll indicator when the user has reduced motion enabled */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
 }
