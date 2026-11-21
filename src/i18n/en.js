@@ -423,7 +423,7 @@ const en = {
     ],
     howTitle: 'How it works',
     howText:
-      'Requests are sent to a secure server endpoint, which calls the AI service with a server-side key. No API key is exposed in the browser. The assistant is instructed to use only verified information from this portfolio, and to say so when a question falls outside it.',
+      'Answers are generated in your browser from the data already published on this site — projects, skills, experience and contact details. There is no external AI provider and no API key, so nothing you type leaves the page, and the assistant says when a question falls outside that information.',
     online: 'Online',
     tryAsking: 'Try asking',
     welcome:
@@ -438,7 +438,7 @@ const en = {
     ],
     inputPlaceholder: 'Ask about projects, skills or contact...',
     typingLabel: 'Assistant is typing',
-    disclaimer: 'Answers are based on this portfolio · AI can make mistakes',
+    disclaimer: 'Answers come from this site’s own data · no external AI service',
     error:
       "The AI assistant isn't available right now. You can still reach Witness directly by email or WhatsApp below.",
     unavailable: 'The AI assistant is unavailable right now.',

@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
-import logoImg from '../images/wit.png';
+import { profile } from '../../data/portfolio';
 
 const NAV_ITEMS = [
   { id: 'home',       label: 'Home',       icon: Home },
@@ -115,7 +115,7 @@ export default function Header() {
               className="flex items-center gap-2.5 group"
             >
               <div className={`relative w-8 h-8 rounded-xl overflow-hidden ring-1 transition-all ring-stone-700 group-hover:ring-orange-500/50`}>
-                <img src={logoImg} alt="Logo" className="w-full h-full object-cover" />
+                <img src={profile.avatar} alt="Portrait of Witness Fabrice" className="w-full h-full object-cover" />
               </div>
               <span className={`hidden sm:block text-sm font-black tracking-tight ${ink}`}>
                 Witness<span className="text-orange-500">.</span>Dev

@@ -423,7 +423,7 @@ const fr = {
     ],
     howTitle: 'Fonctionnement',
     howText:
-      'Les requêtes sont envoyées à un point d’accès serveur sécurisé qui appelle le service d’IA avec une clé côté serveur. Aucune clé API n’est exposée dans le navigateur. L’assistant est instruit de n’utiliser que les informations vérifiées de ce portfolio et de le signaler lorsqu’une question sort de ce cadre.',
+      'Les réponses sont générées dans votre navigateur à partir des données déjà publiées sur ce site — projets, compétences, parcours et coordonnées. Aucun fournisseur d’IA externe ni clé API n’intervient : rien de ce que vous saisissez ne quitte la page, et l’assistant le signale lorsqu’une question sort de ces informations.',
     online: 'En ligne',
     tryAsking: 'Essayez de demander',
     welcome:
@@ -438,7 +438,7 @@ const fr = {
     ],
     inputPlaceholder: 'Posez une question sur les projets, compétences ou contacts...',
     typingLabel: 'L’assistant écrit',
-    disclaimer: 'Réponses basées sur ce portfolio · l’IA peut se tromper',
+    disclaimer: 'Réponses issues des données de ce site · aucun service d’IA externe',
     error:
       'L’assistant IA n’est pas disponible pour le moment. Vous pouvez joindre Witness directement par e-mail ou WhatsApp ci-dessous.',
     unavailable: 'L’assistant IA est indisponible pour le moment.',

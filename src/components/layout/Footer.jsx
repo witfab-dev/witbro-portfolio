@@ -13,12 +13,24 @@ export default function Footer() {
       <div className="container-wide py-12">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr]">
           <div>
-            <p className="font-display text-[15px] font-semibold tracking-[0.16em] text-ink">
-              {profile.brand}
-            </p>
-            <p className="mt-1.5 text-[11.5px] text-muted">
-              {profile.name} · <span className="font-mono text-cyan">{profile.nickname}</span>
-            </p>
+            <div className="flex items-center gap-3">
+              <img
+                src={profile.avatar}
+                alt="Portrait of Witness Fabrice"
+                width="48"
+                height="48"
+                loading="lazy"
+                className="h-12 w-12 shrink-0 rounded-xl border border-line object-cover"
+              />
+              <div>
+                <p className="font-display text-[15px] font-semibold tracking-[0.16em] text-ink">
+                  {profile.brand}
+                </p>
+                <p className="mt-1.5 text-[11.5px] text-muted">
+                  {profile.name} · <span className="font-mono text-cyan">{profile.nickname}</span>
+                </p>
+              </div>
+            </div>
             <p className="mt-3 max-w-sm text-[13px] leading-relaxed text-muted">
               {content.footer.tagline}
             </p>

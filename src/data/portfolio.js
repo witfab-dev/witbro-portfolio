@@ -8,7 +8,8 @@ export const profile = {
   phoneDisplay: '0783 568 337',
   phoneIntl: '250783568337',
   location: 'Kigali, Rwanda',
-  portrait: '/wit.png',
+  portrait: '/images/portrait.jpg',
+  avatar: '/images/avatar.jpg',
 };
 
 export const whatsappUrl = (message) =>

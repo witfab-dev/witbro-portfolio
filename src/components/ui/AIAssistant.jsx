@@ -1,58 +1,40 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { ArrowUp, Bot, MessageSquarePlus, Sparkles, X } from 'lucide-react';
-import { profile, whatsappUrl } from '../../data/portfolio';
+import { answerQuestion } from '../../lib/localAssistant';
 import { useI18n } from '../../i18n/LanguageContext';
 
 export default function AIAssistant({ open, onClose, initialQuestion, onConsumeInitial }) {
-  const { content } = useI18n();
+  const { content, locale } = useI18n();
   const a = content.assistantPage;
-  const firstName = profile.name.split(' ')[0];
 
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState('');
   const reduceMotion = useReducedMotion();
   const scrollRef = useRef(null);
   const inputRef = useRef(null);
   const sendRef = useRef(null);
+  const timerRef = useRef(null);
   const handledRef = useRef(null);
 
-  const send = async (raw) => {
+  const send = (raw) => {
     const text = raw.trim();
     if (!text || busy) return;
 
-    const history = [...messages, { role: 'user', content: text }];
-    setMessages(history);
+    setMessages((prev) => [...prev, { role: 'user', content: text }]);
     setInput('');
     setBusy(true);
-    setError('');
 
-    try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: history.slice(-12).map(({ role, content: messageContent }) => ({
-            role,
-            content: messageContent,
-          })),
-        }),
-      });
-
-      const data = await response.json().catch(() => null);
-
-      if (!response.ok || !data || typeof data.reply !== 'string') {
-        throw new Error(data?.error || a.unavailable);
-      }
-
-      setMessages((prev) => [...prev, { role: 'assistant', content: data.reply }]);
-    } catch {
-      setError(a.error);
-    } finally {
+    // Replies are built locally from the portfolio data — nothing is sent over the network.
+    clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      setMessages((prev) => [
+        ...prev,
+        { role: 'assistant', content: answerQuestion(text, locale) },
+      ]);
       setBusy(false);
-    }
+    }, 420);
   };
 
   sendRef.current = send;
@@ -79,12 +61,15 @@ export default function AIAssistant({ open, onClose, initialQuestion, onConsumeI
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-  }, [messages, busy, error, open]);
+  }, [messages, busy, open]);
+
+  useEffect(() => () => clearTimeout(timerRef.current), []);
 
   const reset = () => {
+    clearTimeout(timerRef.current);
     setMessages([]);
-    setError('');
     setInput('');
+    setBusy(false);
     handledRef.current = null;
   };
 
@@ -178,27 +163,6 @@ export default function AIAssistant({ open, onClose, initialQuestion, onConsumeI
               </Bubble>
             )}
 
-            {error && (
-              <div className="rounded-xl border border-rose-400/30 bg-rose-400/10 px-3.5 py-3 text-[12px] leading-relaxed text-rose-100">
-                <p>{error}</p>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  <a
-                    href={whatsappUrl(content.common.whatsappMessage)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="rounded-lg bg-whatsapp px-2.5 py-1.5 text-[11px] font-semibold text-emerald-950"
-                  >
-                    WhatsApp
-                  </a>
-                  <a
-                    href={`mailto:${profile.email}`}
-                    className="rounded-lg border border-rose-300/30 px-2.5 py-1.5 text-[11px] font-semibold text-rose-50"
-                  >
-                    Email
-                  </a>
-                </div>
-              </div>
-            )}
           </div>
 
           <form
